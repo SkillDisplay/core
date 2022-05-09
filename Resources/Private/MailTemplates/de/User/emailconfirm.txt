@@ -1,0 +1,36 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Änderung deiner E-Mailadresse auf SkillDisplay
+Hallo {user.firstName},
+
+es wurde eine Anfrage zur Änderung der in deinem Benutzerkonto
+bei SkillDisplay hinterlegten E-Mailadresse gestellt.
+
+Falls du deine hinterlegte E-Mailadresse
+von {user.username}
+auf {user.pendingEmail}
+ändern möchtest, klicke zur Bestätigung einfach auf den folgenden Link.
+
+<f:uri.page pageUid="{settings.pids.shortLink}" absolute="1" additionalParams="{code:code, L:1}" noCacheHash="1"/>
+
+Dein SkillDisplay Team
+
+
+--
+Du erhältst diese E-Mail weil eine Anfrage zur Änderung der in deinem Benutzerkonto
+bei SkillDisplay hinterlegten E-Mailadresse gestellt wurde.
+Falls diese Anfrage nicht von dir gekommen ist, kontaktiere bitte das SkillDisplay Team.
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

@@ -1,0 +1,9 @@
+---
+layout: text_de
+subject: Du bist "{organisation.name}" auf SkillDisplay beigetreten
+---
+Hallo {user.firstName},
+
+Du bist jetzt Mitglied der Organisation "{organisation.name}" auf SkillDisplay.
+
+Dein SkillDisplay Team

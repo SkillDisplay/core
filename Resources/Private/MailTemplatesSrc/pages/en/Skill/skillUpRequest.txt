@@ -1,0 +1,16 @@
+---
+layout: text_en
+subject: You received a verification request
+---
+Hi {user.firstName},
+
+you received a verification request from "{certification.user.firstName} {certification.user.lastName}" for
+
+<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+Level: <f:if condition="{certification.level} == 'tier2'">Educational verification</f:if><f:if condition="{certification.level} == 'tier1'">Certification Verification</f:if><f:if condition="{certification.level} == 'tier4'">Business Verification</f:if>
+Brand: {certification.brand.name}
+
+>> View request in verification tools now
+{rx:appLink(url: settings.app, appRoute: 'verification/{certification.uid}', onlyUri: 'true')}
+
+Your SkillDisplay Team

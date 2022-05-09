@@ -1,0 +1,30 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Du hast eine Verifizierungsanfrage erhalten
+Hallo {user.firstName},
+
+du hast eine Verifizierungsanfrage von "{certification.user.firstName} {certification.user.lastName}" erhalten für
+
+<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+Level: <f:if condition="{certification.level} == 'tier2'">Bildungs-Verifizierung</f:if><f:if condition="{certification.level} == 'tier1'">Zertifizierungs-Verifizierung</f:if><f:if condition="{certification.level} == 'tier4'">Branchen-Verifizierung</f:if>
+Marke: {certification.brand.name}
+
+>> Anfrage in den Verifizierungstools ansehen
+{rx:appLink(url: settings.app, appRoute: 'verification/{certification.uid}', onlyUri: 'true')}
+
+
+Dein SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

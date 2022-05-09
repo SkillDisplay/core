@@ -1,0 +1,36 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend" />
+
+<f:section name="content">
+	<h1>{f:translate(id:'backend.reporting.skillUpStatistics')}</h1>
+	<f:form class="form-horizontal" action="generateReport">
+		<fieldset>
+			<div class="form-group row">
+				<div class="col-xs-6">
+					<label class="control-label">Select brand:</label>
+					<f:form.select size="15" class="form-control" name="brands" options="{brands}" prependOptionValue="0" prependOptionLabel="Self Verification" optionLabelField="name" multiple="true"/>
+				</div>
+				<div class="col-xs-6">
+					<label class="control-label">Select SkillSets:</label>
+					<f:form.select size="15" class="form-control" name="skillSets" options="{skillSets}" optionLabelField="name" multiple="true"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12 col-md-6">
+					<f:render partial="Backend/Filters/Date" arguments="{id: 'dateFrom', name: 'dateFrom', value: fromDate, class: 'lower', label: 'backend.reporting.filter.from'}" />
+				</div>
+				<div class="col-xs-12 col-md-6">
+					<f:render partial="Backend/Filters/Date" arguments="{id: 'dateTo', name: 'dateTo', value: toDate, class: 'upper', label: 'backend.reporting.filter.to'}" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12">
+					<f:form.submit value="Generate" class="btn btn-primary" />
+				</div>
+			</div>
+		</fieldset>
+	</f:form>
+</f:section>
+
+</html>

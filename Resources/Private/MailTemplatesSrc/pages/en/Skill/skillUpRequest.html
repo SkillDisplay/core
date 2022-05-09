@@ -1,0 +1,33 @@
+---
+layout: mail_en
+subject: You received a verification request
+description: You received a verification request on the SkillDisplay platform.
+---
+<container>
+	<row>
+		<columns small="12">
+			<h3>Hi {user.firstName},</h3>
+			<p>You received a verification request from &quot;{certification.user.firstName} {certification.user.lastName}&quot; for</p>
+			<p>
+				<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if><br />
+				Level: <f:if condition="{certification.level} == 'tier2'">
+				Educational Verification</f:if><f:if condition="{certification.level} == 'tier1'">
+				Certification Verification</f:if><f:if condition="{certification.level} == 'tier4'">
+				Business Verification</f:if><br />
+				Brand: {certification.brand.name}
+			</p>
+		</columns>
+	</row>
+	<row>
+		<columns small="12">
+			<button href="{rx:appLink(url: settings.app, appRoute: 'verification/{certification.uid}', onlyUri: 'true')}" class="neutral expanded">
+				View request in verification tools now
+			</button>
+		</columns>
+	</row>
+	<row>
+		<columns small="12">
+			<p>Your SkillDisplay Team</p>
+		</columns>
+	</row>
+</container>

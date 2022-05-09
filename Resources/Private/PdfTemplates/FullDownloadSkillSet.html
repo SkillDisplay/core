@@ -1,0 +1,55 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:pdf="http://typo3.org/ns/Bithost/Pdfviewhelpers/ViewHelpers"
+			xsi:schemaLocation="http://typo3.org/ns/Bithost/Pdfviewhelpers/ViewHelpers https://pdfviewhelpers.bithost.ch/schema/2.0.xsd"
+			data-namespace-typo3-fluid="true">
+
+<pdf:document outputPath="{set.name}.pdf" outputDestination="download" sourceFile="{pdfTemplate}">
+	<pdf:page importPage="{f:if(condition: pdfTemplate, then: '1')}" margin="{top: 30, bottom: 30}">
+		<pdf:header></pdf:header>
+		<pdf:footer></pdf:footer>
+		<pdf:headline alignment="center">{set.name}</pdf:headline>
+		<pdf:text alignment="center" color="#808080">Created on: {f:format.date(format: 'd.m.Y', date: 'now')}</pdf:text>
+		<f:for each="{skills}" as="skill" iteration="it">
+			<pdf:headline>{skill.title}</pdf:headline>
+			<pdf:html>{skill.description}</pdf:html>
+			<pdf:text fontStyle="bold">Goals:</pdf:text>
+			<pdf:html>{skill.goals}</pdf:html>
+			<pdf:text fontStyle="bold">Links:</pdf:text>
+			<f:for each="{skill.links}" as="link">
+				<pdf:html>
+					<ul>
+						<li>{link.title}: <a href="{link.url}">{link.url}</a></li>
+					</ul>
+				</pdf:html>
+			</f:for>
+            <pdf:text fontStyle="bold">Maintainer:</pdf:text>
+            <pdf:text padding="{left: 7}">
+                {skill.brands.0.name} ({skill.owner.firstname} {skill.owner.lastname})
+            </pdf:text>
+			<pdf:text fontStyle="bold">Domain Tag:</pdf:text>
+			<f:if condition="{skill.domainTag}">
+				<pdf:html>
+					<ul>
+						<li>{skill.domainTag.title}</li>
+					</ul>
+				</pdf:html>
+			</f:if>
+			<pdf:text fontStyle="bold">Tags:</pdf:text>
+			<f:for each="{skill.tags}" as="tag">
+				<pdf:html>
+					<ul>
+						<li>{tag.title}</li>
+					</ul>
+				</pdf:html>
+			</f:for>
+			<f:if condition="{it.isLast}">
+				<f:else>
+					<pdf:pageBreak/>
+				</f:else>
+			</f:if>
+		</f:for>
+	</pdf:page>
+</pdf:document>
+</html>

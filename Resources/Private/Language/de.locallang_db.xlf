@@ -1,0 +1,1018 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns:t3="http://typo3.org/schemas/xliff" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" original="messages" datatype="plaintext" product-name="skills" date="2021-12-13T21:01:16+01:00">
+		<body>
+			<trans-unit id="fe_users.tx_extbase_type.Tx_Skills_User" resname="fe_users.tx_extbase_type.Tx_Skills_User">
+				<source>Skill Display User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tab.links" resname="tab.links">
+				<source>Links</source>
+				<target>Links</target>
+			</trans-unit>
+			<trans-unit id="tab.ownership" resname="tab.ownership">
+				<source>Ownership</source>
+				<target>Besitzer</target>
+			</trans-unit>
+			<trans-unit id="tab.requirements" resname="tab.requirements">
+				<source>Requirements</source>
+				<target>Voraussetzungen</target>
+			</trans-unit>
+			<trans-unit id="tab.status" resname="tab.status">
+				<source>Status</source>
+				<target>Status</target>
+			</trans-unit>
+			<trans-unit id="tab.tags" resname="tab.tags">
+				<source>Tags</source>
+				<target>Tags</target>
+			</trans-unit>
+			<trans-unit id="tab.visualization" resname="tab.visualization">
+				<source>Visualization</source>
+				<target>Visualisierung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award" resname="tx_skills_domain_model_award">
+				<source>Award</source>
+				<target>Auszeichnung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.brand" resname="tx_skills_domain_model_award.brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.level" resname="tx_skills_domain_model_award.level">
+				<source>Level</source>
+				<target>Level</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.level.business" resname="tx_skills_domain_model_award.level.business">
+				<source>Business</source>
+				<target>Branche</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.level.certificate" resname="tx_skills_domain_model_award.level.certificate">
+				<source>Certificate</source>
+				<target>Zertifikat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.level.educational" resname="tx_skills_domain_model_award.level.educational">
+				<source>Education</source>
+				<target>Bildung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.level.self" resname="tx_skills_domain_model_award.level.self">
+				<source>Self</source>
+				<target>Selbst</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.level.undefined" resname="tx_skills_domain_model_award.level.undefined">
+				<source>Undefined</source>
+				<target>Unbestimmt</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.rank" resname="tx_skills_domain_model_award.rank">
+				<source>Rank</source>
+				<target>Rang</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.rank.bronze" resname="tx_skills_domain_model_award.rank.bronze">
+				<source>Bronze</source>
+				<target>Bronze</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.rank.gold" resname="tx_skills_domain_model_award.rank.gold">
+				<source>Gold</source>
+				<target>Gold</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.rank.platinum" resname="tx_skills_domain_model_award.rank.platinum">
+				<source>Platinum</source>
+				<target>Platin</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.rank.silver" resname="tx_skills_domain_model_award.rank.silver">
+				<source>Silver</source>
+				<target>Silber</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.type" resname="tx_skills_domain_model_award.type">
+				<source>Type</source>
+				<target>Typ</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.type.coach" resname="tx_skills_domain_model_award.type.coach">
+				<source>Coach</source>
+				<target>Coach</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.type.member" resname="tx_skills_domain_model_award.type.member">
+				<source>Member</source>
+				<target>Mitglied</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.type.mentor" resname="tx_skills_domain_model_award.type.mentor">
+				<source>Mentor</source>
+				<target>Mentor</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.type.verified" resname="tx_skills_domain_model_award.type.verified">
+				<source>Verified</source>
+				<target>Verifiziert</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_award.user" resname="tx_skills_domain_model_award.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand" resname="tx_skills_domain_model_brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.banner" resname="tx_skills_domain_model_brand.banner">
+				<source>Banner</source>
+				<target>Banner Bild</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.billable" resname="tx_skills_domain_model_brand.billable">
+				<source>Billable</source>
+				<target>Verrechenbar</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.billing_address" resname="tx_skills_domain_model_brand.billing_address">
+				<source>Billing Address</source>
+				<target>Rechnungsadresse</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.country" resname="tx_skills_domain_model_brand.country">
+				<source>Country</source>
+				<target>Land</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.created_by_brand" resname="tx_skills_domain_model_brand.created_by_brand">
+				<source>Created by brand (via API)</source>
+				<target>Durch dieses Unternehmen erstellt (über API)</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.credit_overdraw" resname="tx_skills_domain_model_brand.credit_overdraw">
+				<source>SkillCredit allow overdraw</source>
+				<target>SkillCredit Überziehen erlauben</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.description" resname="tx_skills_domain_model_brand.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.logo" resname="tx_skills_domain_model_brand.logo">
+				<source>Logo</source>
+				<target>Logo</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.members" resname="tx_skills_domain_model_brand.members">
+				<source>Members</source>
+				<target>Mitglieder</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.name" resname="tx_skills_domain_model_brand.name">
+				<source>Name</source>
+				<target>Name</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level" resname="tx_skills_domain_model_brand.partner_level">
+				<source>Partner level</source>
+				<target>Partner Level</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.0" resname="tx_skills_domain_model_brand.partner_level.I.0">
+				<source>None</source>
+				<target>Kein</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.1" resname="tx_skills_domain_model_brand.partner_level.I.1">
+				<source>1 Star</source>
+				<target>1 Stern</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.2" resname="tx_skills_domain_model_brand.partner_level.I.2">
+				<source>2 Star</source>
+				<target>2 Stern</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.3" resname="tx_skills_domain_model_brand.partner_level.I.3">
+				<source>3 Star</source>
+				<target>3 Stern</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.4" resname="tx_skills_domain_model_brand.partner_level.I.4">
+				<source>4 Star</source>
+				<target>4 Stern</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.5" resname="tx_skills_domain_model_brand.partner_level.I.5">
+				<source>5 Star</source>
+				<target>5 Stern</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.6" resname="tx_skills_domain_model_brand.partner_level.I.6">
+				<source>Platinum</source>
+				<target>Platinum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.partner_level.I.7" resname="tx_skills_domain_model_brand.partner_level.I.7">
+				<source>Diamond</source>
+				<target>Diamond</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level" resname="tx_skills_domain_model_brand.patronage_level">
+				<source>Patronage level</source>
+				<target>Patenschaft-Level</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level.I.0" resname="tx_skills_domain_model_brand.patronage_level.I.0">
+				<source>-</source>
+				<target>-</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level.I.1" resname="tx_skills_domain_model_brand.patronage_level.I.1">
+				<source>Kind</source>
+				<target>Kind</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level.I.2" resname="tx_skills_domain_model_brand.patronage_level.I.2">
+				<source>Gracious</source>
+				<target>Gracious</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level.I.3" resname="tx_skills_domain_model_brand.patronage_level.I.3">
+				<source>Benign</source>
+				<target>Benign</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level.I.4" resname="tx_skills_domain_model_brand.patronage_level.I.4">
+				<source>Generous</source>
+				<target>Generous</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronage_level.I.5" resname="tx_skills_domain_model_brand.patronage_level.I.5">
+				<source>Bountiful</source>
+				<target>Bountiful</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.patronages" resname="tx_skills_domain_model_brand.patronages">
+				<source>Patronages</source>
+				<target>Patenschaften</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.pixel_logo" resname="tx_skills_domain_model_brand.pixel_logo">
+				<source>Pixel Logo</source>
+				<target>Pixel Logo</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.show_in_search" resname="tx_skills_domain_model_brand.show_in_search">
+				<source>Show Organisation in Search</source>
+				<target>Organisation in Suche anzeigen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.show_num_of_certificates" resname="tx_skills_domain_model_brand.show_num_of_certificates">
+				<source>Show number of verifications</source>
+				<target>Zeige Anzahl der Verifizierungen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.url" resname="tx_skills_domain_model_brand.url">
+				<source>Url</source>
+				<target>Url</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.vat_id" resname="tx_skills_domain_model_brand.vat_id">
+				<source>VAT ID</source>
+				<target>VAT ID</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_campaign" resname="tx_skills_domain_model_campaign">
+				<source>Campaign</source>
+				<target>Kampagne</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_campaign.title" resname="tx_skills_domain_model_campaign.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_campaign.user" resname="tx_skills_domain_model_campaign.user">
+				<source>Owner of the campaign</source>
+				<target>Besitzer der Kampagne</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_cerification.usermemberships" resname="tx_skills_domain_model_cerification.usermemberships">
+				<source>Memberships of User</source>
+				<target>Mitgliedschaften des Nutzers</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification" resname="tx_skills_domain_model_certification">
+				<source>Verification</source>
+				<target>Verifikationen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.brand" resname="tx_skills_domain_model_certification.brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.brand_name" resname="tx_skills_domain_model_certification.brand_name">
+				<source>Brand Name</source>
+				<target>Markenname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.campaign" resname="tx_skills_domain_model_certification.campaign">
+				<source>Campaign</source>
+				<target>Kampagne</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.certifier" resname="tx_skills_domain_model_certification.certifier">
+				<source>Verifier</source>
+				<target>Verifizierender</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.comment" resname="tx_skills_domain_model_certification.comment">
+				<source>Comment</source>
+				<target>Kommentar</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.credit_price" resname="tx_skills_domain_model_certification.credit_price">
+				<source>SkillCredit price</source>
+				<target>SkillCredit Preis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.credits_used" resname="tx_skills_domain_model_certification.credits_used">
+				<source>SkillCredits used</source>
+				<target>SkillCredits verbraucht</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.deny_date" resname="tx_skills_domain_model_certification.deny_date">
+				<source>Deny Date</source>
+				<target>Ablehnungsdatum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.expire_date" resname="tx_skills_domain_model_certification.expire_date">
+				<source>Expire Date</source>
+				<target>Ablaufdatum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.grant_date" resname="tx_skills_domain_model_certification.grant_date">
+				<source>Grant Date</source>
+				<target>Bestätigungsdatum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.group_name" resname="tx_skills_domain_model_certification.group_name">
+				<source>Group Name</source>
+				<target>Gruppenname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.request_group" resname="tx_skills_domain_model_certification.request_group">
+				<source>Request Group</source>
+				<target>Anfragegruppe</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.revoke_date" resname="tx_skills_domain_model_certification.revoke_date">
+				<source>Revoke Date</source>
+				<target>Zurückgezogen am</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.revoke_reason" resname="tx_skills_domain_model_certification.revoke_reason">
+				<source>Revoke Reason</source>
+				<target>Zurückgezogen weil</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.rewardable" resname="tx_skills_domain_model_certification.rewardable">
+				<source>Rewardable towards skill creator</source>
+				<target>Belohnung für Skill-Ersteller</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.skill" resname="tx_skills_domain_model_certification.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.skill_title" resname="tx_skills_domain_model_certification.skill_title">
+				<source>Skill Title</source>
+				<target>Skill Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.tier1" resname="tx_skills_domain_model_certification.tier1">
+				<source>Official Certification</source>
+				<target>Offizielle Zertifizierung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.tier2" resname="tx_skills_domain_model_certification.tier2">
+				<source>Educational Verification</source>
+				<target>Bildungs-Bestätigung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.tier3" resname="tx_skills_domain_model_certification.tier3">
+				<source>Self Assessment</source>
+				<target>Selbst-Bestätigung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.tier4" resname="tx_skills_domain_model_certification.tier4">
+				<source>Practical Expertise</source>
+				<target>Praktisches Fachwissen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.user" resname="tx_skills_domain_model_certification.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.user_firstname" resname="tx_skills_domain_model_certification.user_firstname">
+				<source>User Firstname</source>
+				<target>Benutzer Vorname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.user_lastname" resname="tx_skills_domain_model_certification.user_lastname">
+				<source>User Lastname</source>
+				<target>Benutzer Nachname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.user_username" resname="tx_skills_domain_model_certification.user_username">
+				<source>User Username</source>
+				<target>Benutzer Username</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.verifier_name" resname="tx_skills_domain_model_certification.verifier_name">
+				<source>Verifier Name</source>
+				<target>Verifizierender Name</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier" resname="tx_skills_domain_model_certifier">
+				<source>Verifier</source>
+				<target>Verifizierender</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.brand" resname="tx_skills_domain_model_certifier.brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.link" resname="tx_skills_domain_model_certifier.link">
+				<source>Profile link</source>
+				<target>Profil Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.permissions" resname="tx_skills_domain_model_certifier.permissions">
+				<source>Permissions</source>
+				<target>Berechtigungen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.shared_api_secret" resname="tx_skills_domain_model_certifier.shared_api_secret">
+				<source>Shared secret for API</source>
+				<target>Shared secret für API</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.testsystem" resname="tx_skills_domain_model_certifier.testsystem">
+				<source>Test system</source>
+				<target>Testsystem</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.user" resname="tx_skills_domain_model_certifier.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission" resname="tx_skills_domain_model_certifierpermission">
+				<source>Verifier Permission</source>
+				<target>Verifizierungsberechtigung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission.skill" resname="tx_skills_domain_model_certifierpermission.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission.tier1" resname="tx_skills_domain_model_certifierpermission.tier1">
+				<source>Official Certification</source>
+				<target>Offizielle Zertifizierung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission.tier2" resname="tx_skills_domain_model_certifierpermission.tier2">
+				<source>Educational Verification</source>
+				<target>Bildungs-Bestätigung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission.tier4" resname="tx_skills_domain_model_certifierpermission.tier4">
+				<source>Practical Expertise</source>
+				<target>Praktisches Fachwissen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_grantedreward" resname="tx_skills_domain_model_grantedreward">
+				<source>Granted Reward</source>
+				<target>Belohnungszuweisung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_grantedreward.position_index" resname="tx_skills_domain_model_grantedreward.position_index">
+				<source>Position index</source>
+				<target>Positions Index</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_grantedreward.reward" resname="tx_skills_domain_model_grantedreward.reward">
+				<source>Reward</source>
+				<target>Belohnung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_grantedreward.selected_by_user" resname="tx_skills_domain_model_grantedreward.selected_by_user">
+				<source>Selected by user</source>
+				<target>Von Benutzer ausgewählt</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_grantedreward.user" resname="tx_skills_domain_model_grantedreward.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_grantedreward.valid_until" resname="tx_skills_domain_model_grantedreward.valid_until">
+				<source>Valid until</source>
+				<target>Gültig bis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode" resname="tx_skills_domain_model_invitationcode">
+				<source>Invitation code</source>
+				<target>Einladungscode</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode.brand" resname="tx_skills_domain_model_invitationcode.brand">
+				<source>Organisation</source>
+				<target>Organisation</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode.code" resname="tx_skills_domain_model_invitationcode.code">
+				<source>Code</source>
+				<target>Code</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode.created_by" resname="tx_skills_domain_model_invitationcode.created_by">
+				<source>Created by</source>
+				<target>Erstellt von</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode.expires" resname="tx_skills_domain_model_invitationcode.expires">
+				<source>Expires at</source>
+				<target>Läuft ab am</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode.used_at" resname="tx_skills_domain_model_invitationcode.used_at">
+				<source>Used at</source>
+				<target>Eingelöst am</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_invitationcode.used_by" resname="tx_skills_domain_model_invitationcode.used_by">
+				<source>Used by</source>
+				<target>Eingelöst von</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link" resname="tx_skills_domain_model_link">
+				<source>Link</source>
+				<target>Likn</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.color" resname="tx_skills_domain_model_link.color">
+				<source>Color</source>
+				<target>Farbe</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.icon" resname="tx_skills_domain_model_link.icon">
+				<source>Icon</source>
+				<target>Icon</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.title" resname="tx_skills_domain_model_link.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.url" resname="tx_skills_domain_model_link.url">
+				<source>Url</source>
+				<target>Url</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_membershiphistory" resname="tx_skills_domain_model_membershiphistory">
+				<source>Membership History</source>
+				<target>Mitgliedschafts Historie</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_membershiphistory.brand" resname="tx_skills_domain_model_membershiphistory.brand">
+				<source>Brand</source>
+				<target>Organisation</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_membershiphistory.verification" resname="tx_skills_domain_model_membershiphistory.verification">
+				<source>Verification</source>
+				<target>Verifizierung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics" resname="tx_skills_domain_model_organisationstatistics">
+				<source>Organisation Statistics</source>
+				<target>Organisations Statistiken</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.brand" resname="tx_skills_domain_model_organisationstatistics.brand">
+				<source>Brand</source>
+				<target>Organisation</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.composition" resname="tx_skills_domain_model_organisationstatistics.composition">
+				<source>Composition</source>
+				<target>Zusammensetzung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.current_month_issued" resname="tx_skills_domain_model_organisationstatistics.current_month_issued">
+				<source>Current Month Issued</source>
+				<target>Zertifizierungen Aktuellen Monat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.current_month_users" resname="tx_skills_domain_model_organisationstatistics.current_month_users">
+				<source>Current Month Users</source>
+				<target>Nutzer Aktuellen Monat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.current_month_verifications" resname="tx_skills_domain_model_organisationstatistics.current_month_verifications">
+				<source>Last Month Verifications</source>
+				<target>Verifizierungen Letzten Monat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.interests" resname="tx_skills_domain_model_organisationstatistics.interests">
+				<source>Interests</source>
+				<target>Interessen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.last_month_issued" resname="tx_skills_domain_model_organisationstatistics.last_month_issued">
+				<source>Last Month Issued</source>
+				<target>Zertifizierungen Letzten Monat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.last_month_users" resname="tx_skills_domain_model_organisationstatistics.last_month_users">
+				<source>Last Month Users</source>
+				<target>Nutzer Letzten Monat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.monthly_scores" resname="tx_skills_domain_model_organisationstatistics.monthly_scores">
+				<source>Monthly Scores</source>
+				<target>Monatlicher Score</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.potential" resname="tx_skills_domain_model_organisationstatistics.potential">
+				<source>Potential</source>
+				<target>Potential</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_organisationstatistics.total_score" resname="tx_skills_domain_model_organisationstatistics.total_score">
+				<source>Total Score</source>
+				<target>Totaler Score</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_requirement" resname="tx_skills_domain_model_requirement">
+				<source>Requirement</source>
+				<target>Voraussetzung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_requirement.sets" resname="tx_skills_domain_model_requirement.sets">
+				<source>Sets</source>
+				<target>Set</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward" resname="tx_skills_domain_model_reward">
+				<source>Reward</source>
+				<target>Belohnung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.active" resname="tx_skills_domain_model_reward.active">
+				<source>Active</source>
+				<target>Aktiv</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.availability_end" resname="tx_skills_domain_model_reward.availability_end">
+				<source>End</source>
+				<target>Ende</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.availability_start" resname="tx_skills_domain_model_reward.availability_start">
+				<source>Start</source>
+				<target>Start</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.description" resname="tx_skills_domain_model_reward.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.detail_link" resname="tx_skills_domain_model_reward.detail_link">
+				<source>Detail link</source>
+				<target>Detail Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.prerequisites" resname="tx_skills_domain_model_reward.prerequisites">
+				<source>Prerequisites</source>
+				<target>Voraussetzungen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.reward" resname="tx_skills_domain_model_reward.reward">
+				<source>Reward link</source>
+				<target>Belohnungslink</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.skillpath" resname="tx_skills_domain_model_reward.skillpath">
+				<source>SkillSet</source>
+				<target>Skill Set</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.syllabus_layout_file" resname="tx_skills_domain_model_reward.syllabus_layout_file">
+				<source>Syllabus layout file</source>
+				<target>Lehrplan Layout</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.title" resname="tx_skills_domain_model_reward.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.type" resname="tx_skills_domain_model_reward.type">
+				<source>Type</source>
+				<target>Typ</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.type.affiliate" resname="tx_skills_domain_model_reward.type.affiliate">
+				<source>Affiliate link</source>
+				<target>Affiliate Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.type.badge" resname="tx_skills_domain_model_reward.type.badge">
+				<source>Badge</source>
+				<target>Abzeichen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.type.certificate" resname="tx_skills_domain_model_reward.type.certificate">
+				<source>Certificate</source>
+				<target>Zertifikat</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.type.download" resname="tx_skills_domain_model_reward.type.download">
+				<source>Download</source>
+				<target>Download</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.valid_for_organisation" resname="tx_skills_domain_model_reward.valid_for_organisation">
+				<source>Valid for organisation</source>
+				<target>Gültig für Organisation</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward.valid_until" resname="tx_skills_domain_model_reward.valid_until">
+				<source>Valid until</source>
+				<target>Gültig bis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_reward_activation" resname="tx_skills_domain_model_reward_activation">
+				<source>Reward Activation</source>
+				<target>Reward Aktivierung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_rewardprerequisite" resname="tx_skills_domain_model_rewardprerequisite">
+				<source>Reward Prerequisite</source>
+				<target>Belohnungsvoraussetzung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_rewardprerequisite.brand" resname="tx_skills_domain_model_rewardprerequisite.brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_rewardprerequisite.level" resname="tx_skills_domain_model_rewardprerequisite.level">
+				<source>Level</source>
+				<target>Level</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_rewardprerequisite.skill" resname="tx_skills_domain_model_rewardprerequisite.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_set" resname="tx_skills_domain_model_set">
+				<source>Set</source>
+				<target>Set</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_set.skills" resname="tx_skills_domain_model_set.skills">
+				<source>Skills</source>
+				<target>Skills</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_setskill" resname="tx_skills_domain_model_setskill">
+				<source>Set Skill</source>
+				<target>Set Skilll</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_setskill.skill" resname="tx_skills_domain_model_setskill.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink" resname="tx_skills_domain_model_shortlink">
+				<source>Shortlink</source>
+				<target>Kurzlink</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink.action" resname="tx_skills_domain_model_shortlink.action">
+				<source>Action</source>
+				<target>Aktion</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink.hash" resname="tx_skills_domain_model_shortlink.hash">
+				<source>Hash</source>
+				<target>Hash</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink.parameters" resname="tx_skills_domain_model_shortlink.parameters">
+				<source>Parameters</source>
+				<target>Parameter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill" resname="tx_skills_domain_model_skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.brands" resname="tx_skills_domain_model_skill.brands">
+				<source>Brands</source>
+				<target>Brand</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.description" resname="tx_skills_domain_model_skill.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.domain_tag" resname="tx_skills_domain_model_skill.domain_tag">
+				<source>Domain Tag</source>
+				<target>Domain Tag</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.dormant" resname="tx_skills_domain_model_skill.dormant">
+				<source>Dormant</source>
+				<target>Schlafend</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.goals" resname="tx_skills_domain_model_skill.goals">
+				<source>Goals</source>
+				<target>Ziele</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.icon" resname="tx_skills_domain_model_skill.icon">
+				<source>Icon</source>
+				<target>Icon</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.image" resname="tx_skills_domain_model_skill.image">
+				<source>Image</source>
+				<target>Bild</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.info_link" resname="tx_skills_domain_model_skill.info_link">
+				<source>Info Link</source>
+				<target>Info Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.int_notes" resname="tx_skills_domain_model_skill.int_notes">
+				<source>Internal notes</source>
+				<target>Interne Notizen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.links" resname="tx_skills_domain_model_skill.links">
+				<source>Links</source>
+				<target>Links</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.owner" resname="tx_skills_domain_model_skill.owner">
+				<source>Owner</source>
+				<target>Besitzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.placeholder" resname="tx_skills_domain_model_skill.placeholder">
+				<source>Placeholder</source>
+				<target>Platzhalter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.requirements" resname="tx_skills_domain_model_skill.requirements">
+				<source>Requirements</source>
+				<target>Voraussetzungen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.tags" resname="tx_skills_domain_model_skill.tags">
+				<source>Tags</source>
+				<target>Tags</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.title" resname="tx_skills_domain_model_skill.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillgroup" resname="tx_skills_domain_model_skillgroup">
+				<source>SkillGroup</source>
+				<target>Skill Gruppe</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillgroup.skillup_comment_placeholder" resname="tx_skills_domain_model_skillgroup.skillup_comment_placeholder">
+				<source>SkillUp Comment Placeholder</source>
+				<target>SkillUp Kommentar Platzhalter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillgroup.skillup_comment_preset" resname="tx_skills_domain_model_skillgroup.skillup_comment_preset">
+				<source>SkillUp Comment Preset</source>
+				<target>SkillUp Kommentar Vorbelegung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath" resname="tx_skills_domain_model_skillpath">
+				<source>SkillSet</source>
+				<target>SkillSet</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.brands" resname="tx_skills_domain_model_skillpath.brands">
+				<source>Brands</source>
+				<target>Marken</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.certificate_layout_file" resname="tx_skills_domain_model_skillpath.certificate_layout_file">
+				<source>Certificate layout file (Fluid template)</source>
+				<target>Zertifikat Layout Datei (Fluid Vorlage)</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.certificate_link" resname="tx_skills_domain_model_skillpath.certificate_link">
+				<source>Certificate link</source>
+				<target>Zertifikat Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.description" resname="tx_skills_domain_model_skillpath.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.legitimation_date" resname="tx_skills_domain_model_skillpath.legitimation_date">
+				<source>Legitimation Date</source>
+				<target>Legitimations Datum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.legitimation_user" resname="tx_skills_domain_model_skillpath.legitimation_user">
+				<source>Legitimation User</source>
+				<target>Legitimations Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.media" resname="tx_skills_domain_model_skillpath.media">
+				<source>Media</source>
+				<target>Medien</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.name" resname="tx_skills_domain_model_skillpath.name">
+				<source>Name</source>
+				<target>Name</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.skills" resname="tx_skills_domain_model_skillpath.skills">
+				<source>Skills</source>
+				<target>Skills</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.visibility" resname="tx_skills_domain_model_skillpath.visibility">
+				<source>Visibility</source>
+				<target>Sichtbarkeit</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.visibility.link" resname="tx_skills_domain_model_skillpath.visibility.link">
+				<source>Only with link</source>
+				<target>Nur mit Link sichtbar</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.visibility.members" resname="tx_skills_domain_model_skillpath.visibility.members">
+				<source>Organisation Members</source>
+				<target>Organisation Mitglieder</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skillpath.visibility.public" resname="tx_skills_domain_model_skillpath.visibility.public">
+				<source>Public</source>
+				<target>Öffentlich</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag" resname="tx_skills_domain_model_tag">
+				<source>Tag</source>
+				<target>Tag</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag.description" resname="tx_skills_domain_model_tag.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag.domainTaggedSkills" resname="tx_skills_domain_model_tag.domainTaggedSkills">
+				<source>Domain tagged skills</source>
+				<target>Domain tagged skills</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag.domain_tag" resname="tx_skills_domain_model_tag.domain_tag">
+				<source>Tag is a domain tag</source>
+				<target>Tag ist ein Domain Tag</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag.taggedSkills" resname="tx_skills_domain_model_tag.taggedSkills">
+				<source>Tagged skills</source>
+				<target>Tagged skills</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag.title" resname="tx_skills_domain_model_tag.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user" resname="tx_skills_domain_model_user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.anonymous" resname="tx_skills_domain_model_user.anonymous">
+				<source>Is anonymous user</source>
+				<target>Ist anonymer Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.api_key" resname="tx_skills_domain_model_user.api_key">
+				<source>API key</source>
+				<target>API key</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.avatar" resname="tx_skills_domain_model_user.avatar">
+				<source>Avatar</source>
+				<target>Avatar</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.favourite_certifiers" resname="tx_skills_domain_model_user.favourite_certifiers">
+				<source>Favourite Verifiers</source>
+				<target>Bevorzugte Verifizierende</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.github" resname="tx_skills_domain_model_user.github">
+				<source>GitHub</source>
+				<target>GitHub</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.linkedin" resname="tx_skills_domain_model_user.linkedin">
+				<source>LinkedIn</source>
+				<target>LinkedIn</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.locked" resname="tx_skills_domain_model_user.locked">
+				<source>Profile locked</source>
+				<target>Profil gesperrt</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.mail_language" resname="tx_skills_domain_model_user.mail_language">
+				<source>Preferred mail language</source>
+				<target>Bevorzugte E-Mail-Sprache</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.mail_push" resname="tx_skills_domain_model_user.mail_push">
+				<source>Receive mail push notifications</source>
+				<target>E-Mail Push-Benachrichtigungen erhalten</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.managed_brands" resname="tx_skills_domain_model_user.managed_brands">
+				<source>Managed Brands</source>
+				<target>Verwaltete Marken</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.monthly_activity" resname="tx_skills_domain_model_user.monthly_activity">
+				<source>Monthly Activity</source>
+				<target>Monatliche Aktivität</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.newsletter" resname="tx_skills_domain_model_user.newsletter">
+				<source>Newsletter</source>
+				<target>Newsletter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.organisations" resname="tx_skills_domain_model_user.organisations">
+				<source>Organisation memberships</source>
+				<target>Organisationsmitgliedschaften</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.pending_email" resname="tx_skills_domain_model_user.pending_email">
+				<source>Pending email</source>
+				<target>Wartende E-Mailänderung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.profile_link" resname="tx_skills_domain_model_user.profile_link">
+				<source>Link to profile page</source>
+				<target>Link zur Profilseite</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.publish_skills" resname="tx_skills_domain_model_user.publish_skills">
+				<source>Publish Skills</source>
+				<target>Skill öffentlich</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.terms_accepted" resname="tx_skills_domain_model_user.terms_accepted">
+				<source>Terms accepted at</source>
+				<target>AGB akzeptiert am</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.twitter" resname="tx_skills_domain_model_user.twitter">
+				<source>Twitter</source>
+				<target>Twitter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.verifiers" resname="tx_skills_domain_model_user.verifiers">
+				<source>Verifiers</source>
+				<target>Verifizierende</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.xing" resname="tx_skills_domain_model_user.xing">
+				<source>XING</source>
+				<target>XING</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack" resname="tx_skills_domain_model_verificationcreditpack">
+				<source>Verification Credit Pack</source>
+				<target>Verifikationsguthaben</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.brand" resname="tx_skills_domain_model_verificationcreditpack.brand">
+				<source>Organisation</source>
+				<target>Organisation</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.brand_name" resname="tx_skills_domain_model_verificationcreditpack.brand_name">
+				<source>Organisation name</source>
+				<target>Organisationsname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.current_points" resname="tx_skills_domain_model_verificationcreditpack.current_points">
+				<source>Remaining points</source>
+				<target>Verbleibende Punkte</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.initial_points" resname="tx_skills_domain_model_verificationcreditpack.initial_points">
+				<source>Initial points</source>
+				<target>Initiale Punkte</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.invoice_number" resname="tx_skills_domain_model_verificationcreditpack.invoice_number">
+				<source>Assoc. invoice number</source>
+				<target>Zugeordnete Rechnungsnummer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.price" resname="tx_skills_domain_model_verificationcreditpack.price">
+				<source>Price</source>
+				<target>Preis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.price_charged" resname="tx_skills_domain_model_verificationcreditpack.price_charged">
+				<source>Price charged</source>
+				<target>Verrechneter Preis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.title" resname="tx_skills_domain_model_verificationcreditpack.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.user" resname="tx_skills_domain_model_verificationcreditpack.user">
+				<source>Ordering User</source>
+				<target>Bestellender Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.user_firstname" resname="tx_skills_domain_model_verificationcreditpack.user_firstname">
+				<source>First name</source>
+				<target>Vorname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.user_lastname" resname="tx_skills_domain_model_verificationcreditpack.user_lastname">
+				<source>Last name</source>
+				<target>Nachname</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.user_username" resname="tx_skills_domain_model_verificationcreditpack.user_username">
+				<source>Username</source>
+				<target>Benutzername</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.valid_thru" resname="tx_skills_domain_model_verificationcreditpack.valid_thru">
+				<source>Valid thru</source>
+				<target>Gültig bis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditpack.valuta" resname="tx_skills_domain_model_verificationcreditpack.valuta">
+				<source>Valuta date</source>
+				<target>Valuta Datum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditusage" resname="tx_skills_domain_model_verificationcreditusage">
+				<source>Verification Credit Pack Usage</source>
+				<target>Verifikationsguthaben Verwendung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditusage.credit_pack" resname="tx_skills_domain_model_verificationcreditusage.credit_pack">
+				<source>Verification Credit Pack</source>
+				<target>Verifikationsguthaben</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditusage.points" resname="tx_skills_domain_model_verificationcreditusage.points">
+				<source>Used Points</source>
+				<target>Verwendete Punkte</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditusage.price" resname="tx_skills_domain_model_verificationcreditusage.price">
+				<source>Price</source>
+				<target>Preis</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_verificationcreditusage.verification" resname="tx_skills_domain_model_verificationcreditusage.verification">
+				<source>Verification</source>
+				<target>Verifizierung</target>
+			</trans-unit><trans-unit id="tx_skills_domain_model_notification" resname="tx_skills_domain_model_notification">
+				<source>Notification</source>
+				<target>Benachrichtigung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.user" resname="tx_skills_domain_model_notification.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.type" resname="tx_skills_domain_model_notification.type">
+				<source>Type</source>
+				<target>Typ</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.reference" resname="tx_skills_domain_model_notification.reference">
+				<source>Reference</source>
+				<target>Referenz</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.message" resname="tx_skills_domain_model_notification.message">
+				<source>Message</source>
+				<target>Nachricht</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

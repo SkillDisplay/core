@@ -1,0 +1,98 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend"/>
+
+<f:section name="content">
+	<f:flashMessages/>
+	<f:link.action action="creditOverview" class="btn btn-default" title="Back" style="margin-bottom: 10px">
+		<core:icon identifier="actions-arrow-left"/>
+	</f:link.action>
+
+	<h1>{organization.name}</h1>
+	<div class="panel panel-default">
+		<div class="panel-heading">Package History</div>
+		<div class="panel-body">
+			<table class="table">
+				<thead>
+				<tr>
+					<th>Package</th>
+					<th>Credit Points</th>
+					<th>Valuta</th>
+					<th>Valid Until</th>
+					<th class="text-right">Price</th>
+				</tr>
+				</thead>
+				<tbody>
+				<f:for each="{packs}" as="pack">
+					<tr>
+						<td>
+							<be:link.editRecord uid="{pack.uid}" table="tx_skills_domain_model_verificationcreditpack">
+								{pack.title}
+							</be:link.editRecord>
+						</td>
+						<td>
+							<span>{pack.initialPoints}</span>
+						</td>
+						<td>
+							<f:format.date>{pack.valuta}</f:format.date>
+						</td>
+						<td>
+							<f:if condition="{pack.validThru}">
+								<f:then>
+									<f:format.date>{pack.validThru}</f:format.date>
+								</f:then>
+								<f:else>
+									<span>-</span>
+								</f:else>
+							</f:if>
+
+						</td>
+						<td class="text-right">€ {pack.price}</td>
+					</tr>
+				</f:for>
+				</tbody>
+			</table>
+			<div style="font-size: 18px" class="d-flex justify-content-between">
+				<span>Total Amount</span>
+				<span style="float: right" class="text-right">€ {totalPackagePrice}</span>
+			</div>
+		</div>
+	</div>
+	<div class="panel panel-default">
+		<div class="panel-heading">Verification History</div>
+		<div class="panel-body">
+			<table class="table">
+				<thead>
+				<tr>
+					<th>Title</th>
+					<th>Grant Date</th>
+					<th>Type</th>
+					<th>Verified By</th>
+					<th class="text-right">Credits / Price</th>
+				</tr>
+				</thead>
+				<tbody>
+				<f:for each="{usages}" as="usage">
+					<tr>
+						<td>
+							<be:link.editRecord uid="{usage.uid}" table="tx_skills_domain_model_certification">
+								{usage.title}
+							</be:link.editRecord>
+						</td>
+						<td>
+							<f:format.date>{usage.grantDate}</f:format.date>
+						</td>
+						<td>
+							<f:translate key="LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certification.tier{usage.type}" />
+						</td>
+						<td>{usage.verifier.firstName} {usage.verifier.lastName}</td>
+						<td class="text-right">{usage.credits} / € {usage.price}</td>
+					</tr>
+				</f:for>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</f:section>

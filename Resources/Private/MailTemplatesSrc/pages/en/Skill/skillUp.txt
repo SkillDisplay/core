@@ -1,0 +1,49 @@
+---
+layout: text_en
+subject: 'Verification {f:if(condition:''{certification.grantDate -> f:format.date(format: \''U\'')}'',then:''achieved!'', else:''declined'')}'
+---
+Hi {user.firstName},
+<f:if condition="{certification.grantDate -> f:format.date(format: 'U')}"><f:then>
+Congratulations to your
+
+<f:if condition="{certification.level} == 'tier3'">Self Verification</f:if>
+<f:if condition="{certification.level} == 'tier2'">Educational Verification</f:if>
+<f:if condition="{certification.level} == 'tier1'">Certification Verification</f:if>
+<f:if condition="{certification.level} == 'tier4'">Business Verification</f:if>
+
+of
+
+<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+
+Verified by
+-----------
+
+{certification.certifier.user.firstName} {certification.certifier.user.lastName}
+{certification.brand.name}
+
+
+<f:if condition="{certification.requestGroup} == '' && {certification.skill.successorSkills}">
+Next steps
+----------
+
+Skills you may want to achieve next:
+<f:for each="{certification.skill.successorSkills}" as="skill">
+  - {skill.title} <f:uri.action pluginName="skills" action="show" controller="Skill" arguments="{skill: skill}" pageUid="{settings.pids.skillSets}" absolute="1" />
+</f:for>
+</f:if>
+
+</f:then><f:else>
+
+Unfortunately your verification request for
+<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+has been declined by
+{certification.certifier.user.firstName} {certification.certifier.user.lastName} ({certification.brand.name}).
+
+<f:if condition="{certification.revokeReason}">
+Reason: {certification.revokeReason}
+</f:if>
+
+</f:else></f:if>
+
+
+Your SkillDisplay Team

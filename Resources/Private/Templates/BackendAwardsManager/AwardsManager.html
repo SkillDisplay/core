@@ -1,0 +1,40 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend" />
+
+<f:section name="content">
+	<f:flashMessages />
+	<h1>Awards Manager</h1>
+	<div class="panel panel-default">
+		<div class="panel-heading">SkillSets</div>
+		<div class="panel-body">
+			<table class="table">
+				<thead>
+				<tr>
+					<th>SkillSet</th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				<f:for each="{skillSets}" as="skillSet">
+					<tr>
+						<td>
+							<f:link.action action="skillSetAwards" arguments="{skillSet: skillSet}">
+								{skillSet.name}
+							</f:link.action>
+						</td>
+						<td class="text-right">
+							<f:link.action action="skillSetAwards" arguments="{skillSet: skillSet}"
+														 class="btn btn-default" title="View Award">
+								<core:icon identifier="actions-trophy"/>
+							</f:link.action>
+						</td>
+					</tr>
+				</f:for>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</f:section>

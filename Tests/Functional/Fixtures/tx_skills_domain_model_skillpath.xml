@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <tx_skills_domain_model_skillpath>
+        <uid>1</uid>
+        <pid>3</pid>
+        <name>CMS Certified Developer 8</name>
+        <visibility>0</visibility>
+        <brands>3</brands>
+        <skills>5</skills>
+    </tx_skills_domain_model_skillpath>
+    <tx_skills_domain_model_skillpath>
+        <uid>2</uid>
+        <pid>3</pid>
+        <name>CMS Certified Developer 9</name>
+        <visibility>0</visibility>
+        <brands>1</brands>
+        <skills>3</skills>
+    </tx_skills_domain_model_skillpath>
+    <tx_skills_domain_model_skillpath>
+        <uid>3</uid>
+        <pid>3</pid>
+        <name>CMS Certified Developer 10</name>
+        <visibility>0</visibility>
+        <brands>1</brands>
+        <skills>5</skills>
+    </tx_skills_domain_model_skillpath>
+</dataset>

@@ -1,0 +1,32 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="main">
+
+	<h1>
+		{f:translate(id:'terms.header')}
+	</h1>
+
+	<p>
+		{f:translate(id:'terms.text')}
+	</p>
+
+	<f:form action="acceptTerms">
+		<div class="form-group">
+			<div class="form-check">
+				<f:form.checkbox class="form-check-input" name="terms" id="terms" value="1" additionalAttributes="{required: 'required'}" />
+				<label for="terms" class="form-check-label">
+					<f:format.raw>
+						<f:translate id="terms" arguments="{0: '{f:translate(id:\'termsLink\') -> f:link.typolink(parameter: settings.termsLink)}', 1: '{f:translate(id:\'privacyLink\') -> f:link.typolink(parameter: settings.privacyLink)}'}" />
+					</f:format.raw>
+				</label>
+			</div>
+		</div>
+		<div class="form-group">
+			<f:form.submit class="btn btn-primary button primary" value="{f:translate(id: 'user.accept')}" />
+		</div>
+	</f:form>
+</f:section>
+
+</html>

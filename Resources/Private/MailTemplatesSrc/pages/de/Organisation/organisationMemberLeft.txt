@@ -1,0 +1,9 @@
+---
+layout: text_de
+subject: Du hast "{organisation.name}" auf SkillDisplay verlassen
+---
+Hallo {user.firstName},
+
+Wir bestätigen, dass du deine Mitgliedschaft in der Organisation "{organisation.name}" auf SkillDisplay beendet hast.
+
+Dein SkillDisplay Team

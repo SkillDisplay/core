@@ -1,0 +1,9 @@
+﻿*~
+*.bak
+*.map
+.DS_Store
+/.idea
+/node_modules/
+/Resources/Private/MailTemplates/app.css
+/.Build/
+/composer.lock

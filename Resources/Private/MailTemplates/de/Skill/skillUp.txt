@@ -1,0 +1,62 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Verifizierung {f:if(condition:'{certification.grantDate -> f:format.date(format: \'U\')}',then:'erhalten!', else:'abgelehnt')}
+Hallo {user.firstName},
+<f:if condition="{certification.grantDate -> f:format.date(format: 'U')}"><f:then>
+Gratulation zu deinem
+
+<f:if condition="{certification.level} == 'tier3'">Selbst-Verifizierung</f:if>
+<f:if condition="{certification.level} == 'tier2'">Bildungs-Verifizierung</f:if>
+<f:if condition="{certification.level} == 'tier1'">Zertifizierungs-Verifizierung</f:if>
+<f:if condition="{certification.level} == 'tier4'">Branchen-Verifizierung</f:if>
+
+von
+
+<f:if condition="{certification.requestGroup}"><f:then> {certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+
+
+Verifiziert durch
+-----------------
+
+{certification.certifier.user.firstName} {certification.certifier.user.lastName}
+{certification.brand.name}
+
+<f:if condition="{certification.requestGroup} == '' && {certification.skill.successorSkills}">
+Nächste Schritte
+----------------
+
+Skills du als nächstes erreichen kannst:
+<f:for each="{certification.skill.successorSkills}" as="skill">
+  - {skill.title} <f:uri.action pluginName="skills" action="show" controller="Skill" arguments="{skill: skill}" pageUid="{settings.pids.skillSets}" absolute="1" additionalParams="{L:1}"/>
+</f:for>
+</f:if>
+
+</f:then><f:else>
+
+Leider wurde deine Verifizierungsanfrage für
+<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+von
+{certification.certifier.user.firstName} {certification.certifier.user.lastName} ({certification.brand.name})
+abgelehnt.
+
+<f:if condition="{certification.revokeReason}">
+Begründung: {certification.revokeReason}
+</f:if>
+
+</f:else></f:if>
+
+Dein SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

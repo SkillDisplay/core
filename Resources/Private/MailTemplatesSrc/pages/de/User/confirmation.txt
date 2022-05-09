@@ -1,0 +1,25 @@
+---
+layout: text_de
+subject: Aktiviere dein Benutzerkonto bei SkillDisplay
+---
+Hallo {user.firstName},
+
+Danke für deine Registrierung bei SkillDisplay!
+Du bist nur noch einen Klick davon entfernt, dein Benutzerkonto zu aktivieren
+und zu zeigen was du kannst!
+
+Um deinen Account zu aktivieren und deine E-Mailadresse zu bestätigen,
+klicke einfach auf den Link unten.
+
+Achtung: Dieser Link kann nur einmal verwendet werden.
+
+<f:uri.page pageUid="{settings.pids.registration}" absolute="1" additionalParams="{code:code, L:1}" noCacheHash="1" />
+
+
+Dein SkillDisplay Team
+
+
+--
+Du erhältst diese Nachricht, weil ein Benutzerkonto mit dieser E-Mailadresse
+auf www.skilldisplay.eu registriert wurde.
+Falls du dich nicht bei uns registrieren möchtest musst du nichts weiter tun.

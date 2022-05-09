@@ -1,0 +1,63 @@
+---
+layout: text_de
+subject: Willkommen bei SkillDisplay!
+---
+Willkommen bei SkillDisplay!
+
+Wir sind hier, um dir dabei zu helfen, das Profil deiner Organisation einzurichten, dein Team vorzubereiten und deine ersten Schritte in SkillDisplay zu machen.
+
+Erstens: Du musst nichts auswendig lernen. Unser SkillDisplay ServiceDesk ist immer öffentlich zugänglich und enthält Schritt-für-Schritt-Tutorials für alle Aspekte unserer Plattform. Wann immer du irgendwo nicht weiterkommst, kannst du im ServiceDesk nach einer Antwort suchen oder uns direkt kontaktieren.
+
+Zum SkillDisplay ServiceDesk:
+https://skilldisplay.atlassian.net/servicedesk/customer/portals
+
+Alles einrichten
+
+Wir haben bereits deine Frontend- und Backend-Benutzerkonten, sowie deine Organisation eingerichtet. Dein SkillDisplay App Benutzer wurde als Organisationsmanager zugewiesen.
+
+Um auf das SkillDisplay Backend und die entsprechenden Funktionen zuzugreifen, nutze bitte deinen Benutzernamen "{user.username}". Bitte benutze den "Passwort vergessen" Link mit deiner email ""{user.email}"" auf  https://www.skilldisplay.eu/typo3 . Du wirst ein neues Passwort per E-Mail erhalten.
+
+Sobald du Zugang zum Backend hast, empfehlen wir dir, dein Organisations-/Firmenprofil einzurichten
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/12379f78-828c-45a4-a9ff-120cd39f0728/article/910163969
+
+Wie man anfängt
+
+Deiner Organisation wird ein administratives Benutzerkonto zugewiesen, der Organisationsmanager. (siehe oben). Dieses Benutzerkonto hat die Berechtigung, andere Benutzer in deine Organisation einzuladen oder deren Mitgliedschaft zu widerrufen.
+Dein Backend-Account gewährt Zugriff auf die Verifikationsverwaltung und den Visual Skill Editor.
+
+Um deine Kollegen in deine Organisation einzuladen, kannst du Einladungscodes erstellen und diese nach Belieben verteilen. Erstellte Benutzerprofile sind standardmäßig privat, ohne dass die Profildaten für andere Personen außerhalb Ihres Unternehmens sichtbar sind.
+
+Erfahre mehr über die Verwaltung deiner Organisation auf SkillDisplay in unserem ServiceDesk:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/article/1447788545
+
+Verifizierer ernennen
+
+Überprüfungsrechte können unter den Mitgliedern deiner Organisation verteilt werden, je nach Expertise oder wie du es für richtig hältst. Greife auf das SkillDisplay Backend zu und wechsle auf den Reiter Verifizierungsrechte, um die SkillSets und Verifizierungstypen auszuwählen, die du zuweisen möchtest.
+
+Erfahre, wie du den Organisationsmitgliedern Verifizierungsrechte zuweisen kannst:
+https://skilldisplay.atlassian.net/servicedesk/customer/kb/view/1471217665
+
+Erstelle deine eigenen Skills
+
+Bevor du anfängst, deine eigenen Skills zu erstellen, empfehlen wir dir, dich mit der SkillDisplay-Methodik vertraut zu machen und zu lernen, wie Skills definiert und strukturiert sind und wie die verschiedenen Arten der Überprüfung funktionieren.
+
+Erfahre mehr über die grundlegenden Konzepte der SkillDisplay Skill Management Methodik:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/5c91a800-3e63-4b92-97a4-6ea3ae0caa58
+
+Wenn du dich bereit fühlst, mit der Skill-Erstellung zu beginnen, empfehlen wir dir, mit einem einzigen, gut fokussierten SkillSet mit nur wenigen Skills zu starten. Auf diese Weise kannst du dich nicht in der Definition von Abhängigkeiten und der Formulierung von Skilldaten verlieren. Nach den ersten Schritten kannst du auf deinen erstellten Skills aufbauen, neue Skills erstellen oder bestehende Skills in detailliertere Skills aufteilen.
+
+Wie man seine Skills und SkillSets verwaltet:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/120dd3c6-4b00-429c-9fdc-f548e2abd513
+
+Benötigst du Hilfe, um anzufangen?
+Wir bieten eine Vielzahl von Workshops an, um dich bei deinen ersten Schritten zu unterstützen, Skill Maintainer und Admins zu befähigen und dir zu helfen, das Skillmanagement so effektiv wie möglich zu etablieren.
+
+Unser Kickstarter-Workshop hilft dir, an einem einzigen Tag operativ zu werden -> SkillDisplay Kickstarter Workshop: https://www.skilldisplay.biz/skilldisplay-kickstarter-package
+
+Besuchen Sie unsere verfügbaren SkillDisplay-Coachings und Workshops
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/8dc03a8b-a3de-4f56-8e61-c1c363471a90
+
+Integriere SkillDisplay mit deinem LMS
+SkillDisplay ist keine Alternative, sondern eine Ergänzung zu einem Learning Management System. Wenn du Moodle, Confluence oder andere Plattformen nutzt, um zu unterrichten oder Wissen zu verbreiten, bieten wir Plugins und Best Practices für die Integration an. Kontaktiere uns, um mehr zu erfahren.
+
+Dein SkillDisplay Team

@@ -1,0 +1,10 @@
+---
+layout: text_en
+subject: Membership in "{organisation.name}" on SkillDisplay cancelled
+---
+Hi {user.firstName},
+
+We kindly inform you that your membership with the organisation "{organisation.name}"
+on SkillDisplay has been cancelled by an organisation's manager.
+
+Your SkillDisplay Team

@@ -1,0 +1,22 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+
+<f:layout name="Default" />
+
+<f:section name="main">
+	<div class="row">
+	<f:for each="{organisations}" as="organisation">
+		<div class="col-6 col-md-2 text-center">
+			<rx:appLink appRoute="organizations/{organisation.uid}/public" url="{settings.app}">
+				<f:if condition="{organisation.logo}">
+					<f:image image="{organisation.logo.0.originalResource}" alt="{organisation.name}" width="300" class="img-fluid" /><br />
+				</f:if>
+				{organisation.name}
+			</rx:appLink>
+		</div>
+	</f:for>
+	</div>
+</f:section>
+
+</html>

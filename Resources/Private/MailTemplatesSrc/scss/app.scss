@@ -1,0 +1,57 @@
+@import 'variables';
+@import 'settings';
+@import 'foundation-emails';
+
+td {
+	hyphens: manual;
+}
+
+.tier1 {
+    background: $certificate-color;
+    color: $white;
+}
+.tier2 {
+    background: $education-color;
+    color: $white;
+}
+.tier3 {
+    background: $self-color;
+    color: $white;
+}
+.tier4 {
+    background: $business-color;
+    color: $white;
+}
+th.callout-inner {
+    &.tier1 {
+        background: $certificate-color;
+        color: $white;
+        border: darken($certificate-color, 20%) 2px solid;
+    }
+    &.tier2 {
+        background: $education-color;
+        color: $white;
+        border: darken($education-color, 20%) 2px solid;
+    }
+    &.tier3 {
+        background: $self-color;
+        color: $white;
+        border: darken($self-color, 20%) 2px solid;
+    }
+    &.tier4 {
+        background: $business-color;
+        color: $white;
+        border: darken($business-color, 20%) 2px solid;
+    }
+    &.neutral {
+        background: $medium-gray;
+        color: $black;
+        border: darken($medium-gray, 20%) 2px solid;
+    }
+    &.basic {
+        background: $white;
+        color: $brand-gray;
+        border: none;
+        border-bottom: 1px solid $black;
+    }
+}

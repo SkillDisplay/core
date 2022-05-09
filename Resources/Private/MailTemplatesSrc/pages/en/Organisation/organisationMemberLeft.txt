@@ -1,0 +1,9 @@
+---
+layout: text_en
+subject: You've left "{organisation.name}" on SkillDisplay
+---
+Hi {user.firstName},
+
+We confirm that you have cancelled your membership in the organisation "{organisation.name}" on SkillDisplay.
+
+Your SkillDisplay Team

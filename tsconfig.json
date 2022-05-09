@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "ES2015",
+		"alwaysStrict": true,
+		"sourceMap": false,
+		"noFallthroughCasesInSwitch": true,
+		"strict": true,
+		"noImplicitReturns": true,
+		"preserveConstEnums": true,
+		"removeComments": true
+	},
+	"include": [
+		"Resources/Private/TypeScript/**/*"
+	]
+}

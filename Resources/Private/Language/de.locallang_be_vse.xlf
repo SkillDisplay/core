@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<xliff version="1.0">
+	<file source-language="en" target-language="de" date="2020-04-09T18:10:32+02:00">
+		<body>
+			<trans-unit id="mlang_labels_tabdescr" resname="mlang_labels_tabdescr">
+				<source>SkillDisplay Visual Skill Editor (VSE)</source>
+				<target>SkillDisplay Visueller Skill Editor (VSE)</target>
+			</trans-unit>
+			<trans-unit id="mlang_labels_tablabel" resname="mlang_labels_tablabel">
+				<source>SkillDisplay VSE</source>
+				<target>SkillDisplay VSE</target>
+			</trans-unit>
+			<trans-unit id="mlang_tabs_tab" resname="mlang_tabs_tab">
+				<source>Visual Skill Editor</source>
+				<target>Visual Skill Editor</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

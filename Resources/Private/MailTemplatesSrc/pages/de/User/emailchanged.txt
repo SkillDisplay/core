@@ -1,0 +1,12 @@
+---
+layout: text_de
+subject: Deine E-Mailadresse auf SkillDisplay wurde geändert
+---
+Hallo {user.firstName},
+
+deine neue E-Mailadresse bei SkillDisplay lautet jetzt
+{user.username}
+
+Um dich bei SkillDisplay anzumelden, verwende ab sofort diese Adresse.
+
+Dein SkillDisplay Team

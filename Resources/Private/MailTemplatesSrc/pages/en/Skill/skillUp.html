@@ -1,0 +1,118 @@
+---
+layout: mail_en
+subject: 'Verification {f:if(condition:''{certification.grantDate -> f:format.date(format: \''U\'')}'',then:''achieved!'', else:''declined'')}'
+description: '{f:if(condition:''{certification.grantDate -> f:format.date(format: \''U\'')}'',then:''You achieved a verification.'', else:''A verification request was declined.'')}'
+---
+<container>
+	<f:if condition="{certification.grantDate -> f:format.date(format: 'U')}">
+		<f:then>
+			<row>
+				<columns small="12">
+					<h2 class="text-center">Hi {user.firstName},</h2>
+					<p class="text-center">Congratulations to your</p>
+				</columns>
+			</row>
+			<row>
+				<columns small="12" large="12">
+					<f:if condition="{certification.level} == 'tier3'">
+						<callout class="tier3">
+							<span class="text-center">Self Verification</span>
+						</callout>
+					</f:if>
+					<f:if condition="{certification.level} == 'tier2'">
+						<callout class="tier2">
+							<span class="text-center">Educational Verification</span>
+						</callout>
+					</f:if>
+					<f:if condition="{certification.level} == 'tier1'">
+						<callout class="tier1">
+							<span class="text-center">Certification Verification</span>
+						</callout>
+					</f:if>
+					<f:if condition="{certification.level} == 'tier4'">
+						<callout class="tier4">
+							<span class="text-center">Business Verification</span>
+						</callout>
+					</f:if>
+				</columns>
+			</row>
+			<row>
+				<columns small="12">
+					<p class="text-center">of</p>
+				</columns>
+			</row>
+			<row>
+				<columns small="12">
+					<h2 class="text-center">
+						<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if>
+					</h2>
+				</columns>
+			</row>
+			<spacer size="30"></spacer>
+			<row>
+				<columns small="12">
+					<callout class="basic">
+						Verified by
+					</callout>
+				</columns>
+			</row>
+			<row>
+				<columns small="6" large="6" class="callout" valign="middle">
+					<center><div><mail:image msg="{msg}" maxWidth="200" maxHeight="200" image="{certification.certifier.user.avatar}" alt="{certification.certifier.user.firstName} {certification.certifier.user.lastName}" class="float-center" additionalAttributes="{align: 'center'}" /></div></center>
+				</columns>
+				<columns small="6" large="6" valign="middle">
+					<f:if condition="{certification.brand.pixelLogo}"><center><div><mail:image msg="{msg}" maxWidth="200" image="{certification.brand.pixelLogo}" alt="{certification.brand.name}" class="float-center" additionalAttributes="{align: 'center'}" /></div></center></f:if>
+				</columns>
+			</row>
+			<row>
+				<columns small="6" large="6" valign="middle">
+					<p class="text-center">{certification.certifier.user.firstName} {certification.certifier.user.lastName}</p>
+				</columns>
+				<columns small="6" large="6" valign="middle">
+					<p class="text-center">{certification.brand.name}</p>
+				</columns>
+			</row>
+			<f:if condition="{certification.requestGroup} == '' && {certification.skill.successorSkills}">
+				<spacer size="30"></spacer>
+				<row>
+					<columns small="12" large="12">
+						<callout class="basic">
+							Next steps
+						</callout>
+					</columns>
+				</row>
+				<row>
+					<columns small="6" large="6">
+						<h5>Skills you may want to achieve next:</h5>
+						<ul>
+						<f:for each="{certification.skill.successorSkills}" as="skill">
+							<li><f:link.action pluginName="skills" action="show" controller="Skill" arguments="{skill: skill}" pageUid="{settings.pids.skillSets}" absolute="1">{skill.title}</f:link.action></li>
+						</f:for>
+						</ul>
+					</columns>
+				</row>
+			</f:if>
+		</f:then>
+		<f:else>
+			<row>
+				<columns small="12">
+					<h2 class="text-center">Hi {user.firstName},</h2>
+					<p class="text-center">
+						Unfortunately your verification request for<br />
+						<f:if condition="{certification.requestGroup}"><f:then>{certification.requestGroupParent.name}</f:then><f:else>Skill: {certification.skill.title}</f:else></f:if><br />
+						has been declined by<br />
+						{certification.certifier.user.firstName} {certification.certifier.user.lastName} ({certification.brand.name}).
+					</p>
+					<f:if condition="{certification.revokeReason}">
+						<p>Reason: {certification.revokeReason}</p>
+					</f:if>
+				</columns>
+			</row>
+		</f:else>
+	</f:if>
+	<row>
+		<columns small="12">
+			<p>Your SkillDisplay Team</p>
+		</columns>
+	</row>
+</container>

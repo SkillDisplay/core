@@ -1,0 +1,66 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+			data-namespace-typo3-fluid="true"
+>
+
+<f:layout name="Default" />
+
+<f:section name="main">
+
+	<h1><f:translate id="skillPaths.list.title" /></h1>
+
+	<f:flashMessages />
+
+	<f:for each="{paths}" as="path">
+		<div class="package clearfix">
+			<header class="package-header">
+				<div class="row package-mainheader">
+					<div class="col-10">
+						<h2><f:link.action action="show" controller="SkillPath" arguments="{path: path}"><span class="brand">{path.brands.0.name}</span> {path.name}</f:link.action></h2>
+					</div>
+					<div class="col-2 text-right">
+						<f:if condition="{path.infoLink}"><f:link.typolink parameter="{path.infoLink}" class="package-header-infolink"><i class="fas fa-info-circle"></i></f:link.typolink></f:if>
+					</div>
+				</div>
+			</header>
+
+			<div class="package-info">
+				<div class="owl-carousel owl-theme js-owl-carousel" data-carousel-options="{{loop:&quot;true&quot;,items:&quot;4&quot;}}">
+					<div class="package-infosheet">
+						<f:link.action action="show" controller="SkillPath" arguments="{path: path}">
+							<f:image src="{f:uri.resource(path: 'Images/SkillDisplay_Logo.svg')}" width="480" alt="Logo SkillDisplay" />
+						</f:link.action>
+					</div>
+					<div class="package-infosheet">
+						<div class="package-flavortext">
+							<f:link.action action="show" controller="SkillPath" arguments="{path: path}">
+								<p class="package-infosheet-text">{path.description -> f:format.html()}</p>
+							</f:link.action>
+						</div>
+					</div>
+					<div class="package-infosheet">
+						<f:for each="{path.brands}" as="brand"><f:if condition="{brand.logo.0}">
+							<div class="package-brand">
+								<f:link.action action="show" controller="SkillPath" arguments="{path: path}">
+									<f:media file="{brand.logo.0}" class="img-fluid" />
+								</f:link.action>
+							</div>
+						</f:if></f:for>
+					</div>
+					<div class="package-infosheet">
+						<div class="package-video">
+							<f:for each="{path.media}" as="media">
+								<f:link.action action="show" controller="SkillPath" arguments="{path: path}">
+									<f:media file="{media}" class="img-fluid" />
+								</f:link.action>
+							</f:for>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</f:for>
+
+</f:section>
+
+</html>

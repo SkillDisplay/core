@@ -1,0 +1,552 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+			data-namespace-typo3-fluid="true"
+			xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers">
+	<meta charset="utf-8">
+	<head>
+		<link rel="stylesheet" href="PublicProfile.css">
+	</head>
+
+	<div class="header header-left">
+		<span class="header-left-title">Profile Summary</span>
+		<span class="header-left-date">{currentDate}</span>
+	</div>
+
+	<div class="header header-right">
+		<div class="header-right-title">
+			SKiLL<span class="header-right-title2">DiSPLAY</span>
+		</div>
+		<span class="header-right-name">{user.firstname} {user.lastname}</span>
+	</div>
+
+	<body>
+		<div class="profile flex-row">
+			<div class="profile-img">
+				<img class="user-picture" src="file://{imgUrl}" alt="user-img"/>
+			</div>
+			<div class="profile-info flex-column">
+				<span class="profile-name">{user.firstname} {user.lastname}</span>
+				<span class="profile-text">Profile Summary</span>
+				<f:if condition="{user.email} !== ''">
+					<div class="profile-row-icon flex-row">
+						<img class="profile-icon" src="file://{mailSvg}" alt="mailIcon">
+						<span class="profile-email">{user.email}</span>
+					</div>
+				</f:if>
+				<f:if condition="{user.www} !== ''">
+					<div class="profile-row-icon flex-row">
+						<img class="profile-icon" src="file://{webSvg}" alt="webIcon">
+						<span class="profile-www">{user.www}</span>
+					</div>
+				</f:if>
+			</div>
+			<div class="qr-code">
+				<img src="file://{code}" alt="code">
+			</div>
+		</div>
+
+		<p class="subheader">Memberships</p>
+		<div class="memberships flex-row">
+			<f:for each="{profile.organisations}" as="organisation">
+				<div class="organisation flex-row">
+					<img class="organisation-logo" src="file://{organisation.logoForLocalprocessing}" alt="">
+					<div class="organisation-info flex-column">
+						<span class="organisation-title">{organisation.name}</span>
+						<f:if condition="{organisation.memberCount} == 1">
+							<f:then>
+								<span class="organisation-members">{organisation.memberCount} Member</span>
+							</f:then>
+							<f:else>
+								<span class="organisation-members">{organisation.memberCount} Members</span>
+							</f:else>
+						</f:if>
+					</div>
+				</div>
+			</f:for>
+		</div>
+
+		<p class="subheader">Verifications</p>
+		<div class="verifications flex-row">
+			<div class="flex-row align-center">
+				<div class="counter-field total-count flex-column">
+					<span class="verification-text">{totalCount}</span>
+					<span class="verification-info">Verifications</span>
+				</div>
+				<div class="vertical-separator"></div>
+			</div>
+
+			<div class="counter-field self-count flex-column">
+				<span class="verification-text">{selfCount}</span>
+				<span class="verification-info">Self</span>
+			</div>
+			<div class="counter-field education-count flex-column">
+				<span class="verification-text">{educationCount}</span>
+				<span class="verification-info">Education</span>
+			</div>
+			<div class="counter-field business-count flex-column">
+				<span class="verification-text">{businessCount}</span>
+				<span class="verification-info">Business</span>
+			</div>
+			<div class="counter-field cert-count flex-column">
+				<span class="verification-text">{certCount}</span>
+				<span class="verification-info">Certificate</span>
+			</div>
+		</div>
+
+		<p class="subheader">Skills</p>
+		<f:for each="{verifications}" key="brand" as="brandWithTags">
+			<p class="brand-title">{brandWithTags._brandTitle}</p>
+			<f:for each="{brandWithTags.tags}" key="tag" as="tagWithSkills">
+				<p class="tag-title">{tagWithSkills._domain}</p>
+				<f:for each="{tagWithSkills.skills}" key="skill" as="skillWithLevels">
+					<div class="skill">
+						<div class="skill-title-verifications flex-row">
+							<p class="skill-title">{skillWithLevels.skill.title}</p>
+							<div class="levels">
+								<f:if condition="{rx:inArray(haystack: skillWithLevels.levels, needle: '3')}">
+									<f:then>
+										<img class="level-icon self-icon" src="file://{grantedSelfSvg}" alt="grantedSelf">
+									</f:then>
+									<f:else>
+										<img class="level-icon self-icon" src="file://{defaultSelfSvg}" alt="defaultSelf">
+									</f:else>
+								</f:if>
+								<f:if condition="{rx:inArray(haystack: skillWithLevels.levels, needle: '2')}">
+									<f:then>
+										<img class="level-icon education-icon" src="file://{grantedEducationSvg}" alt="grantedEducation">
+									</f:then>
+									<f:else>
+										<img class="level-icon education-icon" src="file://{defaultEducationSvg}" alt="defaultEducation">
+									</f:else>
+								</f:if>
+								<f:if condition="{rx:inArray(haystack: skillWithLevels.levels, needle: '4')}">
+									<f:then>
+										<img class="level-icon business-icon" src="file://{grantedBusinessSvg}" alt="grantedBusiness">
+									</f:then>
+									<f:else>
+										<img class="level-icon business-icon" src="file://{defaultBusinessSvg}" alt="defaultBusiness">
+									</f:else>
+								</f:if>
+								<f:if condition="{rx:inArray(haystack: skillWithLevels.levels, needle: '1')}">
+									<f:then>
+										<img class="level-icon certificate-icon" src="file://{grantedCertSvg}" alt="grantedCert">
+									</f:then>
+									<f:else>
+										<img class="level-icon certificate-icon" src="file://{defaultCertSvg}" alt="defaultCert">
+									</f:else>
+								</f:if>
+							</div>
+						</div>
+						<p class="description-title">Description</p>
+						<span class="skill-description">
+							<f:format.stripTags>{skillWithLevels.skill.description}</f:format.stripTags>
+						</span>
+					</div>
+				</f:for>
+			</f:for>
+		</f:for>
+	</body>
+
+
+
+<style>
+	.qr-code {
+		padding-top: 22px;
+	}
+
+	.qr-code img {
+		width: 70px;
+		height: 70px;
+	}
+
+	.verifications {
+		justify-content: space-between;
+		border: 1px solid #E0E0E0;
+		border-radius: 5px;
+		padding: 10px;
+	}
+
+	.counter-field {
+		text-align: center;
+		padding: 10px 23px;
+	}
+
+	.self-count {
+		border: 2px solid #32BE8C;
+		border-radius: 5px;
+	}
+
+	.education-count {
+		border: 2px solid #4a89c4;
+		border-radius: 5px;
+	}
+
+	.business-count {
+		border: 2px solid #f7bf5d;
+		border-radius: 5px;
+	}
+
+	.cert-count {
+		border: 2px solid #e04c5d;
+		border-radius: 5px;
+	}
+
+	.align-center {
+		align-items: center;
+	}
+
+	.total-count {
+		padding-right: 20px;
+	}
+
+	.vertical-separator {
+		width: 1px;
+		height: 80%;
+		background: #E0E0E0;
+	}
+
+	.verification-text {
+		font-size: 24px;
+		color: #111111;
+	}
+
+	.verification-info {
+		font-size: 14px;
+		color: #828282;
+	}
+
+	.awards {
+		justify-content: space-between;
+	}
+
+	.memberships {
+		justify-content: space-between;
+	}
+
+	.organisation {
+		flex: 1;
+		border: 1px solid #E0E0E0;
+		border-radius: 5px;
+		padding: 6px;
+		align-items: center;
+		font-family: Lato;
+		margin: 5px;
+	}
+
+	.organisation-info {
+		padding-left: 10px;
+	}
+
+	.organisation-logo {
+		width: 35px;
+	}
+
+	.organisation-title {
+		font-size: 14px;
+		color: #000000;
+	}
+
+	.organisation-members {
+		font-size: 12px;
+		color: #828282;
+	}
+
+	.award {
+		width: 150px !important;
+		border: 1px solid #E0E0E0;
+		border-radius: 5px;
+		padding: 10px;
+		padding-bottom: 50px;
+		align-items: center;
+		text-align: center;
+		color: #111111;
+		font-family: Lato;
+		flex: 1;
+	}
+
+	.award .icon-brand {
+		width: 130px;
+		height: 130px;
+		position: relative;
+		margin: 0 auto;
+	}
+
+	.award .icon-brand .award-icon {
+		width: 130px;
+		height: 130px;
+		margin: 0 auto;
+	}
+
+	.award .icon-brand .brand-logo{
+		width: 45px;
+		position: relative;
+		top: -65%;
+		transform: translate(5%, -28%);
+	}
+
+	.award .award-brand {
+		margin-top: 10px;
+		font-weight: bold;
+		font-size: 14px;
+	}
+
+	.sticky-footer {
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+		margin-top: -45px;
+	}
+
+	.award-title {
+		margin-top: 3px;
+		font-size: 12px;
+		margin-bottom: 10px;
+	}
+
+	.award-wrapper {
+		margin-bottom: -30px;
+	}
+
+	.award-bar {
+		height: 10px;
+		width: 150px;
+		border-radius: 5px;
+		margin: 0 auto;
+	}
+
+	.undefined-bar {
+		background: #2FB4BC;
+	}
+
+	.self-bar {
+		background: #32be8c;
+	}
+
+	.education-bar {
+		background: #4a89c4;
+	}
+
+	.business-bar {
+		background: #f7bf5d;
+	}
+
+	.certificate-bar {
+		background: #e04c5d;
+	}
+
+	.header {
+		font-family: Roboto;
+	}
+	.header-left {
+		display: flex;
+		flex-direction: column;
+		position: running(header-left);
+	}
+
+	.header-left-title {
+		font-size: 11px;
+		color: #232323;
+	}
+	.header-left-date {
+		font-size: 11px;
+		color: #828282;
+		font-weight: 300;
+	}
+
+	.header-right {
+		justify-content: flex-end;
+		display: flex;
+		flex-direction: column;
+		position: running(header-right);
+		text-align: right;
+		font-weight: 300;
+	}
+
+	.header-right-title {
+		color: #232323;
+		font-size: 14px;
+		letter-spacing: -0.2px;
+	}
+
+	.header-right-title2 {
+		color: #828282;
+	}
+
+	.header-right-name {
+		text-align: right;
+		font-size: 11px;
+		color: #828282;
+	}
+
+	body {
+		font-family: Lato;
+	}
+
+	.subheader {
+		font-style: normal;
+		font-weight: normal;
+		font-size: 24px;
+		color: #232323;
+		margin-top: 30px;
+	}
+
+	.flex-column {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.flex-row {
+		display: flex;
+		flex-direction: row;
+	}
+
+	.brand-title {
+		font-size: 20px;
+		color: #232323;
+		margin-top: 15px;
+	}
+
+	.tag-title {
+		font-size: 16px;
+		color: #828282;
+		margin-top: 10px;
+		margin-bottom: 5px;
+	}
+
+	.skill {
+		border: 1px solid #E0E0E0;
+		border-radius: 5px;
+		padding: 0 10px 10px;
+		margin-bottom: 10px;
+	}
+
+	.levels {
+		vertical-align: center;
+	}
+
+	.skill-title-verifications {
+		justify-content: space-between;
+	}
+
+	.skill-title {
+		font-size: 14px;
+		color: #232323;
+	}
+
+	.description-title {
+		font-size: 12px;
+		color: #828282;
+		margin-bottom: 1px;
+		margin-top: 0;
+	}
+
+	.skill-description {
+		font-size: 11px;
+	}
+
+	.profile {
+		justify-content: space-between;
+		border-top: 1px solid #E0E0E0;
+		border-bottom: 1px solid #E0E0E0;
+		height: 130px !important;
+		padding-top: 20px;
+	}
+
+	.profile-img {
+		margin-top: -30px;
+	}
+	.user-picture {
+		width: 160px;
+		height: 160px;
+		border: 6px solid #E0E0E0;
+		border-radius: 500px;
+	}
+
+	.profile-info {
+		align-items: stretch;
+		flex: 1;
+		margin-left: 24px;
+	}
+
+	.profile-name {
+		font-size: 18px;
+		color: #232323;
+		margin: 2px 0;
+	}
+
+	.profile-text {
+		font-size: 14px;
+		color: #828282;
+		margin-bottom: 15px;
+	}
+
+	.profile-email{
+		font-size: 12px;
+		color: #232323;
+		margin-bottom: 3px;
+	}
+
+	.profile-row-icon {
+		text-align: center;
+	}
+	.profile-icon {
+		width: 14px;
+		height: 14px;
+		margin-right: 10px;
+		vertical-align: top;
+	}
+
+	.profile-www {
+		font-size: 12px;
+		color: #232323;
+	}
+
+	.levels {
+		margin-top: 13px;
+	}
+
+	.level-icon {
+		width: 20px;
+		height: 20px;
+	}
+
+	svg {
+		fill: #000;
+	}
+
+	.self-icon svg {
+		fill: #32be8c;
+	}
+
+	.education-icon svg {
+		fill: #4a89c4;
+	}
+
+	.business-icon {
+		fill: #f7bf5d;
+	}
+
+	.certificate-icon {
+		fill: #e04c5d;
+	}
+
+	@page {
+		size: A4 portrait;
+
+		@top-left {
+			content: element(header-left);
+		}
+
+		@top-right {
+			content: element(header-right);
+		}
+
+		@bottom-center {
+			content: counter(page) "/" counter(pages);
+			color: #828282;
+			font-size: 11px;
+		}
+	}
+
+</style>
+</html>

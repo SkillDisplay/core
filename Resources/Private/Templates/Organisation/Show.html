@@ -1,0 +1,90 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+			data-namespace-typo3-fluid="true"
+>
+
+<f:layout name="Default" />
+
+<f:section name="main">
+	<h1>{organisation.name}</h1>
+	<hr />
+	<div class="row">
+		<div class="col-12 col-lg-9">
+			<div class="partner-info text-center">
+				<div style="font-family:'Lato', sans-serif;font-weight:400;font-size:10pt;margin-bottom:4pt;"><f:translate id="LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_brand.patronage_level.I.{organisation.patronageLevel}" /></div>
+				<div>
+					<f:for each="{levelRange}" as="level">
+						<i class="fas fa-star" style="color:#8b832d"></i>
+					</f:for>
+				</div>
+				<div style="font-family:'Lato', sans-serif;font-weight:400;font-size:10pt;margin-top:4pt;">{organisation.firstCategory.title}</div>
+			</div>
+			{organisation.description -> f:format.crop(maxCharacters: 500)}
+		</div>
+		<div class="col-12 col-lg-3">
+			<f:link.typolink parameter="{organisation.url}" target="_blank">
+				<f:image image="{organisation.logo.0.originalResource}" alt="{organisation.name}" width="300" class="img-fluid" /><br />
+				{f:translate(id:'brand.show.website')}
+			</f:link.typolink>
+		</div>
+	</div>
+	<hr />
+	<f:if condition="{organisation.showNumOfCertificates}">
+		<f:then>
+			<h2>{f:translate(id:'brand.show.performance')}</h2>
+			<div class="row">
+				<div class="col-12 col-lg-4">
+					<p>{f:translate(id:'brand.show.organisation_verifications')}</p>
+					<div class="chart">
+						<f:for each="{verificationsCount}" as="verification" key="level">
+							<div class="row">
+								<div class="col-12">
+									<span>{f:translate(id:'level.verifiedTier{level}')}</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<div class="bar bg-tier{level}" title="{f:translate(id:'tier{level}')}" style="width: {verificationsPercentage.{level}}%;"></div>
+									<span class="number-span">{verification}</span>
+								</div>
+							</div>
+						</f:for>
+					</div>
+				</div>
+				<div class="col-12 col-lg-4 verification-certificate-count">
+					<p>{f:translate(id:'brand.show.number_of_verifications')}</p>
+					<span class="certificates">{verificationTotal}</span>
+				</div>
+				<div class="col-12 col-lg-4">
+					<p>
+						Conversion rate: In development
+					</p>
+				</div>
+			</div>
+			<hr />
+		</f:then>
+	</f:if>
+	<f:if condition="{organisation.patronages -> f:count()}">
+		<f:then>
+			<h2>{f:translate(id:'brand.show.patronages')}</h2>
+			<div class="row">
+				<f:for each="{organisation.patronages}" as="sponsored">
+					<div class="col-6 col-md-2">
+						<f:link.action action="show" arguments="{organisation: sponsored}">
+							<f:image image="{sponsored.logo.0.originalResource}" alt="{sponsored.name}" width="300" class="img-fluid" /><br />
+							{sponsored.name}
+						</f:link.action>
+					</div>
+				</f:for>
+			</div>
+			<hr />
+		</f:then>
+	</f:if>
+	<h2>{f:translate(id:'brand.show.news')}</h2>
+	<div>
+		<f:cObject typoscriptObjectPath="lib.organisationNews" data="{organisation.uid}" />
+	</div>
+	<f:link.action action="list" class="btn btn-secondary">{f:translate(id:'brand.show.back')}</f:link.action>
+</f:section>
+
+</html>

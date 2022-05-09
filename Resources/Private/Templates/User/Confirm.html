@@ -1,0 +1,20 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+			data-namespace-typo3-fluid="true">
+
+<f:layout name="Default"/>
+
+<f:section name="main">
+
+	<h2><f:translate id="user.confirm.success" /></h2>
+
+	<p><f:translate id="user.confirm.text" /></p>
+	<div>
+		<rx:appLink url="{settings.app}" appRoute="settings" class="btn btn-showInApp button primary">
+			{f:translate(id:'user.confirm.editProfile')}
+		</rx:appLink>
+	</div>
+
+</f:section>
+
+</html>

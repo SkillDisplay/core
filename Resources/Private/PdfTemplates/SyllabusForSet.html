@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:pdf="http://typo3.org/ns/Bithost/Pdfviewhelpers/ViewHelpers"
+			xsi:schemaLocation="http://typo3.org/ns/Bithost/Pdfviewhelpers/ViewHelpers https://pdfviewhelpers.bithost.ch/schema/2.0.xsd"
+			data-namespace-typo3-fluid="true">
+
+	<pdf:document outputPath="{set.name}.pdf" outputDestination="download" sourceFile="{pdfTemplate}">
+		<pdf:page importPage="{f:if(condition: pdfTemplate, then: '1')}" margin="{top: 30, bottom: 30}">
+			<pdf:header></pdf:header>
+			<pdf:footer></pdf:footer>
+			<pdf:headline alignment="center">{set.name}</pdf:headline>
+			<pdf:text alignment="center" color="#808080">Created on: {f:format.date(format: 'd.m.Y', date: 'now')}</pdf:text>
+			<f:for each="{skills}" key="tag" as="subskills">
+				<pdf:text fontStyle="bold" fontSize="14">{tag}</pdf:text>
+					<f:for each="{subskills}" as="skill">
+						<pdf:multiColumn>
+							<pdf:column>
+								<pdf:text>{skill.title}</pdf:text>
+							</pdf:column>
+						</pdf:multiColumn>
+						<pdf:multiColumn>
+							<pdf:column padding="{left: 7}">
+								<pdf:html>
+									{skill.description}
+								</pdf:html>
+							</pdf:column>
+						</pdf:multiColumn>
+						<pdf:multiColumn>
+							<pdf:column padding="{left: 7}">
+								<pdf:html>
+									Maintainer: {skill.brands.0.name} ({skill.owner.firstname} {skill.owner.lastname})
+								</pdf:html>
+							</pdf:column>
+						</pdf:multiColumn>
+					</f:for>
+			</f:for>
+		</pdf:page>
+	</pdf:document>
+</html>

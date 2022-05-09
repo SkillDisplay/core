@@ -1,0 +1,55 @@
+@import "fontawesome";
+
+g {
+	rect {
+		fill: #fafafa;
+		stroke: #000;
+		stroke-width: 0.01em;
+	}
+}
+
+.link {
+	fill: none;
+	stroke: #ccc;
+	stroke-width: 4px;
+
+	:hover{
+		stroke-width: 6px;
+	}
+}
+
+.overlay {
+	background-color: #EEE;
+}
+
+.skillupDivs {
+	background-color: #D0D0CF;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+	vertical-align: middle;
+	width: 20%;
+	height: 100%;
+}
+
+.incomplete {
+	position: absolute;
+	right: 1rem;
+	top: 1rem;
+	color: red;
+}
+
+.removeFromReward {
+	cursor: pointer;
+	position: absolute;
+	right: 0.5rem;
+	bottom: 0.5rem;
+}
+
+.deleteLinkIcon {
+	fill: none;
+	stroke: red;
+	stroke-width: 2px;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}

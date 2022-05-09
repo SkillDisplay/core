@@ -1,0 +1,29 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Welcome to SkillDisplay!
+Hi {user.firstName},
+
+Your user account at SkillDisplay has successfully been activated!
+
+You can log in right away, using your email address {user.email} and the password
+you provided and Show what you can do.
+
+Proceed to login:
+<f:uri.page pageUid="{settings.pids.login}" absolute="1"/>
+
+
+Your SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Vienna
+Austria
+office@skilldisplay.eu
+
+
+Legal notice:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1"/>
+
+Notification settings:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

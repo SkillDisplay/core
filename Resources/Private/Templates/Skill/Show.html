@@ -1,0 +1,187 @@
+<html
+	data-namespace-typo3-fluid="true"
+	xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+	xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+>
+
+<f:layout name="Default"/>
+
+<f:section name="main">
+	<div class="text-center">
+		<div class="sd-progress-image">
+			<f:image alt="Logo SkillDisplay" src="{f:uri.resource(path: 'Images/SkillDisplay_Logo.svg')}" width="140"/>
+		</div>
+	</div>
+
+	<div class="package">
+		<header class="package-header">
+			<div class="package-mainheader">
+				<h1 class="m-0">
+					{skill.title}
+				</h1>
+				<f:if condition="{path}">
+					<p class="h3 m-0">
+						<f:link.action action="show" arguments="{path: path}" class="small" controller="SkillPath"
+													 pageUid="{settings.pids.pathDetail}">
+							<span class="brand-inverse">{path.brands.0.name}</span> {path.name}
+						</f:link.action>
+					</p>
+				</f:if>
+			</div>
+		</header>
+
+		<div class="package-info packageStatsHeader">
+			<div class="row">
+				<div class="col-12 col-lg-8">
+					<div class="row">
+						<div class="col-12 col-lg-6">
+							<div class="skillText">
+								<div class="skillTextDescription">
+									<h5 id="skillDescriptionBlockHeader">
+										<f:translate id="tx_skills_domain_model_skill.description"/>
+									</h5>
+									<div>
+										<f:format.html>{skill.description}</f:format.html>
+									</div>
+								</div>
+							</div>
+							<f:if condition="{skill.validRequirements -> f:count()}">
+								<div class="skillText">
+									<div class="skillTextDescription">
+										<h5 id="skillPrerequisitesBlockHeader">
+											<f:translate id="skill.show.requirements"/>
+										</h5>
+										<div>
+											<f:for as="req" each="{skill.validRequirements}" iteration="sr">
+												<ul class="skillListing{f:if(condition: '{req.sets -> f:count()} > 1', then: ' choice')}">
+													<f:for as="set" each="{req.sets}" iteration="it">
+														<f:for as="setskill" each="{set.skills}">
+															<f:if condition="{path}">
+																<f:then>
+																	<li>
+																		<f:link.action action="show" arguments="{skill: setskill.skill, path: path}" controller="Skill"
+																									 pageUid="{settings.pids.pathDetail}">
+																			<f:if condition="{setskill.skill.completedInformation.statistics.granted}">
+																				<f:then>
+																					<f:for as="_"
+																								 each="{setskill.skill.completedInformation.statistics.granted}" iteration="levels" key="level">
+																						<f:if condition="{levels.isFirst}"><i
+																							class="far fa-check-square skillTierIcon {level}"></i></f:if>
+																					</f:for>
+																				</f:then>
+																				<f:else>
+																					<f:if condition="{setskill.skill.skillable}">
+																						<f:then>
+																							<i class="far fa-square skillTierIcon skillPlay"></i>
+																						</f:then>
+																						<f:else>
+																							<i class="fas fa-lock skillTierIcon skillLocked"></i>
+																						</f:else>
+																					</f:if>
+																				</f:else>
+																			</f:if>
+																			{setskill.skill.title}
+																		</f:link.action>
+																	</li>
+																</f:then>
+																<f:else>
+																	<li>
+																		<f:link.action action="show" arguments="{skill: setskill.skill}"
+																									 controller="Skill"
+																									 pageUid="{settings.pids.skillSets}">
+																			<f:if condition="{setskill.skill.completedInformation.statistics.granted}">
+																				<f:then>
+																					<f:for as="_"
+																								 each="{setskill.skill.completedInformation.statistics.granted}" iteration="levels" key="level">
+																						<f:if condition="{levels.isFirst}"><i
+																							class="far fa-check-square skillTierIcon {level}"></i></f:if>
+																					</f:for>
+																				</f:then>
+																				<f:else>
+																					<f:if condition="{setskill.skill.skillable}">
+																						<f:then>
+																							<i class="far fa-square skillTierIcon skillPlay"></i>
+																						</f:then>
+																						<f:else>
+																							<i class="fas fa-lock skillTierIcon skillLocked"></i>
+																						</f:else>
+																					</f:if>
+																				</f:else>
+																			</f:if>
+																			{setskill.skill.title}
+																		</f:link.action>
+																	</li>
+																</f:else>
+															</f:if>
+														</f:for>
+														<f:if condition="{it.isLast}">
+															<f:else>{f:translate(id:'or')}</f:else>
+														</f:if>
+													</f:for>
+												</ul>
+											</f:for>
+										</div>
+									</div>
+								</div>
+							</f:if>
+							<div class="skillText">
+								<div class="skillTextDescription">
+									<h5 id="skillLinksBlockHeader">
+										<f:translate id="tx_skills_domain_model_skill.links"/>
+									</h5>
+									<div>
+										<ul class="skillListing">
+											<f:for as="link" each="{skill.links}">
+												<li><a href="{link.url}" target="_blank"><i class="fas fa-link skillTierIcon"></i>{link.title}</a></li>
+											</f:for>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div class="skillText">
+								<div class="skillTextDescription">
+									<h5 id="skillTagsBlockHeader">
+										<f:translate id="skill.show.tags"/>
+									</h5>
+									<p>
+										<f:if condition="{skill.domainTag}"><strong>{skill.domainTag.title}</strong>,</f:if>
+										<f:for as="tag" each="{skill.tags}" iteration="it">
+											{tag.title}
+											<f:if condition="{it.isLast}">
+												<f:else>,</f:else>
+											</f:if>
+										</f:for>
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-12 col-lg-6">
+							<div class="skillText">
+								<div class="skillTextDescription">
+									<h5 id="skillGoalsBlockHeader">
+										<f:translate id="skill.show.goals"/>
+									</h5>
+									<div>
+										{skill.goals -> f:format.html()}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="clearfix"></div>
+		<div>
+			<rx:appLink appRoute="skill/{skill.uid}/{f:if(condition: path, then: path.uid, else: 0)}" url="{settings.app}" class="btn btn-showInApp">{f:translate(id: 'showInApp')}</rx:appLink>
+			<f:if condition="{path}">&nbsp; &nbsp;
+					<f:link.action action="show" arguments="{path: path}" class="btn btn-secondary" controller="SkillPath" pageUid="{settings.pids.pathDetail}">
+						<f:translate id="skill.show.backToPath"/>
+					</f:link.action>
+			</f:if>
+		</div>
+	</div>
+</f:section>
+
+</html>

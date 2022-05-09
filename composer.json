@@ -1,0 +1,60 @@
+{
+	"name": "skilldisplay/core",
+	"description": "SkillDisplay Skill Management backend extension",
+	"type": "typo3-cms-extension",
+	"license": "GPL-3.0-or-later",
+	"authors": [
+		{
+			"name": "SkillDisplay",
+			"role": "Owner",
+			"homepage": "https://www.skilldisplay.eu/"
+		},
+		{
+			"name": "Reelworx GmbH",
+			"role": "Developer",
+			"homepage": "https://reelworx.at/"
+		}
+	],
+	"support": {
+		"email": "support@skilldisplay.eu"
+	},
+	"require": {
+		"php": "^7.4",
+		"ext-json": "*",
+		"ext-pdo": "*",
+		"typo3/cms-core": "^10.4",
+		"bithost-gmbh/pdfviewhelpers": "^2",
+		"sjbr/static-info-tables": "^6.8",
+		"reelworx/t3-mailservice": "^1"
+	},
+	"require-dev": {
+		"typo3/minimal": "^10.4",
+		"typo3/testing-framework": "^6"
+	},
+	"autoload": {
+		"psr-4": {
+			"SkillDisplay\\Skills\\": "Classes/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"SkillDisplay\\Skills\\Tests\\": "Tests/"
+		}
+	},
+	"config": {
+		"vendor-dir": ".Build/vendor",
+		"bin-dir": ".Build/bin"
+	},
+	"scripts": {
+		"post-autoload-dump": [
+			"TYPO3\\TestingFramework\\Composer\\ExtensionTestEnvironment::prepare"
+		]
+	},
+	"extra": {
+		"typo3/cms": {
+			"app-dir": ".Build",
+			"web-dir": ".Build/web",
+			"extension-key": "skills"
+		}
+	}
+}

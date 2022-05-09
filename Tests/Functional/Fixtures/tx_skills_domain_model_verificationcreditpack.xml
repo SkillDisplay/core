@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <tx_skills_domain_model_verificationcreditpack>
+        <uid>1</uid>
+        <pid>3</pid>
+        <tstamp>1616152295</tstamp>
+        <crdate>1616152295</crdate>
+        <cruser_id>15</cruser_id>
+        <valuta>1616152295</valuta>
+        <valid_thru>1617358200</valid_thru>
+        <brand>1</brand>
+        <title>Pack 1</title>
+        <brand_name>Skilldisplay</brand_name>
+        <current_points>0</current_points>
+        <initial_points>0</initial_points>
+        <price>10</price>
+    </tx_skills_domain_model_verificationcreditpack>
+    <tx_skills_domain_model_verificationcreditpack>
+        <uid>2</uid>
+        <pid>3</pid>
+        <tstamp>1616152295</tstamp>
+        <crdate>1616152295</crdate>
+        <cruser_id>15</cruser_id>
+        <valuta>1616152295</valuta>
+        <valid_thru>1617358200</valid_thru>
+        <brand>0</brand>
+        <title>Pack 2</title>
+        <brand_name>TYPO3</brand_name>
+        <current_points>0</current_points>
+        <initial_points>0</initial_points>
+        <price>0</price>
+    </tx_skills_domain_model_verificationcreditpack>
+    <tx_skills_domain_model_verificationcreditpack>
+        <uid>3</uid>
+        <pid>3</pid>
+        <tstamp>1616152295</tstamp>
+        <crdate>1616152295</crdate>
+        <cruser_id>15</cruser_id>
+        <valuta>1616152295</valuta>
+        <valid_thru>1617358200</valid_thru>
+        <brand>1</brand>
+        <title>Pack 3</title>
+        <brand_name>Skilldisplay</brand_name>
+        <current_points>10</current_points>
+        <initial_points>10</initial_points>
+        <price>20</price>
+    </tx_skills_domain_model_verificationcreditpack>
+</dataset>

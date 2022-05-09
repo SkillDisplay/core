@@ -1,0 +1,29 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend" />
+
+<f:section name="content">
+<f:form class="form-horizontal" action="moveCertifications">
+	<fieldset>
+		<div class="form-group">
+			<label class="control-label col-md-3">Select skill to move verifications from:</label>
+			<div class="col-md-9">
+				<f:form.select size="10" class="form-control" name="source" options="{skills}" optionLabelField="title" additionalAttributes="{required: 'required'}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="control-label col-md-3">Select target skills to move verifications to:</label>
+			<div class="col-md-9">
+				<f:form.select size="40" multiple="1" name="targets" class="form-control" options="{skills}" optionLabelField="title" additionalAttributes="{required: 'required'}" />
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-md-offset-3 col-md-9">
+				<f:form.submit value="Convert" class="btn btn-primary" />
+			</div>
+		</div>
+	</fieldset>
+</f:form>
+</f:section>
+
+</html>

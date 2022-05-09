@@ -1,0 +1,22 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Du hast "{organisation.name}" auf SkillDisplay verlassen
+Hallo {user.firstName},
+
+Wir bestätigen, dass du deine Mitgliedschaft in der Organisation "{organisation.name}" auf SkillDisplay beendet hast.
+
+Dein SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

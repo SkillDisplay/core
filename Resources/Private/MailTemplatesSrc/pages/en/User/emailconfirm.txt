@@ -1,0 +1,23 @@
+---
+layout: text_en
+subject: Changing your email address at SkillDisplay
+---
+Hi {user.firstName},
+
+we received a request to change the email address used in your SkillDisplay user account.
+
+If you wish to switch the provided email address
+from {user.username}
+to {user.pendingEmail}
+just click on the link below.
+
+<f:uri.page pageUid="{settings.pids.shortLink}" absolute="1" additionalParams="{code:code}" noCacheHash="1" />
+
+
+Your SkillDisplay Team
+
+
+--
+You are receiving this message because a request to change the provided email address
+for your user account at www.skilldisplay.eu has been received.
+If this request did not originate from you, please contact the SkillDisplay Team.

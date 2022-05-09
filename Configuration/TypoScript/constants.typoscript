@@ -1,0 +1,58 @@
+plugin.tx_skills.persistence {
+  # cat=plugin.tx_skills//a; type=string; label=Default storage PID
+  storagePid = {$pids.skill-storage}
+}
+
+plugin.tx_skills.view {
+  # cat=plugin.tx_skills/file/u; type=string; label=Path to template root (FE)
+  templateRootPath =
+  # cat=plugin.tx_skills/file/v; type=string; label=Path to template partials (FE)
+  partialRootPath =
+  # cat=plugin.tx_skills/file/w; type=string; label=Path to template layouts (FE)
+  layoutRootPath =
+}
+
+plugin.tx_skills.settings {
+  mail {
+    view {
+      # cat=plugin.tx_skills/file/x; type=string; label=Path to mail template root
+      templateRootPath =
+      # cat=plugin.tx_skills/file/y; type=string; label=Path to mail template partials
+      partialRootPath =
+      # cat=plugin.tx_skills/file/z; type=string; label=Path to mail template layouts
+      layoutRootPath =
+    }
+  }
+  # cat=plugin.tx_skills//b; type=string; label=URL of the Angular App
+  app = {$app}
+  pids {
+    # cat=plugin.tx_skills//cb; type=int+; label=PageID of the root page
+    root = {$pids.root}
+    # cat=plugin.tx_skills//cb; type=int+; label=PageID of the login page
+    login = {$pids.login}
+    # cat=plugin.tx_skills//vb; type=int+; label=PageID of registration page
+    registration = {$pids.registration}
+    # cat=plugin.tx_skills//cb; type=int+; label=PageID of the page to handle shortlinks
+    shortLink = {$pids.shortLink}
+    # cat=plugin.tx_skills//cd; type=int+; label=PageID of the page for tour
+    tour = {$pids.tour}
+    # cat=plugin.tx_skills//cd; type=int+; label=PageID of the page for skillsets
+    skillSets = {$pids.sets}
+    # cat=plugin.tx_skills//xb; type=int+; label=PageID of skillset detail page
+    pathDetail = {$pids.sets}
+    # cat=plugin.tx_skills//cb; type=int+; label=PageID of the imprint page
+    imprint = {$pids.imprint}
+  }
+  # cat=plugin.tx_skills//c; type=int+; label=Storage PID for fe_users
+  feUserStoragePid = {$pids.fe_users}
+  # cat=plugin.tx_skills//d; type=int+; label=FE user group for accepted FE users
+  acceptedUserGroup = 1
+  # cat=plugin.tx_skills//e; type=int+; label=FE user group for admins
+  adminUserGroup =
+  # cat=plugin.tx_skills//f; type=string; label=Combined identifier for FE user avatar storage
+  avatarFolder = 1:/avatars/
+  # cat=plugin.tx_skills//g; type=string; label=TypoLink to terms and conditions document/page
+  termsLink =
+  # cat=plugin.tx_skills//h; type=string; label=TypoLink to privacy statement document/page
+  privacyLink =
+}

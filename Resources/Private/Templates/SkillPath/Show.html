@@ -1,0 +1,151 @@
+<html
+	data-namespace-typo3-fluid="true"
+	xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+	xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+>
+
+<f:layout name="Default"/>
+
+<f:section name="main">
+	<div class="text-center">
+		<div class="sd-progress-image">
+			<f:image alt="Logo SkillDisplay" src="{f:uri.resource(path: 'Images/SkillDisplay_Logo.svg')}" width="140"/>
+		</div>
+	</div>
+
+	<div class="package">
+		<header class="package-header">
+			<div class="package-mainheader">
+				<h3><span class="brand-inverse">{path.brands.0.name}</span> {path.name}</h3>
+			</div>
+		</header>
+
+		<h5 class="packageStatsHeader">Skills</h5>
+
+		<div class="row package-skillLevels">
+			<f:for as="skill" each="{path.skills}" iteration="it">
+				<f:render arguments="{_all}" section="skillLine"/>
+			</f:for>
+		</div>
+
+		<h5 class="packageStatsHeader">{f:translate(id: 'skillSet.show.resources')}</h5>
+		<f:if condition="{path.links}">
+			<f:then>
+				<ul>
+					<f:for as="link" each="{path.links}">
+						<li><a href="{link.url}" target="_blank"><i class="fas fa-link skillTierIcon"></i>{link.title}</a></li>
+					</f:for>
+				</ul>
+			</f:then>
+			<f:else>
+				{f:translate(id: 'skillSet.show.noresources')}
+			</f:else>
+		</f:if>
+
+		<f:if condition="{path.legitimationUser}">
+			<h5 class="packageStatsHeader">Industry fellow</h5>
+			<div class="row">
+				<div class="col-3">
+					<f:if condition="{path.legitimationUser.avatar}">
+						<f:if condition="{path.legitimationUser.profileLink}">
+							<f:then>
+								<f:link.typolink parameter="{path.legitimationUser.profileLink}">
+									<rx:grayImage class="img-fluid" image="{path.legitimationUser.avatar}" width="200"/>
+								</f:link.typolink>
+							</f:then>
+							<f:else>
+								<rx:grayImage class="img-fluid" image="{path.legitimationUser.avatar}" width="200"/>
+							</f:else>
+						</f:if>
+					</f:if>
+				</div>
+				<div class="col-9">
+					<p>
+						<f:if condition="{path.legitimationUser.profileLink}">
+							<f:then>
+								<f:link.typolink parameter="{path.legitimationUser.profileLink}">
+									{path.legitimationUser.firstName} {path.legitimationUser.LastName}
+								</f:link.typolink>
+							</f:then>
+							<f:else>
+								{path.legitimationUser.firstName} {path.legitimationUser.LastName}
+							</f:else>
+						</f:if>
+						<br/>{path.legitimationUser.company}<br/>
+						SkillSet legitimation date:
+						<f:format.date format="d.m.Y">{path.legitimationDate}</f:format.date>
+					</p>
+				</div>
+			</div>
+		</f:if>
+		<f:if condition="{path.brands}">
+			<h5 class="packageStatsHeader">SkillSet created in cooperation with</h5>
+			<div class="row">
+				<f:for as="brand" each="{path.brands}">
+					<div class="col-6 col-sm-4 col-md-3 col-lg-2">
+						<f:if condition="{brand.url}">
+							<f:then>
+								<f:link.typolink parameter="{brand.url}" target="_blank">
+									<f:if condition="{brand.logo.0.originalResource.properties.extension} == 'svg'">
+										<f:then>
+											<f:if condition="{brand.logo.1}">
+												<f:then>
+													<f:image alt="{brand.name}" class="img-fluid" image="{brand.logo.1.originalResource}"/>
+												</f:then>
+												<f:else>
+													<f:image alt="{brand.name}" class="img-fluid" image="{brand.logo.0.originalResource}"/>
+												</f:else>
+											</f:if>
+										</f:then>
+										<f:else>
+											<rx:grayImage alt="{brand.name}" class="img-fluid" image="{brand.logo.0.originalResource}"/>
+										</f:else>
+									</f:if>
+								</f:link.typolink>
+							</f:then>
+							<f:else>
+								<f:if condition="{brand.logo.0.originalResource.properties.extension} == 'svg'">
+									<f:then>
+										<f:if condition="{brand.logo.1}">
+											<f:then>
+												<f:image alt="{brand.name}" class="img-fluid" image="{brand.logo.1.originalResource}"/>
+											</f:then>
+											<f:else>
+												<f:image alt="{brand.name}" class="img-fluid" image="{brand.logo.0.originalResource}"/>
+											</f:else>
+										</f:if>
+									</f:then>
+									<f:else>
+										<rx:grayImage alt="{brand.name}" class="img-fluid" image="{brand.logo.0.originalResource}"/>
+									</f:else>
+								</f:if>
+							</f:else>
+						</f:if>
+					</div>
+				</f:for>
+			</div>
+		</f:if>
+		<div class="mt-5">
+			<rx:appLink appRoute="skillset/{path.uid}" url="{settings.app}" class="btn btn-showInApp">{f:translate(id: 'showInApp')}</rx:appLink>
+			&nbsp; &nbsp;<f:link.action action="listByBrand" class="btn btn-secondary" controller="SkillPath">
+				<f:translate id="skill.list.backToPaths"/>
+			</f:link.action>
+		</div>
+	</div>
+</f:section>
+
+<f:section name="skillLine">
+	<div class="col-12 col-md-6 col-xl-4 skillEntry">
+		<div class="skillDescription w-100">
+			<f:link.action action="show" arguments="{skill: skill, path: path}" class="d-flex" controller="Skill">
+				<h5 style="min-width: 2rem;">{it.cycle}</h5>
+				<div>{skill.title}</div>
+				<div class="ml-auto">
+					<i class="{f:if(condition: skill.skillable, then: 'far fa-play', else: 'fas fa-lock')}"></i>
+				</div>
+			</f:link.action>
+		</div>
+	</div>
+</f:section>
+
+</html>

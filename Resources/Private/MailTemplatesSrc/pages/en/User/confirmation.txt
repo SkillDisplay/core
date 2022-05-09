@@ -1,0 +1,22 @@
+---
+layout: text_en
+subject: Activate your SkillDisplay user account
+---
+Hi {user.firstName},
+
+Thanks for your registration at SkillDisplay! You are just one click away
+from activating your user account and showing what you can do!
+
+To activate your account and verify your email address, just click the link below.
+
+Note: This link can only be used once.
+
+<f:uri.page pageUid="{settings.pids.registration}" absolute="1" additionalParams="{code:code}" noCacheHash="1" />
+
+Your SkillDisplay Team
+
+
+--
+You are receiving this message, because a user account using this email address
+has been registered at www.skilldisplay.eu.
+If you do not wish to register an account with us, just ignore this email.

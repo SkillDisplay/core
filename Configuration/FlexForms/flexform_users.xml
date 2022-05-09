@@ -1,0 +1,37 @@
+<T3DataStructure>
+    <meta>
+        <langDisable>1</langDisable>
+    </meta>
+
+    <sheets>
+        <sDEF>
+            <ROOT>
+                <TCEforms>
+                    <sheetTitle>LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms_tab.settings</sheetTitle>
+                </TCEforms>
+                <type>array</type>
+                <el>
+                    <switchableControllerActions>
+                        <TCEforms>
+                            <label>LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms.mode</label>
+                            <config>
+                                <type>select</type>
+                                <renderType>selectSingle</renderType>
+                                <items>
+                                    <numIndex index="0">
+                                        <numIndex index="0">LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms.mode.user_register</numIndex>
+                                        <numIndex index="1">User->new;User->create;User->confirm;User->success;User->terms;User->acceptTerms</numIndex>
+                                    </numIndex>
+                                    <numIndex index="1">
+                                        <numIndex index="0">LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms.mode.user_edit</numIndex>
+                                        <numIndex index="1">User->edit;User->update;User->updateEmail;User->updatePassword;User->confirmEmail;User->terms;User->acceptTerms</numIndex>
+                                    </numIndex>
+                                </items>
+                            </config>
+                        </TCEforms>
+                    </switchableControllerActions>
+                </el>
+            </ROOT>
+        </sDEF>
+    </sheets>
+</T3DataStructure>

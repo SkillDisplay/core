@@ -1,0 +1,38 @@
+<T3DataStructure>
+    <meta>
+        <langDisable>1</langDisable>
+    </meta>
+
+    <sheets>
+        <sDEF>
+            <ROOT>
+                <TCEforms>
+                    <sheetTitle>LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms_tab.settings</sheetTitle>
+                </TCEforms>
+                <type>array</type>
+                <el>
+                    <settings.category>
+                        <label>Category</label>
+                        <config>
+                            <type>select</type>
+                            <renderType>selectTree</renderType>
+                            <foreign_table>sys_category</foreign_table>
+                            <foreign_table_where>AND (sys_category.sys_language_uid = 0 OR sys_category.l10n_parent = 0) ORDER BY sys_category.sorting</foreign_table_where>
+                            <treeConfig>
+                                <parentField>parent</parentField>
+                                <appearance>
+                                    <expandAll>TRUE</expandAll>
+                                    <showHeader>TRUE</showHeader>
+                                </appearance>
+                            </treeConfig>
+                            <size>5</size>
+                            <autoSizeMax>10</autoSizeMax>
+                            <minitems>1</minitems>
+                            <maxitems>1</maxitems>
+                        </config>
+                    </settings.category>
+                </el>
+            </ROOT>
+        </sDEF>
+    </sheets>
+</T3DataStructure>

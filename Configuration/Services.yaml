@@ -1,0 +1,105 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  SkillDisplay\Skills\:
+    resource: '../Classes/*'
+
+  SkillDisplay\Skills\Service\CertoBot:
+    tags:
+      - name: event.listener
+        identifier: selfskillup
+        event: SkillDisplay\Skills\Event\VerificationAddedEvent
+        method: selfVerificationHandler
+      - name: event.listener
+        identifier: requestMail
+        event: SkillDisplay\Skills\Event\VerificationAddedEvent
+        method: sendCertificationRequestedMail
+      - name: event.listener
+        identifier: completedMail
+        event: SkillDisplay\Skills\Event\VerificationUpdatedEvent
+        method: sendCertificationCompletedMail
+      - name: event.listener
+        identifier: recommendationUpdate
+        event: SkillDisplay\Skills\Event\VerificationUpdatedEvent
+        method: updateRecommendations
+      - name: event.listener
+        identifier: addVerifierNotification
+        event: SkillDisplay\Skills\Event\VerificationAddedEvent
+        method: addVerifierNotification
+      - name: event.listener
+        identifier: addUserVerificationNotification
+        event: SkillDisplay\Skills\Event\VerificationUpdatedEvent
+        method: addUserVerificationNotification
+
+  SkillDisplay\Skills\Service\SkillSetRelationService:
+    public: true
+
+  SkillDisplay\Skills\Service\RewardService:
+    tags:
+      - name: event.listener
+        identifier: checkRewards
+        event: SkillDisplay\Skills\Event\VerificationUpdatedEvent
+        method: checkRewardsReachedForCertifications
+
+  SkillDisplay\Skills\Command\ImportController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:import'
+        schedulable: false
+
+  SkillDisplay\Skills\Command\ExportController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:export'
+        schedulable: false
+
+  SkillDisplay\Skills\Command\StatisticsController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:stats'
+        schedulable: true
+
+  SkillDisplay\Skills\Command\DomainTagController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:domain_tag:migrate'
+        schedulable: false
+
+  SkillDisplay\Skills\Command\GuestUserController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:guest_cleanup'
+        schedulable: true
+
+  SkillDisplay\Skills\Command\UuidController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:fix-uuids'
+        schedulable: false
+
+  SkillDisplay\Skills\Command\CleanupController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:cleanup-db'
+        schedulable: false
+
+  SkillDisplay\Skills\Command\SkillCategoryFixController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:category-fix'
+        schedulable: false
+
+  SkillDisplay\Skills\Command\RecommendedSkillSetsController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:update-recommendations'
+        schedulable: true
+
+  SkillDisplay\Skills\Command\InitializeRecommendedSkillSetsController:
+    tags:
+      - name: 'console.command'
+        command: 'skills:init-recommendations'
+        schedulable: false

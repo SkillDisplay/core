@@ -1,0 +1,11 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<div class="search-element">
+	<label for="{id}">{f:translate(key: label)}</label>
+	<div class="input-group date js-datetimepicker js-datetimepicker-{class}" data-format="{f:translate(key: 'backend.date.date_format-datepicker')}">
+		<f:form.textfield id="{id}" name="{name}" value="{value}" class="form-control" data="{date-type: 'date'}" />
+		<span class="input-group-addon">
+			<span class="fa fa-calendar"></span>
+		</span>
+	</div>
+</div>
+</html>

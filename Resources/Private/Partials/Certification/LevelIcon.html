@@ -1,0 +1,3 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:if condition="{certification.revokeDate}"><f:then><i class="fas fa-reply skillTierIcon {certification.level}"></i></f:then><f:else><f:if condition="{certification.grantDate}"><f:then><i class="far fa-check-square skillTierIcon {certification.level}"></i></f:then><f:else><f:if condition="{certification.denyDate}"><f:then><i class="fas fa-times skillTierIcon {certification.level}"></i></f:then><f:else><i class="fa fa-hourglass-end skillTierIcon {certification.level}"></i></f:else></f:if></f:else></f:if></f:else></f:if>
+</html>

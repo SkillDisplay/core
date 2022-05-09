@@ -1,0 +1,94 @@
+plugin.tx_skills {
+  persistence {
+    storagePid = {$plugin.tx_skills.persistence.storagePid}
+    updateReferenceIndex = 1
+  }
+
+  view {
+    templateRootPaths.10 = {$plugin.tx_skills.view.templateRootPath}
+    partialRootPaths.10 = {$plugin.tx_skills.view.partialRootPath}
+    layoutRootPaths.10 = {$plugin.tx_skills.view.layoutRootPath}
+  }
+
+  settings {
+    storagePid < plugin.tx_skills.persistence.storagePid
+    app = {$plugin.tx_skills.settings.app}
+    stripeKey = {$plugin.tx_skilldisplay.settings.stripeKey}
+    pids {
+      root = {$plugin.tx_skills.settings.pids.root}
+      login = {$plugin.tx_skills.settings.pids.login}
+      registration = {$plugin.tx_skills.settings.pids.registration}
+      shortLink = {$plugin.tx_skills.settings.pids.shortLink}
+      tour = {$plugin.tx_skills.settings.pids.tour}
+      skillSets = {$plugin.tx_skills.settings.pids.skillSets}
+      pathDetail = {$plugin.tx_skills.settings.pids.pathDetail}
+      imprint = {$plugin.tx_skills.settings.pids.imprint}
+    }
+
+    mail {
+      sender_email = office@skilldisplay.eu
+      sender_name = SkillDisplay
+      recipient_copy =
+      organization = SkillDisplay
+      view {
+        templateRootPaths.1 = EXT:skills/Resources/Private/MailTemplates/
+        templateRootPaths.10 = {$plugin.tx_skills.settings.mail.view.templateRootPath}
+      }
+    }
+
+    feUserStoragePid = {$plugin.tx_skills.settings.feUserStoragePid}
+    acceptedUserGroup = {$plugin.tx_skills.settings.acceptedUserGroup}
+    adminUserGroup = {$plugin.tx_skills.settings.adminUserGroup}
+    avatarFolder = {$plugin.tx_skills.settings.avatarFolder}
+    termsLink = {$plugin.tx_skills.settings.termsLink}
+    privacyLink = {$plugin.tx_skills.settings.privacyLink}
+
+    credits {
+      price = 0.45
+      tier1 = 4
+      tier2 = 4
+      tier3 = 0
+      tier4 = 4
+    }
+  }
+}
+
+module.tx_skills < plugin.tx_skills
+
+lib.organisationNews = USER
+lib.organisationNews {
+  userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+  extensionName = News
+  pluginName = Pi1
+  vendorName = GeorgRinger
+
+  switchableControllerActions {
+    News {
+      1 = list
+    }
+  }
+
+  settings < plugin.tx_news.settings
+  settings {
+    limit = 3
+    overrideFlexformSettingsIfEmpty := addToList(detailPid)
+  }
+}
+
+skills_api = PAGE
+skills_api {
+  typeNum = {$pageTypes.api}
+  config {
+    disableAllHeaderCode = 1
+    debug = 0
+    additionalHeaders {
+      10 {
+        header = Content-Type: application/json
+        replace = 1
+      }
+    }
+  }
+
+  10 < tt_content.list.20.skills_api
+  10.format = json
+}

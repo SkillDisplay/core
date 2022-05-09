@@ -1,0 +1,31 @@
+---
+layout: mail_de
+subject: Willkommen bei SkillDisplay!
+description: Dein Benutzerkonto bei SkillDisplay wurde erfolgreich aktiviert!
+---
+<container>
+	<row>
+		<columns small="12" large="12">
+			<h3>Hallo {user.firstName},</h3>
+			<p>
+				Dein Benutzerkonto bei SkillDisplay wurde erfolgreich aktiviert!
+			</p>
+			<p>
+				Du kannst dich ab sofort mit deiner E-Mailadresse {user.email} und dem von dir festgelegten Passwort auf www.skilldisplay.eu einloggen und zeigen was du kannst!
+			</p>
+			<spacer size="30"></spacer>
+			<row>
+				<columns small="12" large="12">
+					<button href="{f:uri.page(pageUid: settings.pids.login, absolute: 1, additionalParams: '{L:1}')}" class="tier3 expanded">
+						Jetzt einloggen
+					</button>
+				</columns>
+			</row>
+		</columns>
+	</row>
+	<row>
+		<columns small="12">
+			<p>Dein SkillDisplay Team</p>
+		</columns>
+	</row>
+</container>

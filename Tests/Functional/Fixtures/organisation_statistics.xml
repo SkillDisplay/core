@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <tx_skills_domain_model_brand>
+        <uid>1</uid>
+        <pid>3</pid>
+        <name>Skilldisplay</name>
+        <description>lorem ipsum</description>
+        <logo>1</logo>
+        <url>https://www.skilldisplay.eu</url>
+        <members>1</members>
+    </tx_skills_domain_model_brand>
+    <tx_skills_domain_model_brand>
+        <uid>2</uid>
+        <pid>3</pid>
+        <name>Skilldisplay 2</name>
+        <description>lorem ipsum</description>
+        <logo>1</logo>
+        <url>https://www.skilldisplay.eu</url>
+        <members>0</members>
+    </tx_skills_domain_model_brand>
+    <tx_skills_user_organisation_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>1</uid_foreign>
+    </tx_skills_user_organisation_mm>
+    <tx_skills_domain_model_skillpath>
+        <uid>1</uid>
+        <pid>3</pid>
+        <name>CMS Certified Developer 9</name>
+        <brands>1</brands>
+        <skills>1</skills>
+        <visibility>1</visibility>
+    </tx_skills_domain_model_skillpath>
+    <tx_skills_skillset_brand_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>2</uid_foreign>
+    </tx_skills_skillset_brand_mm>
+    <tx_skills_domain_model_skillpath>
+        <uid>2</uid>
+        <pid>3</pid>
+        <name>CMS Certified Developer 10</name>
+        <brands>1</brands>
+        <skills>1</skills>
+        <visibility>0</visibility>
+    </tx_skills_domain_model_skillpath>
+    <tx_skills_skillset_brand_mm>
+        <uid_local>2</uid_local>
+        <uid_foreign>2</uid_foreign>
+    </tx_skills_skillset_brand_mm>
+    <tx_skills_domain_model_organisationstatistics>
+        <uid>1</uid>
+        <pid>3</pid>
+        <brand>1</brand>
+        <interests>{"1":1, "2":1}</interests>
+    </tx_skills_domain_model_organisationstatistics>
+</dataset>

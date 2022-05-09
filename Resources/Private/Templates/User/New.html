@@ -1,0 +1,51 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+<f:layout name="Default" />
+
+<f:section name="main">
+
+<f:flashMessages />
+
+<f:render partial="FormErrors" arguments="{object: newUser}" />
+
+<f:form class="mx-auto mw-100" action="create" pageUid="{settings.pids.registration}" enctype="multipart/form-data" name="newUser" object="{newUser}">
+	<div class="form-group">
+		<label for="firstName"><f:translate id="user.firstName" /></label>
+		<f:form.textfield class="form-control" property="firstName" id="firstName" required="true" />
+	</div>
+	<div class="form-group">
+		<label for="lastName"><f:translate id="user.lastName" /></label>
+		<f:form.textfield class="form-control" property="lastName" id="lastName" required="true" />
+	</div>
+	<div class="form-group">
+		<label for="username"><f:translate id="user.email" /></label>
+		<f:form.textfield class="form-control" property="username" id="username" required="true" />
+	</div>
+	<div class="form-group">
+		<label for="password"><f:translate id="user.password" /></label>
+		<f:form.textfield class="form-control" property="password" id="password" type="password" additionalAttributes="{aria-describedby: 'password-helptext', required: 'required', autocomplete: 'new-password'}" />
+		<small id="password-helptext" class="form-text text-muted"><f:translate id="user.password.help" /></small>
+	</div>
+	<div class="form-group">
+		<label for="passwordRepeat"><f:translate id="user.password2" /></label>
+		<f:form.textfield class="form-control" property="passwordRepeat" id="passwordRepeat" type="password" required="true" additionalAttributes="{autocomplete: 'new-password'}" />
+	</div>
+	<div class="form-group">
+		<div class="form-check">
+			<f:form.checkbox class="form-check-input" property="newsletter" id="newsletter" value="1"/>
+			<label for="newsletter" class="form-check-label"><f:translate id="newsletter" /></label>
+		</div>
+		<div class="form-check">
+			<f:form.checkbox class="form-check-input" property="terms" id="terms" value="1" additionalAttributes="{required: 'required'}" />
+			<label for="terms" class="form-check-label">
+				<f:format.raw>
+					<f:translate id="terms" arguments="{0: '{f:translate(id:\'termsLink\') -> f:link.typolink(parameter: settings.termsLink)}', 1: '{f:translate(id:\'privacyLink\') -> f:link.typolink(parameter: settings.privacyLink)}'}" />
+				</f:format.raw>
+			</label>
+		</div>
+	</div>
+	<div class="form-group">
+		<f:form.submit class="btn btn-primary button primary" value="{f:translate(id: 'user.register')}" />
+	</div>
+</f:form>
+</f:section>
+</html>

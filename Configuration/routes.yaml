@@ -1,0 +1,229 @@
+routeEnhancers:
+  FrontendSkills:
+    type: Extbase
+    extension: Skills
+    plugin: Skills
+    routes:
+      - routePath: '/{set}/skill/{skill}'
+        _controller: 'Skill::show'
+        _arguments:
+          set: path
+          skill: skill
+      - routePath: '/{set}'
+        _controller: 'SkillPath::show'
+        _arguments:
+          set: path
+    aspects:
+      set:
+        type: PersistedAliasMapper
+        tableName: tx_skills_domain_model_skillpath
+        routeFieldName: 'path_segment'
+      skill:
+        type: PersistedAliasMapper
+        tableName: tx_skills_domain_model_skill
+        routeFieldName: 'path_segment'
+  RestApi:
+    type: RestApi
+    extension: Skills
+    plugin: Api
+    routePrefix: /api/v1/
+    routes:
+      - routePath: 'portal/links'
+        _controller: 'Portal::links'
+      - routePath: 'credit/overview/{organisation}'
+        _controller: 'VerificationCredit::overview'
+        _arguments:
+          organisation: organisation
+      - routePath: 'credit/pack/add'
+        _controller: 'VerificationCredit::add'
+      - routePath: 'credit/pack/list/{organisation}'
+        _controller: 'VerificationCredit::list'
+        _arguments:
+          organisation: organisation
+      - routePath: 'verification/create'
+        _controller: 'Certification::create'
+      - routePath: 'verification/modify'
+        _controller: 'Certification::modify'
+      - routePath: 'verification/cancel'
+        _controller: 'Certification::userCancel'
+      - routePath: 'verification/history'
+        _controller: 'Certification::history'
+      - routePath: 'verification/recent'
+        _controller: 'Certification::recent'
+      - routePath: 'verification/recentRequests'
+        _controller: 'Certification::recentRequests'
+      - routePath: 'verification/request'
+        _controller: 'Skill::skillUpAjax'
+      - routePath: 'verification/list/brand/{organisation}'
+        _controller: 'Certification::listForOrganisation'
+        _arguments:
+          organisation: organisation
+      - routePath: 'verification/list/{verifier}'
+        _controller: 'Certification::listForVerifier'
+        _arguments:
+          verifier: verifier
+      - routePath: 'verification/{verification}'
+        _controller: 'Certification::show'
+        _arguments:
+          verification: verification
+      - routePath: 'skillsets'
+        _controller: 'SkillPath::list'
+      - routePath: 'skillset/{set}/progress'
+        _controller: 'SkillPath::progressForSet'
+        _arguments:
+          set: set
+      - routePath: 'skillset/{set}/syllabus'
+        _controller: 'SkillPath::syllabusForSetPdf'
+        _arguments:
+          set: set
+      - routePath: 'skillset/{set}/pdf'
+        _controller: 'SkillPath::completeDownloadForSetPdf'
+        _arguments:
+          set: set
+      - routePath: 'skillset/{set}/awards'
+        _controller: 'SkillPath::getAwardsForSkillSet'
+        _arguments:
+          set: set
+      - routePath: 'skillset/{set}'
+        _controller: 'SkillPath::showApi'
+        _arguments:
+          set: set
+        _queryMapping:
+          includeFullSkills: includeFullSkills
+      - routePath: 'certificateDownload/{set}'
+        _controller: 'SkillPath::certificateDownload'
+        _arguments:
+          set: set
+      - routePath: 'skill/{skill}'
+        _controller: 'Skill::show'
+        _arguments:
+          skill: skill
+      - routePath: 'verifier/star'
+        _controller: 'User::starCertifierAjax'
+      - routePath: 'verifier/roles'
+        _controller: 'Verifier::listOfUser'
+        _arguments:
+          skill: skill
+      - routePath: 'verifier/{verifier}'
+        _controller: 'Verifier::show'
+        _arguments:
+          verifier: verifier
+      - routePath: 'verifiers/{tier}/{skill}/{set}'
+        _controller: 'Verifier::forSkill'
+        _arguments:
+          tier: tier
+          skill: skill
+          set: set
+      - routePath: 'countries'
+        _controller: 'User::countries'
+      - routePath: 'profile'
+        _controller: 'User::show'
+      - routePath: 'profile/patrons'
+        _controller: 'User::patrons'
+      - routePath: 'profile/baseData'
+        _controller: 'User::baseData'
+      - routePath: 'profile/password'
+        _controller: 'User::updatePassword'
+      - routePath: 'profile/notifications'
+        _controller: 'User::updateNotifications'
+      - routePath: 'profile/email'
+        _controller: 'User::updateEmail'
+      - routePath: 'profile/social'
+        _controller: 'User::updateSocialPlatforms'
+      - routePath: 'profile/update'
+        _controller: 'User::updateProfile'
+      - routePath: 'public-profile/pdf'
+        _controller: 'User::downloadPublicProfilePdf'
+      - routePath: 'public-profile/{user}'
+        _controller: 'User::publicProfile'
+        _arguments:
+          user: user
+      - routePath: 'public-verifications/{user}/{type}'
+        _controller: 'User::publicProfileVerifications'
+        _arguments:
+          user: user
+          type: type
+      - routePath: 'user/organisations'
+        _controller: 'User::getOrganizationsForCurrentUser'
+      - routePath: 'user/awards/{award}/updateSelection'
+        _controller: 'User::updateAwardSelection'
+        _arguments:
+          award: grantedReward
+      - routePath: 'user/awards'
+        _controller: 'User::getAllAwards'
+      - routePath: 'user/stripePortal'
+        _controller: 'Payment::getCustomerPortalUrl'
+        _queryMapping:
+          returnUrl: returnUrl
+      - routePath: 'organisation/leave'
+        _controller: 'Organisation::leave'
+      - routePath: 'organisation/join'
+        _controller: 'Organisation::joinOrganisation'
+      - routePath: 'organisation/member/remove'
+        _controller: 'Organisation::removeMember'
+      - routePath: 'organisation/invitations/create'
+        _controller: 'Organisation::createInvitationCodesAjax'
+      - routePath: 'organisation/overdraw'
+        _controller: 'Organisation::setAccountOverdraw'
+      - routePath: 'organisation/{organisation}/subscription'
+        _controller: 'Payment::getSubscription'
+        _arguments:
+          organisation: organisation
+      - routePath: 'organisation/{organisation}/managers'
+        _controller: 'Organisation::managerList'
+        _arguments:
+          organisation: organisation
+      - routePath: 'organisation/{organisation}/getBillingInformation'
+        _controller: 'Organisation::getBillingInformation'
+        _arguments:
+          organisation: organisation
+      - routePath: 'organisation/{organisation}/statistics'
+        _controller: 'Organisation::organisationStatistics'
+        _arguments:
+          organisation: organisation
+      - routePath: 'organisation/{organisation}/statistics/csv'
+        _controller: 'Organisation::downloadCsvStatistics'
+        _arguments:
+          organisation: organisation
+      - routePath: 'organisation/{organisation}/listVerifications/{type}'
+        _controller: 'Organisation::verificationList'
+        _arguments:
+          organisation: organisation
+          type: type
+      - routePath: 'organisation/{organisation}'
+        _controller: 'Organisation::show'
+        _arguments:
+          organisation: organisation
+      - routePath: 'search'
+        _controller: 'Search::search'
+        _queryMapping:
+          q: searchWord
+          skills: skillSearch
+          skillSetSearch: skillsets
+          verifications: verificationSearch
+          organisations: brandSearch
+      - routePath: 'campaigns'
+        _controller: 'Campaign::getForUser'
+      - routePath: 'notifications/delete'
+        _controller: 'Notification::deleteNotifications'
+      - routePath: 'notifications'
+        _controller: 'Notification::show'
+    defaults:
+      format: json
+    aspects:
+      set:
+        type: UidMapper
+      skill:
+        type: UidMapper
+      verification:
+        type: UidMapper
+      organisation:
+        type: UidMapper
+      user:
+        type: UidMapper
+      type:
+        type: UidMapper
+      tier:
+        type: UidMapper
+      verifier:
+        type: UidMapper

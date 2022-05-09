@@ -1,0 +1,39 @@
+---
+layout: mail_de
+subject: Aktiviere dein Benutzerkonto bei SkillDisplay
+description: Danke für deine Registrierung bei SkillDisplay!
+---
+<container>
+	<row>
+		<columns small="12">
+			<h3>Hallo {user.firstName},</h3>
+			<p>Danke für deine Registrierung bei SkillDisplay! Du bist nur noch
+				einen Klick davon entfernt, dein Benutzerkonto zu aktivieren und
+				zu zeigen was du kannst!</p>
+			<p>Um deinen Account zu aktivieren und deine E-Mailadresse zu
+				bestätigen, klicke einfach auf die untenstehende
+				Schaltfläche.</p>
+			<p><strong>Achtung:</strong> Dieser Link kann nur einmal verwendet werden.</p>
+			<spacer size="30"></spacer>
+			<row>
+				<columns small="12" large="12">
+ 	 				<button href="{f:uri.page(pageUid: settings.pids.registration, absolute: 1, additionalParams: '{code:code, L:1}')}" class="tier3 expanded">
+						E-Mailadresse bestätigen
+					</button>
+				</columns>
+			</row>
+		</columns>
+	</row>
+	<row>
+		<columns small="12">
+			<p>Dein SkillDisplay Team</p>
+			<spacer size="30"></spacer>
+			<p>
+				Du erhältst diese Nachricht, weil ein Benutzerkonto mit dieser
+				E-Mailadresse auf www.skilldisplay.eu registriert wurde. Falls
+				du dich nicht bei uns registrieren möchtest musst du nichts
+				weiter tun.
+			</p>
+		</columns>
+	</row>
+</container>

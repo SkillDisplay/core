@@ -1,0 +1,15 @@
+---
+layout: text_de
+subject: Willkommen bei SkillDisplay!
+---
+Hallo {user.firstName},
+
+Dein Benutzerkonto bei SkillDisplay wurde erfolgreich aktiviert!
+
+Du kannst dich ab sofort mit deiner E-Mailadresse {user.email} und dem von
+dir festgelegten Passwort auf www.skilldisplay.eu einloggen und zeigen was du kannst!
+
+Zum Login:
+<f:uri.page pageUid="{settings.pids.login}" absolute="1" additionalParams="{L:1}" />
+
+Dein SkillDisplay Team

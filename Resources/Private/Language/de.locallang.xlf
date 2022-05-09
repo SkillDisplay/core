@@ -1,0 +1,1124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" original="messages" product-name="skills" date="2020-12-10T08:54:46+01:00">
+		<header></header>
+		<body>
+			<trans-unit id="achievement.created" resname="achievement.created">
+				<source>Received:</source>
+				<target>Erhalten:</target>
+			</trans-unit>
+			<trans-unit id="achievement.validUntil" resname="achievement.validUntil">
+				<source>Valid until:</source>
+				<target>Gültig bis:</target>
+			</trans-unit>
+			<trans-unit id="and" resname="and">
+				<source>and</source>
+				<target>und</target>
+			</trans-unit>
+			<trans-unit id="anonymousLogin.button" resname="anonymousLogin.button">
+				<source>Continue without registration</source>
+				<target>Weiter ohne Registrierung</target>
+			</trans-unit>
+			<trans-unit id="anonymousLogin.description" resname="anonymousLogin.description">
+				<source>You want to test SkillDisplay but don’t have an account yet? You can login anonymously, track your progress and convert your account to a regular account at a later time.</source>
+				<target>Du möchstes SkillDisplay testen aber hast noch keine Konto? Logge Dich anonym ein, speichere Deinen Fortschritt und wandle Dein Konto zu einem späteren Zeitpunkt um.</target>
+			</trans-unit>
+			<trans-unit id="backend.date.date_format-datepicker" resname="backend.date.date_format-datepicker">
+				<source>YYYY-MM-DD</source>
+				<target>DD.MM.YYYY</target>
+			</trans-unit>
+			<trans-unit id="backend.date.date_format-presentation" resname="backend.date.date_format-presentation">
+				<source>Y-m-d</source>
+				<target>d.m.Y</target>
+			</trans-unit>
+			<trans-unit id="backend.reporting" resname="backend.reporting">
+				<source>Reporting</source>
+				<target>Reporting</target>
+			</trans-unit>
+			<trans-unit id="backend.reporting.filter.from" resname="backend.reporting.filter.from">
+				<source>Starts by</source>
+				<target>Beginnt ab</target>
+			</trans-unit>
+			<trans-unit id="backend.reporting.filter.to" resname="backend.reporting.filter.to">
+				<source>Ends before</source>
+				<target>Endet vor</target>
+			</trans-unit>
+			<trans-unit id="backend.reporting.skillUpStatistics" resname="backend.reporting.skillUpStatistics">
+				<source>SkillUp Statistics</source>
+				<target>SkillUp Statistik</target>
+			</trans-unit>
+			<trans-unit id="backend.skillUpSplitting" resname="backend.skillUpSplitting">
+				<source>SkillUp Splitting</source>
+				<target>SkillUp Splitting</target>
+			</trans-unit>
+			<trans-unit id="backend.verificationManager" resname="backend.verificationManager">
+				<source>Verification History CSV</source>
+				<target>Verifizierungsverlauf CSV</target>
+			</trans-unit>
+			<trans-unit id="backend.creditOverview" resname="backend.creditOverview">
+				<source>Credit Overview</source>
+				<target>Credit Übersicht</target>
+			</trans-unit>
+			<trans-unit id="brand.show.back" resname="brand.show.back">
+				<source>Back to partner listing</source>
+				<target>Zurück zur Partnerliste</target>
+			</trans-unit>
+			<trans-unit id="brand.show.news" resname="brand.show.news">
+				<source>News</source>
+				<target>Neuigkeiten</target>
+			</trans-unit>
+			<trans-unit id="brand.show.number_of_verifications" resname="brand.show.number_of_verifications">
+				<source>Number of verifications issued:</source>
+				<target>Anzahl der Verifizierungen:</target>
+			</trans-unit>
+			<trans-unit id="brand.show.organisation_verifications" resname="brand.show.organisation_verifications">
+				<source>Organisation verifications:</source>
+				<target>Organisationsverifizierungen:</target>
+			</trans-unit>
+			<trans-unit id="brand.show.patronages" resname="brand.show.patronages">
+				<source>Patronages</source>
+				<target>Patenschaften</target>
+			</trans-unit>
+			<trans-unit id="brand.show.patronages.none" resname="brand.show.patronages.none">
+				<source>No patronages yet</source>
+				<target>Noch keine Patenschaften</target>
+			</trans-unit>
+			<trans-unit id="brand.show.performance" resname="brand.show.performance">
+				<source>Performance</source>
+				<target>Kennzahlen</target>
+			</trans-unit>
+			<trans-unit id="brand.show.statsNotPublished" resname="brand.show.statsNotPublished">
+				<source>The organization does not wish to share this information publicly</source>
+				<target>Diese Organisation möchte diese Information nicht veröffentlichen.</target>
+			</trans-unit>
+			<trans-unit id="brand.show.website" resname="brand.show.website">
+				<source>Website</source>
+				<target>Webseite</target>
+			</trans-unit>
+			<trans-unit id="chart.person" resname="chart.person">
+				<source>You</source>
+				<target>Sie</target>
+			</trans-unit>
+			<trans-unit id="chart.title" resname="chart.title">
+				<source>% of skills acquired</source>
+				<target>% erreichter Skills</target>
+			</trans-unit>
+			<trans-unit id="for" resname="for">
+				<source>for</source>
+				<target>für</target>
+			</trans-unit>
+			<trans-unit id="hide" resname="hide">
+				<source>Hide</source>
+				<target>Ausblenden</target>
+			</trans-unit>
+			<trans-unit id="latest" resname="latest">
+				<source>Latest</source>
+				<target>Aktuellste</target>
+			</trans-unit>
+			<trans-unit id="level.verifiedTier1" resname="level.verifiedTier1">
+				<source>Official Certification</source>
+				<target>Offizielle Zertifizierung</target>
+			</trans-unit>
+			<trans-unit id="level.verifiedTier2" resname="level.verifiedTier2">
+				<source>Educational Verification</source>
+				<target>Bildungsbestätigt</target>
+			</trans-unit>
+			<trans-unit id="level.verifiedTier3" resname="level.verifiedTier3">
+				<source>Self Assessment</source>
+				<target>Selbstbestätigt</target>
+			</trans-unit>
+			<trans-unit id="level.verifiedTier4" resname="level.verifiedTier4">
+				<source>Practical Expertise</source>
+				<target>Praktisches Fachwissen</target>
+			</trans-unit>
+			<trans-unit id="login.registerButton" resname="login.registerButton">
+				<source>Create new account</source>
+				<target>Neues Konto erstellen</target>
+			</trans-unit>
+			<trans-unit id="newsletter" resname="newsletter">
+				<source>I would like to receive SkillDisplay information by email</source>
+				<target>Ich möchte SkillDisplay Informationen per E-Mail erhalten</target>
+			</trans-unit>
+			<trans-unit id="or" resname="or">
+				<source>or</source>
+				<target>oder</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.actions" resname="organisation.listmy.actions">
+				<source>Actions</source>
+				<target>Aktionen</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.actions.leave" resname="organisation.listmy.actions.leave">
+				<source>Leave</source>
+				<target>Verlassen</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.actions.leave.question" resname="organisation.listmy.actions.leave.question">
+				<source>Really leave this organisation?</source>
+				<target>Wollen Sie diese Organisation wirklich verlassen?</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.actions.manage" resname="organisation.listmy.actions.manage">
+				<source>Manage</source>
+				<target>Verwalten</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.code" resname="organisation.listmy.code">
+				<source>Code</source>
+				<target>Code</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.invitationCode" resname="organisation.listmy.invitationCode">
+				<source>Invitation code</source>
+				<target>Einladungscode</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join" resname="organisation.listmy.join">
+				<source>Join</source>
+				<target>Beitreten</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.alreadyMember.header" resname="organisation.listmy.join.error.alreadyMember.header">
+				<source>Already a member</source>
+				<target>Bereits Mitgleid</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.alreadyMember.text" resname="organisation.listmy.join.error.alreadyMember.text">
+				<source>You are already a member of this organisation.</source>
+				<target>Sie sind bereits Mitglied dieser Organisation.</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.expiredCode.header" resname="organisation.listmy.join.error.expiredCode.header">
+				<source>Code expired</source>
+				<target>Code ist abgelaufen</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.expiredCode.text" resname="organisation.listmy.join.error.expiredCode.text">
+				<source>The given invitation code is expired.</source>
+				<target>Der eingegebene Einladungscode ist abgelaufen.</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.invalidCode.header" resname="organisation.listmy.join.error.invalidCode.header">
+				<source>Invalid code</source>
+				<target>Ungültiger Code</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.invalidCode.text" resname="organisation.listmy.join.error.invalidCode.text">
+				<source>The given invitation code is invalid.</source>
+				<target>Der eingegebene Einladungscode ist ungültig.</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.usedCode.header" resname="organisation.listmy.join.error.usedCode.header">
+				<source>Duplicate code usage</source>
+				<target>Doppelte Codeverwendung</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.error.usedCode.text" resname="organisation.listmy.join.error.usedCode.text">
+				<source>The given invitation code has already been used.</source>
+				<target>Der eingegebene Einladungscode wurde bereits verwendet.</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.success.header" resname="organisation.listmy.join.success.header">
+				<source>Success</source>
+				<target>Erfolgreich</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.join.success.text" resname="organisation.listmy.join.success.text">
+				<source>You are now member of %s.</source>
+				<target>Sie sind jetzt Mitgliedvon %s.</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.joinNewOrganisation" resname="organisation.listmy.joinNewOrganisation">
+				<source>Join an organisation</source>
+				<target>Einer Organisation beitreten</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.managedOrganisations" resname="organisation.listmy.managedOrganisations">
+				<source>Managed Organisations</source>
+				<target>Verwaltete Organisationen</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.memberships" resname="organisation.listmy.memberships">
+				<source>Organisation Membership</source>
+				<target>Organisationsmitgliedschaften</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.memberships.none" resname="organisation.listmy.memberships.none">
+				<source>No memberships yet</source>
+				<target>Bisher keine Mitgliedschaften</target>
+			</trans-unit>
+			<trans-unit id="organisation.listmy.name" resname="organisation.listmy.name">
+				<source>Name</source>
+				<target>Name</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.actions.remove" resname="organisation.manage.actions.remove">
+				<source>Remove person from organisation</source>
+				<target>Person aus Organisation entfernen</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.actions.remove.question" resname="organisation.manage.actions.remove.question">
+				<source>Really remove person from your organisation?</source>
+				<target>Diese Person wirklich aus Ihrere Organisation entfernen?</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.back" resname="organisation.manage.back">
+				<source>Back to my organisations</source>
+				<target>Zurück zu meinen Organisationen</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.createCodes" resname="organisation.manage.createCodes">
+				<source>Create codes</source>
+				<target>Codes erzeugen</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.createInvitationCodes" resname="organisation.manage.createInvitationCodes">
+				<source>Create invitation codes</source>
+				<target>Einladungscodes erzeugen</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.createdCodes" resname="organisation.manage.createdCodes">
+				<source>Created codes</source>
+				<target>Erzeugte Codes</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.members" resname="organisation.manage.members">
+				<source>Members of your organisation</source>
+				<target>Mitglieder deiner Organisation</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.members.none" resname="organisation.manage.members.none">
+				<source>No members yet</source>
+				<target>Noch keine Mitgleider</target>
+			</trans-unit>
+			<trans-unit id="organisation.manage.numberOfCodes" resname="organisation.manage.numberOfCodes">
+				<source>Number of codes to generate</source>
+				<target>Anzahl der zu erzeugenden Codes</target>
+			</trans-unit>
+			<trans-unit id="privacyLink" resname="privacyLink">
+				<source>the privacy clauses</source>
+				<target>die Datenschutzbestimmungen</target>
+			</trans-unit>
+			<trans-unit id="rewards.availableRewards" resname="rewards.availableRewards">
+				<source>Available Rewards</source>
+				<target>Verfügbare Belohnungen</target>
+			</trans-unit>
+			<trans-unit id="rewards.badge" resname="rewards.badge">
+				<source>Congratulations you have %1$d new rewards.</source>
+				<target>Gratulation du hast %1$d neue Belohnungen.</target>
+			</trans-unit>
+			<trans-unit id="rewards.getFirstReward" resname="rewards.getFirstReward">
+				<source>Time to get your first reward.</source>
+				<target>Zeit für deine erste Belohnung.</target>
+			</trans-unit>
+			<trans-unit id="rewards.myRewards" resname="rewards.myRewards">
+				<source>My Rewards</source>
+				<target>Meine Belohnungen</target>
+			</trans-unit>
+			<trans-unit id="rewards.requiredSkills" resname="rewards.requiredSkills">
+				<source>Required Skills</source>
+				<target>Benötigte Skills</target>
+			</trans-unit>
+			<trans-unit id="rewards.type.affiliate" resname="rewards.type.affiliate">
+				<source>Affiliate link</source>
+				<target>Affiliate Link</target>
+			</trans-unit>
+			<trans-unit id="rewards.type.certificate" resname="rewards.type.certificate">
+				<source>Certificate</source>
+				<target>Zertifikat</target>
+			</trans-unit>
+			<trans-unit id="rewards.type.download" resname="rewards.type.download">
+				<source>Download</source>
+				<target>Download</target>
+			</trans-unit>
+			<trans-unit id="show" resname="show">
+				<source>Show</source>
+				<target>Anzeigen</target>
+			</trans-unit>
+			<trans-unit id="skill.list.backToPaths" resname="skill.list.backToPaths">
+				<source>Back to SkillSets</source>
+				<target>Zurück zu den SkillSets</target>
+			</trans-unit>
+			<trans-unit id="skill.list.noSkills" resname="skill.list.noSkills">
+				<source>No skills found.</source>
+				<target>Keine Skills gefunden.</target>
+			</trans-unit>
+			<trans-unit id="skill.list.showAll" resname="skill.list.showAll">
+				<source>Show all skills</source>
+				<target>Zeige all Skills</target>
+			</trans-unit>
+			<trans-unit id="skill.show.and" resname="skill.show.and">
+				<source>and</source>
+				<target>und</target>
+			</trans-unit>
+			<trans-unit id="skill.show.backToPath" resname="skill.show.backToPath">
+				<source>Back to SkillSet</source>
+				<target>Zurück zur zum SkillSet</target>
+			</trans-unit>
+			<trans-unit id="skill.show.certifiedUsers" resname="skill.show.certifiedUsers">
+				<source>Recently verified</source>
+				<target>Kürzlich verifiziert</target>
+			</trans-unit>
+			<trans-unit id="skill.show.embedLink" resname="skill.show.embedLink">
+				<source>Create SkillUp embed link</source>
+				<target>SkillUp Link zum Einbetten erstellen</target>
+			</trans-unit>
+			<trans-unit id="skill.show.embedLink.createButton" resname="skill.show.embedLink.createButton">
+				<source>Create embed link</source>
+				<target>Link erstellen</target>
+			</trans-unit>
+			<trans-unit id="skill.show.embedLink.description" resname="skill.show.embedLink.description">
+				<source>Create Self-SkillUp link for external usage</source>
+				<target>Erstellen Sie einen Selbst-SkillUp Link zur externen Verwendung</target>
+			</trans-unit>
+			<trans-unit id="skill.show.embedLink.result" resname="skill.show.embedLink.result">
+				<source>Your share link is:</source>
+				<target>Dein Link:</target>
+			</trans-unit>
+			<trans-unit id="skill.show.embedLink.result.button" resname="skill.show.embedLink.result.button">
+				<source>Your SkillUp button is:</source>
+				<target>Dein SkillUp Button:</target>
+			</trans-unit>
+			<trans-unit id="skill.show.embedLink.result.button.code" resname="skill.show.embedLink.result.button.code">
+				<source>Your SkillUp button code is:</source>
+				<target>Dein SkillUp Button Code:</target>
+			</trans-unit>
+			<trans-unit id="skill.show.goals" resname="skill.show.goals">
+				<source>Goals</source>
+				<target>Ziele</target>
+			</trans-unit>
+			<trans-unit id="skill.show.links" resname="skill.show.links">
+				<source>Links</source>
+				<target>Links</target>
+			</trans-unit>
+			<trans-unit id="skill.show.noRequirements" resname="skill.show.noRequirements">
+				<source>None.</source>
+				<target>Keine.</target>
+			</trans-unit>
+			<trans-unit id="skill.show.or" resname="skill.show.or">
+				<source>or</source>
+				<target>oder</target>
+			</trans-unit>
+			<trans-unit id="skill.show.overview" resname="skill.show.overview">
+				<source>Overview</source>
+				<target>Übersicht</target>
+			</trans-unit>
+			<trans-unit id="skill.show.requirements" resname="skill.show.requirements">
+				<source>Prerequisites</source>
+				<target>Voraussetzungen</target>
+			</trans-unit>
+			<trans-unit id="skill.show.requirements.login" resname="skill.show.requirements.login">
+				<source>Login please</source>
+				<target>Bitte einloggen</target>
+			</trans-unit>
+			<trans-unit id="skill.show.requirements.missing" resname="skill.show.requirements.missing">
+				<source>Prerequisites missing</source>
+				<target>Voraussetzungen fehlen</target>
+			</trans-unit>
+			<trans-unit id="skill.show.skillup" resname="skill.show.skillup">
+				<source>Skill Up!</source>
+				<target>Skill Up!</target>
+			</trans-unit>
+			<trans-unit id="skill.show.statistics" resname="skill.show.statistics">
+				<source>SkillUp Statistics</source>
+				<target>SkillUp Statistik</target>
+			</trans-unit>
+			<trans-unit id="skill.show.tags" resname="skill.show.tags">
+				<source>Tags</source>
+				<target>Tags</target>
+			</trans-unit>
+			<trans-unit id="skillGroups.includedSkills" resname="skillGroups.includedSkills">
+				<source>Included skills</source>
+				<target>Enthaltene Skills</target>
+			</trans-unit>
+			<trans-unit id="skillGroups.list.title" resname="skillGroups.list.title">
+				<source>Available Skill Groups</source>
+				<target>Verfügbare Skill Gruppen</target>
+			</trans-unit>
+			<trans-unit id="skillPaths.list.title" resname="skillPaths.list.title">
+				<source>SkillSets</source>
+				<target>SkillSets</target>
+			</trans-unit>
+			<trans-unit id="skillUp.certifier.markFav" resname="skillUp.certifier.markFav">
+				<source>Mark as favourite</source>
+				<target>Als Favorit markieren</target>
+			</trans-unit>
+			<trans-unit id="skillUp.certifier.removeFav" resname="skillUp.certifier.removeFav">
+				<source>Remove this favourite</source>
+				<target>Favorit entfernen</target>
+			</trans-unit>
+			<trans-unit id="skillUp.comment" resname="skillUp.comment">
+				<source>Comment</source>
+				<target>Kommentar</target>
+			</trans-unit>
+			<trans-unit id="skillUp.error.noCertifiers" resname="skillUp.error.noCertifiers">
+				<source>There are no verifiers available.</source>
+				<target>Leider sind keine Verifizierenden vorhanden.</target>
+			</trans-unit>
+			<trans-unit id="skillUp.error.noSelection" resname="skillUp.error.noSelection">
+				<source>Please select a verifier.</source>
+				<target>Bitte wählen Sie einen Verifizierenden aus.</target>
+			</trans-unit>
+			<trans-unit id="skillUp.loginRequired" resname="skillUp.loginRequired">
+				<source>Login required</source>
+				<target>Anmeldung erforderlich</target>
+			</trans-unit>
+			<trans-unit id="skillUp.loginRequired.login" resname="skillUp.loginRequired.login">
+				<source>login</source>
+				<target>melde dich an</target>
+			</trans-unit>
+			<trans-unit id="skillUp.loginRequired.register" resname="skillUp.loginRequired.register">
+				<source>register</source>
+				<target>registriere dich</target>
+			</trans-unit>
+			<trans-unit id="skillUp.loginRequired.text" resname="skillUp.loginRequired.text">
+				<source>Please %1$s to redeem your SkillUp or %2$s as a new user if you do not have an account yet.</source>
+				<target>Bitte %1$s oder %2$s als neuer Benutzer, wenn du noch keinen Zugang hast.</target>
+			</trans-unit>
+			<trans-unit id="skillUp.patronOf" resname="skillUp.patronOf">
+				<source>Patrons of</source>
+				<target>Paten von</target>
+			</trans-unit>
+			<trans-unit id="skillUp.request" resname="skillUp.request">
+				<source>Request %s</source>
+				<target>%s anfragen</target>
+			</trans-unit>
+			<trans-unit id="skillUp.selectCertifier" resname="skillUp.selectCertifier">
+				<source>Send verification request to</source>
+				<target>Verifizierungsanfrage senden an</target>
+			</trans-unit>
+			<trans-unit id="skillUp.showAllCertifiers" resname="skillUp.showAllCertifiers">
+				<source>Show all verifiers</source>
+				<target>Zeige alle Verifizierenden</target>
+			</trans-unit>
+			<trans-unit id="sought" resname="sought">
+				<source>Trending</source>
+				<target>Gefragte</target>
+			</trans-unit>
+			<trans-unit id="terms" resname="terms">
+				<source>I confirm I&#39;ve read and understood %1$s and I do accept %2$s within the privacy statement.</source>
+				<target>Ich bestätige %1$s gelesen zu haben und akzeptiere %2$s innerhalb der Datenschutzerklärung.</target>
+			</trans-unit>
+			<trans-unit id="terms.header" resname="terms.header">
+				<source>Updated privacy statement</source>
+				<target>Aktualisierte Datenschutzerklärung</target>
+			</trans-unit>
+			<trans-unit id="terms.text" resname="terms.text">
+				<source>We have updated our privacy statement and our terms and conditions. Please confirm your agreement in order to continue using your account.</source>
+				<target>Wir haben unsere Datenschutzerklärung und Allgemeinen Geschäftsbedingungen aktualisiert. Bitte stimmen Sie diesen zu, um Ihren Account weiter verwenden zu können.</target>
+			</trans-unit>
+			<trans-unit id="termsLink" resname="termsLink">
+				<source>the general terms and conditions</source>
+				<target>die Allgemeinen Geschäftsbedingungen</target>
+			</trans-unit>
+			<trans-unit id="tier1" resname="tier1">
+				<source>Official Certification</source>
+				<target>Offizielle Zertifizierung</target>
+			</trans-unit>
+			<trans-unit id="tier1.short" resname="tier1.short">
+				<source>Certification</source>
+				<target>Zertifizierung</target>
+			</trans-unit>
+			<trans-unit id="tier2" resname="tier2">
+				<source>Educational Verification</source>
+				<target>Bildungs-Bestätigung</target>
+			</trans-unit>
+			<trans-unit id="tier2.short" resname="tier2.short">
+				<source>Educational</source>
+				<target>Bildung</target>
+			</trans-unit>
+			<trans-unit id="tier3" resname="tier3">
+				<source>Self Assessment</source>
+				<target>Selbst-Bestätigung</target>
+			</trans-unit>
+			<trans-unit id="tier3.short" resname="tier3.short">
+				<source>Self</source>
+				<target>Selbst</target>
+			</trans-unit>
+			<trans-unit id="tier4" resname="tier4">
+				<source>Practical Expertise</source>
+				<target>Praktisches Fachwissen</target>
+			</trans-unit>
+			<trans-unit id="tier4.short" resname="tier4.short">
+				<source>Business</source>
+				<target>Branchen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand" resname="tx_skills_domain_model_brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.description" resname="tx_skills_domain_model_brand.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.logo" resname="tx_skills_domain_model_brand.logo">
+				<source>Logo</source>
+				<target>Logo</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.name" resname="tx_skills_domain_model_brand.name">
+				<source>Name</source>
+				<target>Name</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_brand.url" resname="tx_skills_domain_model_brand.url">
+				<source>Url</source>
+				<target>Url</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification" resname="tx_skills_domain_model_certification">
+				<source>Verification</source>
+				<target>Verifizierung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.brand" resname="tx_skills_domain_model_certification.brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.certifier" resname="tx_skills_domain_model_certification.certifier">
+				<source>Verifier</source>
+				<target>Verifizierender</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.decline_reason" resname="tx_skills_domain_model_certification.decline_reason">
+				<source>Decline Reason</source>
+				<target>Abgelehnt weil</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.deny_date" resname="tx_skills_domain_model_certification.deny_date">
+				<source>Deny Date</source>
+				<target>Ablehnungsdatum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.expire_date" resname="tx_skills_domain_model_certification.expire_date">
+				<source>Expire Date</source>
+				<target>Ablaufdatum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.grant_date" resname="tx_skills_domain_model_certification.grant_date">
+				<source>Grant Date</source>
+				<target>Bestätigungsdatum</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.revoke_date" resname="tx_skills_domain_model_certification.revoke_date">
+				<source>Revoke Date</source>
+				<target>Zurückgezogen am</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.revoke_reason" resname="tx_skills_domain_model_certification.revoke_reason">
+				<source>Revoke Reason</source>
+				<target>Zurückgezogen weil</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.skill" resname="tx_skills_domain_model_certification.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certification.user" resname="tx_skills_domain_model_certification.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier" resname="tx_skills_domain_model_certifier">
+				<source>Verifier</source>
+				<target>Verifizierender</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.brand" resname="tx_skills_domain_model_certifier.brand">
+				<source>Brand</source>
+				<target>Marke</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.permissions" resname="tx_skills_domain_model_certifier.permissions">
+				<source>Permissions</source>
+				<target>Berechtigungen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.user" resname="tx_skills_domain_model_certifier.user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission" resname="tx_skills_domain_model_certifierpermission">
+				<source>Verifier Permission</source>
+				<target>Verifizierungsberechtigung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifierpermission.skill" resname="tx_skills_domain_model_certifierpermission.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link" resname="tx_skills_domain_model_link">
+				<source>Link</source>
+				<target>Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.icon" resname="tx_skills_domain_model_link.icon">
+				<source>Icon</source>
+				<target>Icon</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.title" resname="tx_skills_domain_model_link.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_link.url" resname="tx_skills_domain_model_link.url">
+				<source>Url</source>
+				<target>Url</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_requirement" resname="tx_skills_domain_model_requirement">
+				<source>Requirement</source>
+				<target>Voraussetzung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_requirement.sets" resname="tx_skills_domain_model_requirement.sets">
+				<source>Sets</source>
+				<target>Sets</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_set" resname="tx_skills_domain_model_set">
+				<source>Set</source>
+				<target>Set</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_set.skills" resname="tx_skills_domain_model_set.skills">
+				<source>Skills</source>
+				<target>Skills</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_setskill" resname="tx_skills_domain_model_setskill">
+				<source>Set Skill</source>
+				<target>Set Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_setskill.skill" resname="tx_skills_domain_model_setskill.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink" resname="tx_skills_domain_model_shortlink">
+				<source>Shortlink</source>
+				<target>Kurzlink</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink.action" resname="tx_skills_domain_model_shortlink.action">
+				<source>Action</source>
+				<target>Aktion</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink.hash" resname="tx_skills_domain_model_shortlink.hash">
+				<source>Hash</source>
+				<target>Hash</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_shortlink.parameters" resname="tx_skills_domain_model_shortlink.parameters">
+				<source>Parameters</source>
+				<target>Parameter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill" resname="tx_skills_domain_model_skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.brands" resname="tx_skills_domain_model_skill.brands">
+				<source>Brands</source>
+				<target>Marken</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.description" resname="tx_skills_domain_model_skill.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.icon" resname="tx_skills_domain_model_skill.icon">
+				<source>Icon</source>
+				<target>Icon</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.image" resname="tx_skills_domain_model_skill.image">
+				<source>Image</source>
+				<target>Bild</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.info_link" resname="tx_skills_domain_model_skill.info_link">
+				<source>Info Link</source>
+				<target>Info Link</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.links" resname="tx_skills_domain_model_skill.links">
+				<source>Links</source>
+				<target>Links</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.placeholder" resname="tx_skills_domain_model_skill.placeholder">
+				<source>Placeholder</source>
+				<target>Platzhalter</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.requirements" resname="tx_skills_domain_model_skill.requirements">
+				<source>Requirements</source>
+				<target>Voraussetzungen</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.tags" resname="tx_skills_domain_model_skill.tags">
+				<source>Tags</source>
+				<target>Tags</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_skill.title" resname="tx_skills_domain_model_skill.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag" resname="tx_skills_domain_model_tag">
+				<source>Tag</source>
+				<target>Tag</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_tag.title" resname="tx_skills_domain_model_tag.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user" resname="tx_skills_domain_model_user">
+				<source>User</source>
+				<target>Benutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.avatar" resname="tx_skills_domain_model_user.avatar">
+				<source>Avatar</source>
+				<target>Avatar</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.favourite_certifiers" resname="tx_skills_domain_model_user.favourite_certifiers">
+				<source>Favourite Verifiers</source>
+				<target>Bevorzugte Verifizierende</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.managed_brands" resname="tx_skills_domain_model_user.managed_brands">
+				<source>Managed Brands</source>
+				<target>Verwaltete Marken</target>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_user.publish_skills" resname="tx_skills_domain_model_user.publish_skills">
+				<source>Publish Skills</source>
+				<target>Skills öffentlich</target>
+			</trans-unit>
+			<trans-unit id="user.accept" resname="user.accept">
+				<source>Accept</source>
+				<target>Akzeptieren</target>
+			</trans-unit>
+			<trans-unit id="user.address" resname="user.address">
+				<source>Address</source>
+				<target>Adresse</target>
+			</trans-unit>
+			<trans-unit id="user.certifier.acceptedCertifications" resname="user.certifier.acceptedCertifications">
+				<source>Your completed verifications</source>
+				<target>Ihre abgeschlossenen Verifizierungsanfragen</target>
+			</trans-unit>
+			<trans-unit id="user.certifier.acceptedCertifications.none" resname="user.certifier.acceptedCertifications.none">
+				<source>You don&#39;t have any completed verification requests.</source>
+				<target>Sie haben keine erledigten Verifizierungsanfragen.</target>
+			</trans-unit>
+			<trans-unit id="user.certifier.pendingCertification.none" resname="user.certifier.pendingCertification.none">
+				<source>You don&#39;t have any pending verification requests.</source>
+				<target>Sie haben keine offenen Verifizierungsanfragen.</target>
+			</trans-unit>
+			<trans-unit id="user.changeEmail" resname="user.changeEmail">
+				<source>Change your email address</source>
+				<target>E-Mailadresse ändern</target>
+			</trans-unit>
+			<trans-unit id="user.changePassword" resname="user.changePassword">
+				<source>Change your password</source>
+				<target>Passwort ändern</target>
+			</trans-unit>
+			<trans-unit id="user.city" resname="user.city">
+				<source>City</source>
+				<target>Ort</target>
+			</trans-unit>
+			<trans-unit id="user.company" resname="user.company">
+				<source>Company</source>
+				<target>Unternehmen</target>
+			</trans-unit>
+			<trans-unit id="user.confirm.editProfile" resname="user.confirm.editProfile">
+				<source>Visit your profile page</source>
+				<target>Profil jetzt bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="user.confirm.success" resname="user.confirm.success">
+				<source>Your registration has been confirmed. Thank you.</source>
+				<target>Deine Registrierung wurde bestätigt. Vielen Dank.</target>
+			</trans-unit>
+			<trans-unit id="user.confirm.text" resname="user.confirm.text">
+				<source>Please complete your user profile by adding a profile picture:</source>
+				<target>Bitte vervollständige dein Profil indem du ein Profilbild ergänzt:</target>
+			</trans-unit>
+			<trans-unit id="user.confirm.toProfile" resname="user.confirm.toProfile">
+				<source>profile page</source>
+				<target>Profil-Seite</target>
+			</trans-unit>
+			<trans-unit id="user.confirmEmail.success" resname="user.confirmEmail.success">
+				<source>Your email address has been changed successfully</source>
+				<target>Ihre E-Mailadresse wurde erfolgreich geändert.</target>
+			</trans-unit>
+			<trans-unit id="user.confirmEmail.text" resname="user.confirmEmail.text">
+				<source>The new email address is</source>
+				<target>Ihre neue E-Mailadresse ist</target>
+			</trans-unit>
+			<trans-unit id="user.country" resname="user.country">
+				<source>Country</source>
+				<target>Land</target>
+			</trans-unit>
+			<trans-unit id="user.create.header" resname="user.create.header">
+				<source>Account successfully created. Confirmation required.</source>
+				<target>Zugang erfolgreich angelegt. Bestätigung notwendig.</target>
+			</trans-unit>
+			<trans-unit id="user.create.text" resname="user.create.text">
+				<source>Your account has been created successfully. In order to confirm your registration, please follow the instructions sent to your email address.</source>
+				<target>Dein Zugang wurde erfolgreich angelegt. Um deine Registrierung zu bestätigen, folge bitte den Anweisungen im zugesandten E-Mail.</target>
+			</trans-unit>
+			<trans-unit id="user.currentEmail" resname="user.currentEmail">
+				<source>Your current email address is</source>
+				<target>Ihre derzeitige E-Mailadresse ist</target>
+			</trans-unit>
+			<trans-unit id="user.currentPassword" resname="user.currentPassword">
+				<source>Current password</source>
+				<target>Aktuelles Passwort</target>
+			</trans-unit>
+			<trans-unit id="user.email" resname="user.email">
+				<source>Email address</source>
+				<target>E-Mailadresse</target>
+			</trans-unit>
+			<trans-unit id="user.firstName" resname="user.firstName">
+				<source>First name</source>
+				<target>Vorname</target>
+			</trans-unit>
+			<trans-unit id="user.github" resname="user.github">
+				<source>GitHub username</source>
+				<target>GitHub Benutzername</target>
+			</trans-unit>
+			<trans-unit id="user.lastName" resname="user.lastName">
+				<source>Last name</source>
+				<target>Nachname</target>
+			</trans-unit>
+			<trans-unit id="user.level.1" resname="user.level.1">
+				<source>Level I - Initiate</source>
+				<target>Level I - Initiand</target>
+			</trans-unit>
+			<trans-unit id="user.level.2" resname="user.level.2">
+				<source>Level II - Novice</source>
+				<target>Level II - Novize</target>
+			</trans-unit>
+			<trans-unit id="user.linkedin" resname="user.linkedin">
+				<source>LinkedIn profile link</source>
+				<target>LinkedIn Profil Link</target>
+			</trans-unit>
+			<trans-unit id="user.list.title" resname="user.list.title">
+				<source>Active users in SkillDisplay</source>
+				<target>Aktive Benutzer in SkillDisplay</target>
+			</trans-unit>
+			<trans-unit id="user.lockedInformation" resname="user.lockedInformation">
+				<source>You are a SkillDisplay user of at least Level II, therefore your Firstname, Lastname and Image were confirmed by you in person and locked</source>
+				<target>Du bist ein SkillDisplay Benutzer mit zumindest Level II, daher wurden Dein Vorname, Nachname und Bild von Dir persönlich bestätigt und gesperrt</target>
+			</trans-unit>
+			<trans-unit id="user.logoutLink" resname="user.logoutLink">
+				<source>Logout</source>
+				<target>Logout</target>
+			</trans-unit>
+			<trans-unit id="user.mailLanguage" resname="user.mailLanguage">
+				<source>Language of emails</source>
+				<target>Sprache der E-Mails</target>
+			</trans-unit>
+			<trans-unit id="user.mailPush" resname="user.mailPush">
+				<source>I want to receive push notifications by email</source>
+				<target>Ich möchte Benachrichtigungen direkt via Mail erhalten</target>
+			</trans-unit>
+			<trans-unit id="user.new" resname="user.new">
+				<source>Register</source>
+				<target>Registrierung</target>
+			</trans-unit>
+			<trans-unit id="user.newEmail" resname="user.newEmail">
+				<source>New email address</source>
+				<target>Neue E-Mailadresse</target>
+			</trans-unit>
+			<trans-unit id="user.newEmail.infoText" resname="user.newEmail.infoText">
+				<source>Your new email address first has to be confirmed. An according link will be sent to your new email address. After confirming your new email address it will be your new login email.</source>
+				<target>Ihre neue E-Mailadresse muss zuerst bestätigt werden. Ein entsprechender Link wurde an Ihre E-Mailadresse gesendet. Nachdem Ihre Adresse bestätigt wurde, wird sie zu Ihrem neuen Login.</target>
+			</trans-unit>
+			<trans-unit id="user.newPassword" resname="user.newPassword">
+				<source>New password</source>
+				<target>Neues Passwort</target>
+			</trans-unit>
+			<trans-unit id="user.notifications" resname="user.notifications">
+				<source>Notifications</source>
+				<target>Benachrichtigungen</target>
+			</trans-unit>
+			<trans-unit id="user.password" resname="user.password">
+				<source>Password</source>
+				<target>Passwort</target>
+			</trans-unit>
+			<trans-unit id="user.password.help" resname="user.password.help">
+				<source>Your password must be at least 8 characters of length and must contain characters and digits.</source>
+				<target>Dein Passwort muss mindestens 8 Zeichen umfassen und muss aus Buchstaben und Ziffern bestehen.</target>
+			</trans-unit>
+			<trans-unit id="user.password2" resname="user.password2">
+				<source>Password repeat</source>
+				<target>Passwort Wiederholung</target>
+			</trans-unit>
+			<trans-unit id="user.personalData" resname="user.personalData">
+				<source>Personal data</source>
+				<target>Persönliche Daten</target>
+			</trans-unit>
+			<trans-unit id="user.publishSkills" resname="user.publishSkills">
+				<source>Show my verifications/certifications publicly</source>
+				<target>Meine Verifizierungen/Zertifizierungen öffentlich einsehbar machen</target>
+			</trans-unit>
+			<trans-unit id="user.register" resname="user.register">
+				<source>Register now</source>
+				<target>Jetzt registrieren</target>
+			</trans-unit>
+			<trans-unit id="user.save" resname="user.save">
+				<source>Save profile</source>
+				<target>Profil speichern</target>
+			</trans-unit>
+			<trans-unit id="user.saveEmail" resname="user.saveEmail">
+				<source>Save email address</source>
+				<target>Email speichern</target>
+			</trans-unit>
+			<trans-unit id="user.savePassword" resname="user.savePassword">
+				<source>Save password</source>
+				<target>Passwort speichern</target>
+			</trans-unit>
+			<trans-unit id="user.show.acceptedCertifications" resname="user.show.acceptedCertifications">
+				<source>Your verifications</source>
+				<target>Deine Verifizierungen</target>
+			</trans-unit>
+			<trans-unit id="user.show.acceptedCertifications.none" resname="user.show.acceptedCertifications.none">
+				<source>You don&#39;t have any verifications yet, time to skillup.</source>
+				<target>Du hast noch keine Verifizierung. Zeit für dein erstes SkillUp.</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.approved" resname="user.show.certification.approved">
+				<source>Approval</source>
+				<target>Freigabe</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.certificationDate" resname="user.show.certification.certificationDate">
+				<source>Accepted/Declined date</source>
+				<target>Bestätigungs-/Ablehnungsdatum</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.certifier" resname="user.show.certification.certifier">
+				<source>Certified by</source>
+				<target>Zertifizierung durch</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.containingPaths" resname="user.show.certification.containingPaths">
+				<source>In SkillSets</source>
+				<target>In SkillSets</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.dateFormat" resname="user.show.certification.dateFormat">
+				<source>m/d/Y</source>
+				<target>d.m.Y</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.header" resname="user.show.certification.header">
+				<source>Verification overview for</source>
+				<target>Verifizierungsübersicht für</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.level" resname="user.show.certification.level">
+				<source>Level</source>
+				<target>Level</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.requestDate" resname="user.show.certification.requestDate">
+				<source>Request date</source>
+				<target>Anfragedatum</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.selectedRequests" resname="user.show.certification.selectedRequests">
+				<source>Selected requests:</source>
+				<target>Ausgewählte Anfragen:</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.skill" resname="user.show.certification.skill">
+				<source>Skill</source>
+				<target>Skill</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.skillList" resname="user.show.certification.skillList">
+				<source>Included skills</source>
+				<target>Beinhaltete Skills</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.user.firstName" resname="user.show.certification.user.firstName">
+				<source>First name</source>
+				<target>Vorname</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.user.lastName" resname="user.show.certification.user.lastName">
+				<source>Last name</source>
+				<target>Nachname</target>
+			</trans-unit>
+			<trans-unit id="user.show.certification.verifier" resname="user.show.certification.verifier">
+				<source>Verified by</source>
+				<target>Verifizierung durch</target>
+			</trans-unit>
+			<trans-unit id="user.show.declinedCertifications" resname="user.show.declinedCertifications">
+				<source>Declined verifications</source>
+				<target>Abgelehnte Verifizierungen</target>
+			</trans-unit>
+			<trans-unit id="user.show.pendingCertifications" resname="user.show.pendingCertifications">
+				<source>Pending verification requests</source>
+				<target>Offene Verifizierungsanfragen</target>
+			</trans-unit>
+			<trans-unit id="user.show.revokedCertifications" resname="user.show.revokedCertifications">
+				<source>Revoked verifications</source>
+				<target>Zurückgezogene Verifizierungen</target>
+			</trans-unit>
+			<trans-unit id="user.show.toCertificationOverview" resname="user.show.toCertificationOverview">
+				<source>My verification overview</source>
+				<target>Zur Verifizierungsübersicht</target>
+			</trans-unit>
+			<trans-unit id="user.show.toCertifierOverview" resname="user.show.toCertifierOverview">
+				<source>Verification tools</source>
+				<target>Verifizierungstools</target>
+			</trans-unit>
+			<trans-unit id="user.show.toSkillGroupView" resname="user.show.toSkillGroupView">
+				<source>Skill Groups</source>
+				<target>Skill Groups</target>
+			</trans-unit>
+			<trans-unit id="user.social" resname="user.social">
+				<source>Social platforms</source>
+				<target>Soziale Medien</target>
+			</trans-unit>
+			<trans-unit id="user.status.email.message" resname="user.status.email.message">
+				<source>We sent a confirmation link to your new email address.</source>
+				<target>Wir haben einen Bestätigungslink an Ihre E-Mailadresse gesendet.</target>
+			</trans-unit>
+			<trans-unit id="user.status.email.title" resname="user.status.email.title">
+				<source>Email address update</source>
+				<target>E-Mailadresse aktualisiert</target>
+			</trans-unit>
+			<trans-unit id="user.status.passwordSuccess.message" resname="user.status.passwordSuccess.message">
+				<source>Your password has been updated successfully.</source>
+				<target>Ihr Passwort wurde erfolgreich aktualisiert.</target>
+			</trans-unit>
+			<trans-unit id="user.status.passwordSuccess.title" resname="user.status.passwordSuccess.title">
+				<source>Password update</source>
+				<target>Passwort aktualisieren</target>
+			</trans-unit>
+			<trans-unit id="user.telephone" resname="user.telephone">
+				<source>Phone</source>
+				<target>Telefon</target>
+			</trans-unit>
+			<trans-unit id="user.twitter" resname="user.twitter">
+				<source>Twitter handle</source>
+				<target>Twitter handle</target>
+			</trans-unit>
+			<trans-unit id="user.unconfirmedEmail" resname="user.unconfirmedEmail">
+				<source>Unconfirmed pending email address change</source>
+				<target>Unbestätigte wartende E-Mailadressenänderung</target>
+			</trans-unit>
+			<trans-unit id="user.validation.emailInvalid" resname="user.validation.emailInvalid">
+				<source>Email address is invalid.</source>
+				<target>Die E-Mailadresse ist ungültig.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.emailRequired" resname="user.validation.emailRequired">
+				<source>Email address is a required field.</source>
+				<target>Die E-Mailadresse ein ein Pflichtfeld.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.firstNameRequired" resname="user.validation.firstNameRequired">
+				<source>First name is a required field.</source>
+				<target>Vorname ist ein Pflichtfeld.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.lastNameRequired" resname="user.validation.lastNameRequired">
+				<source>Last name is a required field.</source>
+				<target>Nachname ist ein Pflichtfeld.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.passwordCriteria" resname="user.validation.passwordCriteria">
+				<source>Your password does not match the criteria.</source>
+				<target>Das Passwort entspricht nicht den Kriterien.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.passwordMismatch" resname="user.validation.passwordMismatch">
+				<source>The passwords do not match.</source>
+				<target>Die Passwörter stimmen nicht überein.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.passwordOld" resname="user.validation.passwordOld">
+				<source>Your current password is incorrect.</source>
+				<target>Ihr Passowrt ist inkorrekt.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.passwordRequired" resname="user.validation.passwordRequired">
+				<source>The passwords are required fields.</source>
+				<target>Die Passwortfelder sind Pflichtfelder.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.terms" resname="user.validation.terms">
+				<source>You must accept the terms and conditions.</source>
+				<target>Du musst die AGB und Datenschutzbedingungen akzeptieren.</target>
+			</trans-unit>
+			<trans-unit id="user.validation.userDuplicate" resname="user.validation.userDuplicate">
+				<source>A user with the given email address already exists.</source>
+				<target>Ein Benutzer mit dieser E-Mailadresse existiert bereits.</target>
+			</trans-unit>
+			<trans-unit id="user.website" resname="user.website">
+				<source>Website</source>
+				<target>Website</target>
+			</trans-unit>
+			<trans-unit id="user.xing" resname="user.xing">
+				<source>Xing profile link</source>
+				<target>Xing Profil Link</target>
+			</trans-unit>
+			<trans-unit id="user.zip" resname="user.zip">
+				<source>ZIP code</source>
+				<target>Postleitzahl</target>
+			</trans-unit>
+			<trans-unit id="your" resname="your">
+				<source>Your</source>
+				<target>Deine</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.skillSetAwards" resname="skillSetAwards.skillSetAwards">
+				<source>Awards for </source>
+				<source>Auszeichnungen für </source>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.awards" resname="skillSetAwards.awards">
+				<source>Awards</source>
+				<target>Auszeichnungen</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.award" resname="skillSetAwards.award">
+				<source>Award</source>
+				<target>Auszeichnung</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.payMessage" resname="skillSetAwards.payMessage">
+				<source>Keep in mind that the activation of awards for SkillSets is a paid feature</source>
+				<target>Beachten Sie, dass die Aktivierung von Auszeichnungen für SkillSets eine kostenpflichtige Funktion ist</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.title" resname="skillSetAwards.title">
+				<source>Title</source>
+				<target>Titel</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.description" resname="skillSetAwards.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.createAward" resname="skillSetAwards.createAward">
+				<source>Create Award</source>
+				<target>Auszeichnung erstellen</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

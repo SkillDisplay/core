@@ -1,0 +1,35 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:rx="http://typo3.org/ns/SkillDisplay/Skills/ViewHelpers"
+			data-namespace-typo3-fluid="true"
+>
+
+<f:layout name="Default" />
+
+<f:section name="main">
+	<div class="text-center">
+		<div class="sd-progress-image">
+			<f:image src="{f:uri.resource(path: 'Images/SkillDisplay_Logo.svg')}" width="140" alt="Logo SkillDisplay" />
+		</div>
+	</div>
+
+	<h1><f:translate id="skillPaths.list.title" /></h1>
+
+	<f:for each="{brands}" as="skillSets">
+		<f:for each="{skillSets}" as="set" iteration="it">
+			<f:if condition="{it.isFirst}">
+				<h2>{set.brands.0.name}</h2>
+				<ul>
+			</f:if>
+				<f:render section="skillSets" arguments="{_all}" />
+			<f:if condition="{it.isLast}">
+				</ul>
+			</f:if>
+		</f:for>
+	</f:for>
+</f:section>
+
+<f:section name="skillSets">
+	<li><f:link.action action="show" controller="SkillPath" arguments="{path: set}">{set.brands.0.name} {set.name}</f:link.action></li>
+</f:section>
+
+</html>

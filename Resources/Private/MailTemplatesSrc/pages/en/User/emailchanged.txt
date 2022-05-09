@@ -1,0 +1,13 @@
+---
+layout: text_en
+subject: Your email address at SkillDisplay has been updated
+---
+Hi {user.firstName},
+
+your new email address at SkillDisplay is now
+{user.username}
+
+Please use your new address to log in at SkillDisplay.
+
+
+Your SkillDisplay Team

@@ -1,0 +1,78 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Welcome to SkillDisplay!
+Welcome to SkillDisplay!
+
+We are here to help you with setting up your organization's profile, getting your team ready and taking your first steps in SkillDisplay.
+
+First, there is no need to memorize anything. Our SkillDisplay ServiceDesk is always publicly available and contains step-by-step tutorials for all aspects of our platform. Whenever you are stuck somewhere, head over to the ServiceDesk to find an answer or contact us directly.
+
+To the SkillDisplay ServiceDesk:
+https://skilldisplay.atlassian.net/servicedesk/customer/portals
+
+# Setting everything up
+
+We have already setup your frontend and backend user accounts, as well as your organization. Your SkillDisplay App user has been assigned as an organization manager.
+
+To access the SkillDisplay backend and according functionality, please use your username "{user.username}". Please use the "forgot password" link with your email "{user.email} on https://www.skilldisplay.eu/typo3 . You'll receive a new password via email.
+
+Once you have access to the backend, we recommend setting up your Organization/Company profile:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/12379f78-828c-45a4-a9ff-120cd39f0728/article/910163969
+
+# How to get started
+
+Your organization will be granted an administrative user account, the organization manager. (see above). This user account has privileges to invite other users to your organization, or revoke their membership.
+Your backend account grants access to verification management and the Visual Skill Editor.
+
+To invite your colleagues to your organization, you can create invite codes and distribute them as you see fit. Created user profiles are private by default, with no profile data visible to anyone else outside your company.
+
+Find out more about managing your organization on SkillDisplay in our ServiceDesk:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/article/1447788545
+
+## Appoint Verifiers
+
+Verification rights can be distributed among your organization's members, according to expertise or however you see fit. Access the SkillDisplay Backend and switch to the Verifier Permissions tab to select the SkillSets and verification types you want to assign.
+
+Learn about assigning verification permissions to organization members:
+https://skilldisplay.atlassian.net/servicedesk/customer/kb/view/1471217665
+
+## Create your own Skills
+
+Before you start to create your own skills, we suggest you get used to the SkillDisplay Methodology, and learn how skills are defined, structured, and how the different types of verification work.
+
+Find out about basic concepts of the SkillDisplay skill management methodology:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/5c91a800-3e63-4b92-97a4-6ea3ae0caa58
+
+When you feel ready to start skill creation, we suggest starting with a single, well focused SkillSet with only a small number of skills. That way you cannot get lost in defining dependencies and formulating skill data. After your first steps you can build on your created skills, create new ones, or break existing skills down into more detailed skills.
+
+How to manage your Skills and SkillSets:
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/120dd3c6-4b00-429c-9fdc-f548e2abd513
+
+# Want some help to get started?
+
+We offer a variety of workshops to support your first steps, enable skill maintainers and admins, and help you to establish skill management as effectively as possible.
+
+Our Kickstarter Workshop helps you to get operative in a single day -> SkillDisplay Kickstarter Workshop: https://www.skilldisplay.biz/skilldisplay-kickstarter-package
+
+Visit our available SkillDisplay coachings and workshops
+https://skilldisplay.atlassian.net/servicedesk/customer/portal/2/topic/8dc03a8b-a3de-4f56-8e61-c1c363471a90
+
+# Integrate SkillDisplay with your LMS
+
+SkillDisplay is not an alternative, but a supplement to a Learning Management System. If you use Moodle, Confluence or other platforms to teach, or disseminate knowledge, we offer plugins and best practices for integration. Contact us to learn more.
+
+Your SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Vienna
+Austria
+office@skilldisplay.eu
+
+
+Legal notice:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1"/>
+
+Notification settings:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

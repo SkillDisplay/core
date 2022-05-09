@@ -1,0 +1,56 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+			xmlns:core="http://typo3.org/ns/TYPO3/CMS/Core/ViewHelpers"
+			xmlns:be="http://typo3.org/ns/TYPO3/CMS/Backend/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend"/>
+
+<f:section name="content">
+	<f:flashMessages/>
+	<h1>Verification Manager</h1>
+	<div class="panel panel-default">
+		<div class="panel-heading">Credit Overview</div>
+		<div class="panel-body">
+			<table class="table">
+				<thead>
+				<tr>
+					<th>Organization</th>
+					<th class="text-right">Verification Credit Points</th>
+					<th class="text-right">Balance</th>
+					<th></th>
+					<th></th>
+				</tr>
+				</thead>
+				<tbody>
+				<f:for each="{data}" as="data">
+					<tr>
+						<td>
+							<f:link.action action="creditHistory" arguments="{organization: data.organization}">
+								{data.organization.name}
+							</f:link.action>
+						</td>
+						<td class="text-right">{data.points}</td>
+						<td class="text-right">
+							<f:if condition="{data.balance} < 0">
+								<f:then>{data.balance}</f:then>
+								<f:else>-</f:else>
+							</f:if>
+						</td>
+						<td class="text-right">
+							<f:link.action action="creditHistory" arguments="{organization: data.organization}"
+														 class="btn btn-default" title="View History">
+								<core:icon identifier="actions-eye"/>
+							</f:link.action>
+						</td>
+						<td class="text-right">
+							<be:link.editRecord uid="{data.organization.uid}" table="tx_skills_domain_model_brand"
+																	class="btn btn-default" title="Edit Brand">
+								<core:icon identifier="actions-open"/>
+							</be:link.editRecord>
+						</td>
+					</tr>
+				</f:for>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</f:section>

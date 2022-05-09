@@ -1,0 +1,10 @@
+---
+layout: text_de
+subject: Mitgliedschaft in "{organisation.name}" auf SkillDisplay beendet
+---
+Hallo {user.firstName},
+
+wir müssen dir mitteilen, dass deine Mitgliedschaft in der Organisation "{organisation.name}"
+auf SkillDisplay durch einen Organisations-Betreuer beendet wurde.
+
+Dein SkillDisplay Team

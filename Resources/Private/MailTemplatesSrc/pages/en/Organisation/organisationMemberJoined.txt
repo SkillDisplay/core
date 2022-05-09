@@ -1,0 +1,9 @@
+---
+layout: text_en
+subject: You've joined "{organisation.name}" on SkillDisplay
+---
+Hi {user.firstName},
+
+You are now a member of the organisation "{organisation.name}" on SkillDisplay.
+
+Your SkillDisplay Team

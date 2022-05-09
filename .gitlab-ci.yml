@@ -1,0 +1,61 @@
+image: git.reelworx.net:5001/reelworx/infrastructure/docker-library/php74dev
+
+before_script:
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | base64 -d | ssh-add -
+  - echo "$SSH_TYPO3GMBH_PRIVATE_KEY" | base64 -d | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - rm -f ~/.ssh/known_hosts
+  - ssh-keyscan -H -p 2222 $CI_SERVER_HOST >> ~/.ssh/known_hosts
+  - ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
+test:
+  stage: test
+  services:
+    - mysql:5.7
+  cache:
+    paths:
+      - .Build/vendor/
+  variables:
+    MYSQL_DATABASE: test_db
+    MYSQL_ROOT_PASSWORD: mysql_strong_password
+    typo3DatabaseHost: mysql
+    typo3DatabaseName: test_db
+    typo3DatabasePassword: mysql_strong_password
+    typo3DatabaseUsername: root
+  before_script:
+    - composer install --no-ansi --no-progress
+  script:
+    - .Build/bin/phpunit --configuration .Build/vendor/typo3/testing-framework/Resources/Core/Build/UnitTests.xml --colors=never Tests/Unit/
+    - .Build/bin/phpunit --configuration .Build/vendor/typo3/testing-framework/Resources/Core/Build/FunctionalTests.xml --colors=never Tests/Functional/
+
+update_dev:
+  stage: deploy
+  only:
+    - dev
+  environment:
+    name: Development
+  script:
+    - git clone --branch development --single-branch --no-tags ssh://git@git.reelworx.net:2222/skilldisplay/sitesetup.git
+    - cd sitesetup/web
+    - composer update --no-ansi --no-progress -w skilldisplay/skills
+    - git config user.email "support@reelworx.at"
+    - git config user.name "gitlab ci"
+    - git add composer.lock && git commit -m "[TASK] Update skills extension"
+    - git push
+
+update_staging:
+  stage: deploy
+  only:
+    - staging
+  environment:
+    name: Staging
+  script:
+    - git clone --branch staging --no-tags ssh://git@git.reelworx.net:2222/skilldisplay/sitesetup.git
+    - cd sitesetup/web
+    - git config user.email "support@reelworx.at"
+    - git config user.name "gitlab ci"
+    - git merge origin/development
+    - git push

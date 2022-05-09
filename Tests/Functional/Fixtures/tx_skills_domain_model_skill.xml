@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <tx_skills_domain_model_skill>
+        <uid>1</uid>
+        <pid>3</pid>
+        <visibility>0</visibility>
+        <title>TestSkill</title>
+        <goals>lorem ipsuum</goals>
+        <description>lorem ipsum</description>
+        <brands>3</brands>
+    </tx_skills_domain_model_skill>
+    <tx_skills_domain_model_skill>
+        <uid>2</uid>
+        <pid>3</pid>
+        <visibility>0</visibility>
+        <title>TestSkill</title>
+        <goals>lorem ipsuum</goals>
+        <description>lorem ipsum</description>
+        <brands>2</brands>
+    </tx_skills_domain_model_skill>
+    <tx_skills_domain_model_skill>
+        <uid>3</uid>
+        <pid>3</pid>
+        <visibility>0</visibility>
+        <title>TestSkill</title>
+        <goals>lorem ipsuum</goals>
+        <description>lorem ipsum</description>
+        <brands>2</brands>
+    </tx_skills_domain_model_skill>
+    <tx_skills_domain_model_skill>
+        <uid>4</uid>
+        <pid>3</pid>
+        <visibility>0</visibility>
+        <title>TestSkill</title>
+        <goals>lorem ipsuum</goals>
+        <description>lorem ipsum</description>
+        <brands>2</brands>
+    </tx_skills_domain_model_skill>
+    <tx_skills_domain_model_skill>
+        <uid>5</uid>
+        <pid>3</pid>
+        <visibility>0</visibility>
+        <title>TestSkill</title>
+        <goals>lorem ipsuum</goals>
+        <description>lorem ipsum</description>
+        <brands>1</brands>
+    </tx_skills_domain_model_skill>
+</dataset>

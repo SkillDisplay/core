@@ -1,0 +1,40 @@
+---
+layout: mail_de
+subject: Änderung deiner E-Mailadresse auf SkillDisplay
+description: E-Mailadresse bestätigen
+---
+<container>
+	<row>
+		<columns small="12" large="12">
+			<h3>Hallo {user.firstName},</h3>
+			<p>
+				es wurde eine Anfrage zur Änderung der in deinem Benutzerkonto bei SkillDisplay hinterlegten E-Mailadresse gestellt.
+			</p>
+			<p>
+				Falls du deine hinterlegte E-Mailadresse<br />
+				von <strong>{user.username}</strong><br />
+				auf <strong>{user.pendingEmail}</strong><br />
+				ändern möchtest, klicke zur Bestätigung einfach auf die untenstehende Schaltfläche.
+			</p>
+			<spacer size="30"></spacer>
+			<row>
+				<columns small="12" large="12">
+					<button href="{f:uri.page(pageUid: settings.pids.shortLink, absolute: 1, additionalParams: '{code:code, L:1}')}" class="tier3 expanded">
+						E-Mailadresse ändern
+					</button>
+				</columns>
+			</row>
+		</columns>
+	</row>
+	<row>
+		<columns small="12">
+			<p>Your SkillDisplay Team</p>
+			<spacer size="30"></spacer>
+			<p>
+				Du erhältst diese E-Mail weil eine Anfrage zur Änderung der in deinem Benutzerkonto
+				bei SkillDisplay hinterlegten E-Mailadresse gestellt wurde.
+				Falls diese Anfrage nicht von dir gekommen ist, kontaktiere bitte das SkillDisplay Team.
+			</p>
+		</columns>
+	</row>
+</container>

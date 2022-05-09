@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <tx_skills_domain_model_certifier>
+        <uid>1</uid>
+        <pid>3</pid>
+        <user>1</user>
+        <brand>1</brand>
+        <permissions>1</permissions>
+    </tx_skills_domain_model_certifier>
+    <tx_skills_domain_model_certifier>
+        <uid>2</uid>
+        <pid>3</pid>
+        <user>3</user>
+        <brand>1</brand>
+        <permissions>1</permissions>
+    </tx_skills_domain_model_certifier>
+    <tx_skills_domain_model_certifier>
+        <uid>3</uid>
+        <pid>3</pid>
+        <user>2</user>
+        <brand>1</brand>
+        <permissions>1</permissions>
+    </tx_skills_domain_model_certifier>
+    <tx_skills_domain_model_certifier>
+        <uid>4</uid>
+        <pid>3</pid>
+        <user>3</user>
+        <brand>2</brand>
+        <permissions>1</permissions>
+    </tx_skills_domain_model_certifier>
+    <tx_skills_domain_model_certifier>
+        <uid>5</uid>
+        <pid>3</pid>
+        <user>3</user>
+        <brand>3</brand>
+        <permissions>1</permissions>
+    </tx_skills_domain_model_certifier>
+</dataset>

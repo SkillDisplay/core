@@ -1,0 +1,40 @@
+---
+layout: mail_en
+subject: Changing your email address at SkillDisplay
+description: Confirm email address change.
+---
+<container>
+	<row>
+		<columns small="12" large="12">
+			<h3>Hi {user.firstName},</h3>
+			<p>
+				we received a request to change the email address used in your SkillDisplay user account.
+			</p>
+			<p>
+				If you wish to switch the provided email address<br />
+				from <strong>{user.username}</strong><br />
+				to <strong>{user.pendingEmail}</strong><br />
+				just click on the button below.
+			</p>
+			<spacer size="30"></spacer>
+			<row>
+				<columns small="12" large="12">
+					<button href="{f:uri.page(pageUid: settings.pids.shortLink, absolute: 1, additionalParams: '{code:code}')}" class="tier3 expanded">
+						Confirm email address
+					</button>
+				</columns>
+			</row>
+		</columns>
+	</row>
+	<row>
+		<columns small="12">
+			<p>Your SkillDisplay Team</p>
+			<spacer size="30"></spacer>
+			<p>
+				You are receiving this message because a request to change the provided email address for your user account
+				at www.skilldisplay.eu has been received.<br />
+				If this request did not originate from you, please contact the SkillDisplay Team.
+			</p>
+		</columns>
+	</row>
+</container>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" date="2021-03-05T11:00:00+01:00">
+		<body>
+			<trans-unit id="mlang_labels_tabdescr" resname="mlang_labels_tabdescr">
+				<source>SkillDisplay Verification Manager</source>
+				<target>SkillDisplay Verification Manager</target>
+			</trans-unit>
+			<trans-unit id="mlang_labels_tablabel" resname="mlang_labels_tablabel">
+				<source>Verification Manager</source>
+				<target>Verification Manager</target>
+			</trans-unit>
+			<trans-unit id="mlang_tabs_tab" resname="mlang_tabs_tab">
+				<source>Verification Manager</source>
+				<target>Verification Manager</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

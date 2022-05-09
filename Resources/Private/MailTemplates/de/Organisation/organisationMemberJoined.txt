@@ -1,0 +1,22 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Du bist "{organisation.name}" auf SkillDisplay beigetreten
+Hallo {user.firstName},
+
+Du bist jetzt Mitglied der Organisation "{organisation.name}" auf SkillDisplay.
+
+Dein SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

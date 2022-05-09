@@ -1,0 +1,74 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend" />
+
+<f:section name="content">
+	<f:flashMessages />
+	<h1>Verifier permission manager</h1>
+	<f:if condition="{users}">
+		<div class="panel panel-default">
+			<div class="panel-heading">Create new verifier</div>
+			<div class="panel-body">
+				<f:form class="form-horizontal" action="addVerifier">
+					<div class="form-group row">
+						<div class="col-xs-6">
+							<label class="control-label">Select user:</label>
+							<f:form.select class="form-control" name="user" options="{users}" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-xs-6">
+							<f:form.button type="submit" name="submitType" class="btn btn-default">Add verifier</f:form.button>
+						</div>
+					</div>
+				</f:form>
+			</div>
+		</div>
+	</f:if>
+	<div class="panel panel-default">
+		<div class="panel-heading">Verifier permissions</div>
+		<div class="panel-body">
+			<f:form class="form-horizontal" action="modifyPermissions">
+				<fieldset>
+					<div class="form-group row">
+						<div class="col-xs-6">
+							<label class="control-label">Select Verifier:</label>
+							<f:form.select size="15" class="form-control" name="verifiers" options="{verifiers}" multiple="true" />
+							<br>
+
+						</div>
+						<div class="col-xs-6">
+							<label class="control-label">Select SkillSets:</label>
+							<f:form.select size="15" class="form-control" name="skillSets" options="{skillSets}" optionLabelField="name" multiple="true" />
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-xs-12">
+							<f:for each="{allowedTiers}" as="tier">
+								<label class="control-label">
+									<f:form.checkbox name="tier{tier}" value="1" />
+									<f:translate key="LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier{tier}" />
+								</label><br />
+							</f:for>
+							<f:if condition="!{allowedTiers}">
+								<em>Configuration error. Your brand has no allowed verification levels. (Admin-Hint: Category)</em>
+							</f:if>
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-xs-12">
+							<f:form.button type="submit" name="submitType" class="btn btn-primary" value="grant">Grant Permissions</f:form.button>
+							<f:form.button type="submit" name="submitType" class="btn btn-danger" value="revoke">Revoke Permissions</f:form.button><br>
+							<p style="margin-top: 15px">
+								Both operations modify the selected permissions for the selected Verifier/SkillSets combinations. Only selected permissions are modified with both operations.
+							</p>
+						</div>
+					</div>
+				</fieldset>
+			</f:form>
+		</div>
+	</div>
+</f:section>
+</html>

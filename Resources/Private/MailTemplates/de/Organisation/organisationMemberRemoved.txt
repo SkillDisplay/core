@@ -1,0 +1,23 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Mitgliedschaft in "{organisation.name}" auf SkillDisplay beendet
+Hallo {user.firstName},
+
+wir müssen dir mitteilen, dass deine Mitgliedschaft in der Organisation "{organisation.name}"
+auf SkillDisplay durch einen Organisations-Betreuer beendet wurde.
+
+Dein SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

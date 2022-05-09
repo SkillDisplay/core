@@ -1,0 +1,22 @@
+version: '3.7'
+services:
+  web:
+    image: git.reelworx.net:5001/reelworx/infrastructure/docker-library/php74dev
+    volumes:
+      - composer-cache:/root/.composer
+      - type: bind
+        source: ./
+        target: /var/www/
+    working_dir: /var/www/
+    environment:
+      typo3DatabaseDriver: pdo_sqlite
+
+  node:
+    image: node:16
+    working_dir: /home/node/app
+    command: yarn
+    volumes:
+      - ./:/home/node/app
+
+volumes:
+  composer-cache:

@@ -1,0 +1,25 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Deine E-Mailadresse auf SkillDisplay wurde geändert
+Hallo {user.firstName},
+
+deine neue E-Mailadresse bei SkillDisplay lautet jetzt
+{user.username}
+
+Um dich bei SkillDisplay anzumelden, verwende ab sofort diese Adresse.
+
+Dein SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Wien
+Österreich
+office@skilldisplay.eu
+
+
+Impressum:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1" additionalParams="{L:1}"/>
+
+Benachrichtungseinstellungen:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}

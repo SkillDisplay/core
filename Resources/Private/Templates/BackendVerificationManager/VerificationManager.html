@@ -1,0 +1,36 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Backend" />
+
+<f:section name="content">
+	<f:flashMessages />
+	<h1>Verification Manager</h1>
+	<div class="panel panel-default">
+		<div class="panel-heading">Generate Organization Verification History CSV</div>
+		<div class="panel-body">
+			<f:form class="form-horizontal" action="generateCSV">
+				<fieldset>
+					<div class="form-group row">
+						<div class="col-xs-12 col-md-6">
+							<f:render partial="Backend/Filters/Date" arguments="{id: 'dateFrom', name: 'dateFrom', value: fromDate, class: 'lower', label: 'backend.reporting.filter.from'}"/>
+						</div>
+						<div class="col-xs-12 col-md-6">
+							<f:render partial="Backend/Filters/Date" arguments="{id: 'dateTo', name: 'dateTo', value: toDate, class: 'upper', label: 'backend.reporting.filter.to'}" />
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-md-12">
+							<label class="control-label">Select Organizations:</label>
+							<f:form.select size="15" class="form-control" name="organizations" options="{organizations}" optionLabelField="name" multiple="true" value="1"/>
+						</div>
+					</div>
+					<div class="form-group row">
+						<div class="col-xs-12">
+							<f:form.submit value="Download CSV" class="btn btn-primary" />
+						</div>
+					</div>
+				</fieldset>
+			</f:form>
+		</div>
+	</div>
+</f:section>

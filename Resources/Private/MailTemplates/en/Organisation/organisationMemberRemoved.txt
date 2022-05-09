@@ -1,0 +1,23 @@
+{escaping off}{namespace rx=SkillDisplay\Skills\ViewHelpers}Membership in "{organisation.name}" on SkillDisplay cancelled
+Hi {user.firstName},
+
+We kindly inform you that your membership with the organisation "{organisation.name}"
+on SkillDisplay has been cancelled by an organisation's manager.
+
+Your SkillDisplay Team
+
+
+
+-----------------------------------------------------------------------------------------------------
+SkillDisplay GmbH
+Oberzellergasse 3/3/2
+1030 Vienna
+Austria
+office@skilldisplay.eu
+
+
+Legal notice:
+<f:uri.page pageUid="{settings.pids.imprint}" absolute="1"/>
+
+Notification settings:
+{rx:appLink(url: settings.app, appRoute: 'settings', onlyUri: 'true')}
