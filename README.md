@@ -35,9 +35,6 @@ The SkillDisplay App will be released separately in the near future.
 
 ## Skill Management
 
-### Importing existing skills:
-We will introduce means to import existing skills from the central skill vault on `skilldisplay.eu` (https://www.skilldisplay.eu) in the near future.
-
 ### Methodology and Manuals
 You can find articles on how to use the Visual Skill Editor for creating and managing your own SkillSets at the `SkillDisplay service desk` (https://skilldisplay.atlassian.net/servicedesk/customer/portal/2)
 
