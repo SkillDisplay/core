@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns:t3="http://typo3.org/schemas/xliff" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-	<file source-language="en" original="messages" datatype="plaintext" product-name="skills" date="2021-12-13T21:01:16+01:00">
+	<file source-language="en" original="messages" datatype="plaintext" product-name="skills" date="2022-10-06T08:43:43+02:00">
 		<body>
 			<trans-unit id="fe_users.tx_extbase_type.Tx_Skills_User" resname="fe_users.tx_extbase_type.Tx_Skills_User">
 				<source>Skill Display User</source>
@@ -284,6 +284,9 @@
 			<trans-unit id="tx_skills_domain_model_certifier.permissions" resname="tx_skills_domain_model_certifier.permissions">
 				<source>Permissions</source>
 			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_certifier.public" resname="tx_skills_domain_model_certifier.public">
+				<source>Publicly visible</source>
+			</trans-unit>
 			<trans-unit id="tx_skills_domain_model_certifier.shared_api_secret" resname="tx_skills_domain_model_certifier.shared_api_secret">
 				<source>Shared secret for API</source>
 			</trans-unit>
@@ -370,6 +373,21 @@
 			</trans-unit>
 			<trans-unit id="tx_skills_domain_model_membershiphistory.verification" resname="tx_skills_domain_model_membershiphistory.verification">
 				<source>Verification</source>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification" resname="tx_skills_domain_model_notification">
+				<source>Notification</source>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.message" resname="tx_skills_domain_model_notification.message">
+				<source>Message</source>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.reference" resname="tx_skills_domain_model_notification.reference">
+				<source>Reference</source>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.type" resname="tx_skills_domain_model_notification.type">
+				<source>Type</source>
+			</trans-unit>
+			<trans-unit id="tx_skills_domain_model_notification.user" resname="tx_skills_domain_model_notification.user">
+				<source>User</source>
 			</trans-unit>
 			<trans-unit id="tx_skills_domain_model_organisationstatistics" resname="tx_skills_domain_model_organisationstatistics">
 				<source>Organisation Statistics</source>
@@ -748,21 +766,6 @@
 			</trans-unit>
 			<trans-unit id="tx_skills_domain_model_verificationcreditusage.verification" resname="tx_skills_domain_model_verificationcreditusage.verification">
 				<source>Verification</source>
-			</trans-unit>
-			<trans-unit id="tx_skills_domain_model_notification" resname="tx_skills_domain_model_notification">
-				<source>Notification</source>
-			</trans-unit>
-			<trans-unit id="tx_skills_domain_model_notification.user" resname="tx_skills_domain_model_notification.user">
-				<source>User</source>
-			</trans-unit>
-			<trans-unit id="tx_skills_domain_model_notification.type" resname="tx_skills_domain_model_notification.type">
-				<source>Type</source>
-			</trans-unit>
-			<trans-unit id="tx_skills_domain_model_notification.reference" resname="tx_skills_domain_model_notification.reference">
-				<source>Reference</source>
-			</trans-unit>
-			<trans-unit id="tx_skills_domain_model_notification.message" resname="tx_skills_domain_model_notification.message">
-				<source>Message</source>
 			</trans-unit>
 		</body>
 	</file>

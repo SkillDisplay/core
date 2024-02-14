@@ -1,17 +1,19 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2019 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
+use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Skill;
@@ -19,26 +21,23 @@ use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
+use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Service\VerificationService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
 
 class VerifierController extends AbstractController
 {
-    protected CertifierRepository $certifierRepository;
-    protected VerificationService $verificationService;
-    protected CertificationRepository $certificationRepository;
-    protected BrandRepository $brandRepository;
-
-    public function __construct(CertifierRepository $repo, VerificationService $service, BrandRepository $brandRepository, CertificationRepository $certificationRepository)
-    {
-        $this->certifierRepository = $repo;
-        $this->verificationService = $service;
-        $this->brandRepository = $brandRepository;
-        $this->certificationRepository = $certificationRepository;
+    public function __construct(
+        UserRepository $userRepository,
+        protected readonly CertifierRepository $certifierRepository,
+        protected readonly VerificationService $verificationService,
+        protected readonly CertificationRepository $certificationRepository,
+        protected readonly BrandRepository $brandRepository
+    ) {
+        parent::__construct($userRepository);
     }
 
-    public function showAction(Certifier $verifier)
+    public function showAction(Certifier $verifier): ResponseInterface
     {
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -49,28 +48,29 @@ class VerifierController extends AbstractController
             $verifier = $verifier->toJsonData(true);
         }
 
-        $verificationService = GeneralUtility::makeInstance(VerificationService::class);
-        $verificationService->setCreditSettings($this->settings['credits']);
+        $this->verificationService->setCreditSettings($this->settings['credits']);
         foreach ($verifier['recentRequests'] as &$request) {
             if ($request['requestGroup']) {
                 $certs = $this->certificationRepository->findByRequestGroup($request['requestGroup'])->toArray();
             } else {
                 $certs = [$this->certificationRepository->findByUid($request['uid'])];
             }
-            $neededPoints = $verificationService->calculatePointsNeeded($certs);
+            $neededPoints = $this->verificationService->calculatePointsNeeded($certs);
             $organisation = $this->brandRepository->findByUid((int)$request['brandId']);
             $request['canBeAccepted'] = $certs[0]->isPending() && ($organisation->getCreditOverdraw() ||
-                          $verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));
+                          $this->verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));
         }
         $this->view->assign('verifier', $verifier);
+        return $this->createResponse();
     }
 
     /**
      * @param int $tier
      * @param Skill|null $skill
      * @param SkillPath|null $set
+     * @return ResponseInterface
      */
-    public function forSkillAction(int $tier, ?Skill $skill, ?SkillPath $set)
+    public function forSkillAction(int $tier, ?Skill $skill, ?SkillPath $set): ResponseInterface
     {
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -93,7 +93,7 @@ class VerifierController extends AbstractController
         if (!$user || $tier < 1 || $tier > 4 || $tier === 3) {
             $this->view->assign('verifiers', []);
             $this->view->assign('testSystems', []);
-            return;
+            return $this->createResponse();
         }
 
         $skills = $skill ? [$skill] : [];
@@ -135,9 +135,10 @@ class VerifierController extends AbstractController
 
         $this->view->assign('verifiers', $convertedPersonVerifiers);
         $this->view->assign('testSystems', $convertedTestVerifiers);
+        return $this->createResponse();
     }
 
-    public function listOfUserAction()
+    public function listOfUserAction(): ResponseInterface
     {
         $user = $this->getCurrentUser();
         if (!$user) {
@@ -146,8 +147,7 @@ class VerifierController extends AbstractController
         $verifiers = $this->certifierRepository->findByUser($user);
 
         if ($this->view instanceof JsonView) {
-            $verificationService = GeneralUtility::makeInstance(VerificationService::class);
-            $verificationService->setCreditSettings($this->settings['credits']);
+            $this->verificationService->setCreditSettings($this->settings['credits']);
 
             $convertedVerifiers = [];
             /** @var Certifier $verifier */
@@ -160,10 +160,10 @@ class VerifierController extends AbstractController
                     } else {
                         $certs = [$this->certificationRepository->findByUid($request['uid'])];
                     }
-                    $neededPoints = $verificationService->calculatePointsNeeded($certs);
+                    $neededPoints = $this->verificationService->calculatePointsNeeded($certs);
                     $organisation = $this->brandRepository->findByUid((int)$request['brandId']);
                     $request['canBeAccepted'] = $certs[0]->isPending() && ($organisation->getCreditOverdraw() ||
-                                                $verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));
+                                                $this->verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));
                 }
                 unset($request);
 
@@ -181,5 +181,6 @@ class VerifierController extends AbstractController
         }
 
         $this->view->assign('verifiers', $verifiers);
+        return $this->createResponse();
     }
 }

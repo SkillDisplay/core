@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Event;
@@ -7,17 +8,11 @@ use SkillDisplay\Skills\Domain\Model\Certification;
 
 class VerificationUpdatedEvent
 {
-    /** @var Certification[] */
-    private $verifications;
+    public function __construct(private readonly array $verifications) {}
 
     /**
-     * @param Certification[] $verifications
+     * @return Certification[]
      */
-    public function __construct(array $verifications)
-    {
-        $this->verifications = $verifications;
-    }
-
     public function getVerifications(): array
     {
         return $this->verifications;

@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -9,26 +10,25 @@
  *
  *  (c) 2016 Markus Klein
  *           Georg Ringer
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
+use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Requirement extends AbstractEntity
 {
     /**
-     * sets
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Set>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Cascade("remove")
+     * @var ObjectStorage<Set>
+     * @Cascade("remove")
      */
-    protected $sets = null;
+    protected ObjectStorage $sets;
 
     public function __construct()
     {
-        $this->sets = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+        $this->sets = new ObjectStorage();
     }
 
     public function addSet(Set $set): void
@@ -44,9 +44,9 @@ class Requirement extends AbstractEntity
     /**
      * Returns the sets
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Set> sets
+     * @return ObjectStorage<Set> sets
      */
-    public function getSets()
+    public function getSets(): ObjectStorage
     {
         return $this->sets;
     }
@@ -54,9 +54,9 @@ class Requirement extends AbstractEntity
     /**
      * Sets the sets
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Set> $sets
+     * @param ObjectStorage<Set> $sets
      */
-    public function setSets(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $sets): void
+    public function setSets(ObjectStorage $sets): void
     {
         $this->sets = $sets;
     }

@@ -1,65 +1,60 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Service\TestSystemProviderService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
+use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Certifier extends AbstractEntity
 {
-    const JsonViewConfiguration = [
+    public const JsonViewConfiguration = [
         '_exclude' => ['sharedApiSecret'],
         '_descend' => [
             'brand' => [],
             'recentRequests' => [
-                '_descendAll' => Certification::JsonViewConfiguration
+                '_descendAll' => Certification::JsonViewConfiguration,
             ],
             'stats' => [],
         ],
     ];
 
-    /** @var string */
-    protected $link = '';
-
-    /** @var \SkillDisplay\Skills\Domain\Model\User */
-    protected $user = null;
-
-    /** @var string */
+    protected bool $public = false;
+    protected ?User $user = null;
+    protected string $link = '';
     protected string $testSystem = '';
-
-    /** @var \SkillDisplay\Skills\Domain\Model\Brand */
-    protected $brand = null;
+    protected ?Brand $brand = null;
+    protected string $sharedApiSecret = '';
 
     /**
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\CertifierPermission>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Cascade("remove")
+     * @var ObjectStorage<CertifierPermission>
+     * @Cascade("remove")
+     * @Lazy
      */
-    protected $permissions = null;
-
-    /** @var string */
-    protected $sharedApiSecret = '';
+    protected ObjectStorage|LazyObjectStorage $permissions;
 
     public function __construct()
     {
         $this->permissions = new ObjectStorage();
     }
 
-    public function toJsonData(bool $addVerifications = false, int $recentLimit = 5) : array
+    public function toJsonData(bool $addVerifications = false, int $recentLimit = 5): array
     {
         $recentRequests = [];
         $stats = [
@@ -69,8 +64,7 @@ class Certifier extends AbstractEntity
             'total' => 0,
         ];
         if ($addVerifications) {
-            $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-            $certRepo = $objectManager->get(CertificationRepository::class);
+            $certRepo = GeneralUtility::makeInstance(CertificationRepository::class);
             $groups = $certRepo->findByCertifier($this);
 
             foreach ($groups as $group) {
@@ -90,82 +84,82 @@ class Certifier extends AbstractEntity
                 }
                 $stats['total']++;
             }
-            usort($recentRequests, function(array $a, array $b) {
+            usort($recentRequests, function (array $a, array $b) {
                 return $b['crdate'] - $a['crdate'];
             });
             $recentRequests = array_slice($recentRequests, 0, $recentLimit);
         }
+        $logoUrl = $this->brand
+            ? ($this->brand->getLogoScaled() ? (string)$this->brand->getLogoScaled()->getPublicUrl() : '')
+            : '';
         if ($this->getUser() !== null) {
             return [
                 'uid' => $this->uid,
                 'firstName' => $this->user ? $this->user->getFirstName() : '',
                 'lastName' => $this->user ? $this->user->getLastName() : '',
-                'imageUrl' => $this->user ? (string)$this->user->getAvatarScaled()->getPublicUrl() : '',
+                'imageUrl' => (string)$this->user?->getAvatarScaled()->getPublicUrl(),
                 'favourite' => false,
                 'brand' => [
                     'name' => $this->brand ? $this->brand->getName() : '',
-                    'logoPublicUrl' => $this->brand ? ($this->brand->getLogoScaled() ? (string)$this->brand->getLogoScaled()->getPublicUrl() : '') : '',
-                ],
-                'recentRequests' => $recentRequests,
-                'stats' => $stats,
-            ];
-        } else {
-            $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
-            return [
-                'uid' => $this->uid,
-                'testSystemId' => $this->getTestSystem(),
-                'testSystemLabel' => $providerService->getProviderById($this->getTestSystem())->getLabel(),
-                'brand' => [
-                    'name' => $this->brand ? $this->brand->getName() : '',
-                    'logoPublicUrl' => $this->brand ? ($this->brand->getLogoScaled() ? (string)$this->brand->getLogoScaled()->getPublicUrl() : '') : '',
+                    'logoPublicUrl' => $logoUrl,
                 ],
                 'recentRequests' => $recentRequests,
                 'stats' => $stats,
             ];
         }
+        $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
+        return [
+            'uid' => $this->uid,
+            'testSystemId' => $this->getTestSystem(),
+            'testSystemLabel' => $providerService->getProviderById($this->getTestSystem())->getLabel(),
+            'brand' => [
+                'name' => $this->brand ? $this->brand->getName() : '',
+                'logoPublicUrl' => $logoUrl,
+            ],
+            'recentRequests' => $recentRequests,
+            'stats' => $stats,
+        ];
 
     }
 
-    public function getPendingCertifications() : array
+    public function getPendingCertifications(): array
     {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $certRepo = $objectManager->get(CertificationRepository::class);
+        $certRepo = GeneralUtility::makeInstance(CertificationRepository::class);
         return $certRepo->findPendingByCertifier($this);
     }
 
-    public function getCompletedCertifications() : array
+    public function getCompletedCertifications(): array
     {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $certRepo = $objectManager->get(CertificationRepository::class);
+        $certRepo = GeneralUtility::makeInstance(CertificationRepository::class);
         return $certRepo->findCompletedByCertifier($this);
     }
 
-    public function getUser() : ?User
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(?User $user)
+    public function setUser(?User $user): void
     {
         $this->user = $user;
     }
 
-    public function getBrand() : ?Brand
+    public function getBrand(): ?Brand
     {
         return $this->brand;
     }
 
-    public function setBrand(?Brand $brand)
+    public function setBrand(?Brand $brand): void
     {
         $this->brand = $brand;
     }
 
-    public function addPermission(CertifierPermission $permission)
+    public function addPermission(CertifierPermission $permission): void
     {
         $this->permissions->attach($permission);
     }
 
-    public function removePermission(CertifierPermission $permissionToRemove)
+    public function removePermission(CertifierPermission $permissionToRemove): void
     {
         $this->permissions->detach($permissionToRemove);
     }
@@ -173,7 +167,7 @@ class Certifier extends AbstractEntity
     /**
      * @return ObjectStorage<CertifierPermission>
      */
-    public function getPermissions() : ObjectStorage
+    public function getPermissions(): ObjectStorage
     {
         return $this->permissions;
     }
@@ -181,7 +175,7 @@ class Certifier extends AbstractEntity
     /**
      * @param ObjectStorage<CertifierPermission> $permissions
      */
-    public function setPermissions(ObjectStorage $permissions)
+    public function setPermissions(ObjectStorage $permissions): void
     {
         $this->permissions = $permissions;
     }
@@ -191,32 +185,33 @@ class Certifier extends AbstractEntity
         return $this->link;
     }
 
-    public function setLink(string $link)
+    public function setLink(string $link): void
     {
         $this->link = $link;
     }
 
-    /**
-     * @return string
-     */
     public function getSharedApiSecret(): string
     {
         return $this->sharedApiSecret;
     }
 
-    /**
-     * @param string $sharedApiSecret
-     */
     public function setSharedApiSecret(string $sharedApiSecret): void
     {
         $this->sharedApiSecret = $sharedApiSecret;
     }
 
-    /**
-     * @return string
-     */
     public function getTestSystem(): string
     {
         return $this->testSystem;
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->public;
+    }
+
+    public function setPublic(bool $public): void
+    {
+        $this->public = $public;
     }
 }

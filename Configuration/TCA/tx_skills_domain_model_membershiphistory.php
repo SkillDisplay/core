@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_membershiphistory',
@@ -16,7 +17,7 @@ return [
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'foreign_table' => 'tx_skills_domain_model_certification'
+                'foreign_table' => 'tx_skills_domain_model_certification',
             ],
         ],
         'brand' => [
@@ -36,7 +37,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required'
+                'eval' => 'trim,required',
             ],
         ],
     ],

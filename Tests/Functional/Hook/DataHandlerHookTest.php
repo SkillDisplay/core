@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Hook;
@@ -11,29 +12,20 @@ use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Exception;
 
-/**
- * Test case.
- *
- * @author Mattthias Böhm <matthias.boehm@reelworx.at>
- */
 class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
 {
-    /** @var DataHandlerHook */
-    protected $dataHandlerHook;
-
-    /** @var VerificationCreditUsageRepository */
-    private $verificationcreditUsageRepository;
+    protected DataHandlerHook $dataHandlerHook;
+    protected VerificationCreditUsageRepository $verificationcreditUsageRepository;
 
     /**
      * @throws DBALException
      * @throws Exception
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
      */
     protected function setUp(): void
     {
         parent::setUp();
         $this->dataHandlerHook = GeneralUtility::makeInstance(DataHandlerHook::class);
-        $this->verificationcreditUsageRepository = $this->objectManager->get(VerificationCreditUsageRepository::class);
+        $this->verificationcreditUsageRepository = GeneralUtility::makeInstance(VerificationCreditUsageRepository::class);
 
         $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_verificationcreditpack.xml');
         $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certification.xml');
@@ -49,11 +41,12 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
             'tx_skills_domain_model_verificationcreditpack',
             '1',
             [],
-            new DataHandler());
+            new DataHandler()
+        );
 
         $usages = $this->verificationcreditUsageRepository->findAll()->toArray();
 
-        $this->assertCount(11, $usages);
+        self::assertCount(11, $usages);
     }
 
     /**
@@ -66,11 +59,12 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
             'tx_skills_domain_model_verificationcreditpack',
             '2',
             [],
-            new DataHandler());
+            new DataHandler()
+        );
 
         $usages = $this->verificationcreditUsageRepository->findAll()->toArray();
 
-        $this->assertCount(4, $usages);
+        self::assertCount(4, $usages);
     }
 
     /**
@@ -83,10 +77,11 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
             'tx_skills_domain_model_verificationcreditpack',
             '3',
             [],
-            new DataHandler());
+            new DataHandler()
+        );
 
         $usages = $this->verificationcreditUsageRepository->findAll()->toArray();
 
-        $this->assertCount(0, $usages);
+        self::assertCount(0, $usages);
     }
 }

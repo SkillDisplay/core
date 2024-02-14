@@ -1,38 +1,35 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace SkillDisplay\Skills\Domain\Model;
 
-/***
- *
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2021 Reelworx GmbH
- *
- ***/
+ **/
 
+use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyLoadingProxy;
 
 class CertificationCredit extends AbstractEntity
 {
     protected int $valuta = 0;
-
-    protected Brand $brand;
-
+    protected ?Brand $brand = null;
     protected string $title = '';
-
     protected float $price = 0.0;
 
     /**
-     * @var User|null
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @Lazy
      */
-    protected ?User $user = null;
+    protected User|LazyLoadingProxy|null $user = null;
 
     protected string $invoiceNumber = '';
-
     protected string $brandName = '';
     protected string $userUsername = '';
     protected string $userFirstname = '';
@@ -73,9 +70,6 @@ class CertificationCredit extends AbstractEntity
         return $this->price;
     }
 
-    /**
-     * @param float $price
-     */
     public function setPrice(float $price): void
     {
         $this->price = $price;

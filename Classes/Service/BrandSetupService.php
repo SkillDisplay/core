@@ -1,11 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service;
 
 use DateTime;
-use PDO;
 use RuntimeException;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -112,10 +114,10 @@ class BrandSetupService
         $existing = $qb->select('*')
                        ->from('be_users')
                        ->where(
-                           $qb->expr()->eq('username', $qb->createNamedParameter($username, PDO::PARAM_STR))
+                           $qb->expr()->eq('username', $qb->createNamedParameter($username))
                        )
-                       ->execute()
-                       ->fetch();
+                       ->executeQuery()
+                       ->fetchAssociative();
         if ($existing) {
             return $this->updateBeUserGroups($existing);
         }
@@ -159,9 +161,9 @@ class BrandSetupService
         $qb->update('be_users')
             ->set('usergroup', $user['usergroup'])
             ->where(
-                $qb->expr()->eq('uid', $qb->createNamedParameter($user['uid'], PDO::PARAM_INT))
+                $qb->expr()->eq('uid', $qb->createNamedParameter($user['uid'], Connection::PARAM_INT))
             )
-            ->execute();
+            ->executeStatement();
 
         return $user;
     }
@@ -172,9 +174,9 @@ class BrandSetupService
         $count = $qb->count('*')
             ->from('tx_skills_user_organisation_mm')
             ->where(
-                $qb->expr()->eq('uid_local', $qb->createNamedParameter($feUserId, PDO::PARAM_INT)),
-                $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($this->brandUid, PDO::PARAM_INT))
-            )->execute()->fetchColumn();
+                $qb->expr()->eq('uid_local', $qb->createNamedParameter($feUserId, Connection::PARAM_INT)),
+                $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($this->brandUid, Connection::PARAM_INT))
+            )->executeQuery()->fetchOne();
         if (!$count) {
             $qb->resetQueryParts();
             $qb->insert('tx_skills_user_organisation_mm')
@@ -182,7 +184,7 @@ class BrandSetupService
                     'uid_local' => $feUserId,
                     'uid_foreign' => $this->brandUid,
                 ])
-                ->execute();
+                ->executeStatement();
         }
     }
 
@@ -192,9 +194,9 @@ class BrandSetupService
         $count = $qb->count('*')
                     ->from('tx_skills_user_brand_mm')
                     ->where(
-                        $qb->expr()->eq('uid_local', $qb->createNamedParameter($feUserId, PDO::PARAM_INT)),
-                        $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($this->brandUid, PDO::PARAM_INT))
-                    )->execute()->fetchColumn();
+                        $qb->expr()->eq('uid_local', $qb->createNamedParameter($feUserId, Connection::PARAM_INT)),
+                        $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($this->brandUid, Connection::PARAM_INT))
+                    )->executeQuery()->fetchOne();
         if (!$count) {
             $qb->resetQueryParts();
             $qb->insert('tx_skills_user_brand_mm')
@@ -202,7 +204,7 @@ class BrandSetupService
                    'uid_local' => $feUserId,
                    'uid_foreign' => $this->brandUid,
                ])
-               ->execute();
+               ->executeStatement();
         }
     }
 
@@ -252,10 +254,9 @@ class BrandSetupService
             ->from('tx_skills_domain_model_brand')
             ->where(
                 $qb->expr()->orX(
-
                     $qb->expr()->andX(
-                        $qb->expr()->eq('pid', $qb->createNamedParameter($this->sysFolderUid, PDO::PARAM_INT)),
-                        $qb->expr()->eq('name', $qb->createNamedParameter($this->brandName, PDO::PARAM_STR))
+                        $qb->expr()->eq('pid', $qb->createNamedParameter($this->sysFolderUid, Connection::PARAM_INT)),
+                        $qb->expr()->eq('name', $qb->createNamedParameter($this->brandName))
                     )
                 )
             );
@@ -263,12 +264,13 @@ class BrandSetupService
         if (!empty($this->foreignId)) {
             $qb = $qb->orWhere(
                 $qb->expr()->eq(
-                    'foreign_id', $qb->createNamedParameter($this->foreignId, PDO::PARAM_STR)
+                    'foreign_id',
+                    $qb->createNamedParameter($this->foreignId)
                 )
             );
         }
 
-        $existing = $qb->execute()->fetch();
+        $existing = $qb->executeQuery()->fetchAssociative();
 
         if ($existing) {
             $this->brandUid = $existing['uid'];
@@ -317,10 +319,10 @@ class BrandSetupService
             ->count('*')
             ->from('tx_skills_domain_model_verificationcreditpack')
             ->where(
-                $qb->expr()->eq('brand', $qb->createNamedParameter($this->brandUid, \PDO::PARAM_INT)),
+                $qb->expr()->eq('brand', $qb->createNamedParameter($this->brandUid, Connection::PARAM_INT)),
             )
-            ->execute()
-            ->fetchColumn();
+            ->executeQuery()
+            ->fetchOne();
 
         // only create initial pack if none exists yet
         if ($numberOfExistingPacks) {
@@ -350,11 +352,11 @@ class BrandSetupService
         $existing = $qb->select('uid')
                        ->from('sys_filemounts')
                        ->where(
-                           $qb->expr()->eq('title', $qb->createNamedParameter($this->sysFolderName, PDO::PARAM_STR)),
-                           $qb->expr()->eq('path', $qb->createNamedParameter($this->brandFolder->getReadablePath(), PDO::PARAM_STR)),
+                           $qb->expr()->eq('title', $qb->createNamedParameter($this->sysFolderName)),
+                           $qb->expr()->eq('path', $qb->createNamedParameter($this->brandFolder->getReadablePath())),
                        )
-                       ->execute()
-                       ->fetch();
+                       ->executeQuery()
+                       ->fetchAssociative();
         if ($existing) {
             return (int)$existing['uid'];
         }
@@ -384,11 +386,11 @@ class BrandSetupService
         $existing = $qb->select('uid')
                        ->from('be_groups')
                        ->where(
-                           $qb->expr()->eq('title', $qb->createNamedParameter($groupTitle, PDO::PARAM_STR)),
-                           $qb->expr()->eq('db_mountpoints', $qb->createNamedParameter((string)$this->sysFolderUid, PDO::PARAM_STR)),
+                           $qb->expr()->eq('title', $qb->createNamedParameter($groupTitle)),
+                           $qb->expr()->eq('db_mountpoints', $qb->createNamedParameter((string)$this->sysFolderUid)),
                        )
-                       ->execute()
-                       ->fetch();
+                       ->executeQuery()
+                       ->fetchAssociative();
         if ($existing) {
             $this->backendUserGroupUid = (int)$existing['uid'];
             return;
@@ -421,14 +423,13 @@ class BrandSetupService
     {
         $qb = $this->connectionPool->getQueryBuilderForTable('be_users');
         $qb->getRestrictions()->removeAll();
-        $statement = $qb
+        $result = $qb
             ->select('*')
             ->from('be_users')
             ->where(
                 $qb->expr()->eq('username', $qb->createNamedParameter(self::DEFAULT_BE_USER))
             )
-            ->execute();
-        $result = $statement->fetchAll();
+            ->executeQuery()->fetchAllAssociative();
         if (count($result) === 1) {
             unset($result[0]['uid']);
             return $result[0];
@@ -447,8 +448,8 @@ class BrandSetupService
             ->where(
                 $qb->expr()->eq('title', $qb->createNamedParameter(self::DEFAULT_BE_GROUP))
             )
-            ->execute();
-        $result = $statement->fetchAll();
+            ->executeQuery();
+        $result = $statement->fetchAllAssociative();
         if (count($result) === 1) {
             unset($result[0]['uid']);
             return $result[0];
@@ -466,8 +467,8 @@ class BrandSetupService
             ->where(
                 $qb->expr()->eq('description', $qb->createNamedParameter($verificationLevel)),
             )
-            ->execute();
-        $result = $statement->fetchAll();
+            ->executeQuery();
+        $result = $statement->fetchAllAssociative();
         if (count($result) === 1) {
             return (int)$result[0]['uid'];
         }
@@ -492,15 +493,14 @@ class BrandSetupService
     private function fetchFolder(string $title): int
     {
         $qb = $this->connectionPool->getQueryBuilderForTable('pages');
-        $statement = $qb
+        $result = $qb
             ->select('uid')
             ->from('pages')
             ->where(
                 $qb->expr()->eq('title', $qb->createNamedParameter($title)),
                 $qb->expr()->eq('doktype', 254)
             )
-            ->execute();
-        $result = $statement->fetchAll();
+            ->executeQuery()->fetchAllAssociative();
         if (count($result) === 1) {
             return (int)$result[0]['uid'];
         }

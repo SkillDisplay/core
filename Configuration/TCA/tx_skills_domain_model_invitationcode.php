@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_invitationcode',
@@ -11,23 +12,23 @@ return [
             'endtime' => 'expires',
         ],
         'searchFields' => 'code',
-        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_tag.png'
+        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_tag.png',
     ],
     'types' => [
         0 => ['showitem' => 'code,brand,expires,created_by,used_by,used_at'],
     ],
     'columns' => [
-	    'code' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_invitationcode.code',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 30,
+        'code' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_invitationcode.code',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
-	    'brand' => [
+                'eval' => 'trim,required',
+            ],
+        ],
+        'brand' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_invitationcode.brand',
             'config' => [
@@ -66,9 +67,9 @@ return [
                 'foreign_table' => 'fe_users',
                 'foreign_table_where' => 'ORDER BY fe_users.username',
                 'items' => [
-                    ['', 0]
+                    ['', 0],
                 ],
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'used_at' => [

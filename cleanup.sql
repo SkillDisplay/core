@@ -91,6 +91,7 @@ order by s.title;
 # tables with duplicate uuids
 select * from tx_skills_domain_model_link group by uuid having count(*) > 1 or uuid = '' or uuid is null;
 select * from tx_skills_domain_model_tag group by uuid having count(*) > 1 or uuid = '' or uuid is null;
-select * from tx_skills_domain_model_brand group by uuid having count(*) > 1 or uuid = '' or uuid is null;
-select * from tx_skills_domain_model_skill group by uuid having count(*) > 1 or uuid = '' or uuid is null;
-select * from tx_skills_domain_model_skillpath group by uuid having count(*) > 1 or uuid = '' or uuid is null;
+select * from tx_skills_domain_model_brand where deleted = 0 group by uuid having count(*) > 1 or uuid = '' or uuid is null;
+select * from tx_skills_domain_model_skill where deleted = 0 group by uuid having count(*) > 1 or uuid = '' or uuid is null;
+select * from tx_skills_domain_model_skillpath where deleted = 0 group by uuid having count(*) > 1 or uuid = '' or uuid is null;
+

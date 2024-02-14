@@ -1,19 +1,19 @@
 <?php
+
 declare(strict_types=1);
 
-/***
- *
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -55,10 +55,10 @@ class BackendPageAccessCheckService
         $result = $qb->select('*')
             ->from('pages')
             ->where(
-                $qb->expr()->eq('uid', $qb->createNamedParameter($pageUid, \PDO::PARAM_INT))
+                $qb->expr()->eq('uid', $qb->createNamedParameter($pageUid, Connection::PARAM_INT))
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         if (count($result) === 1) {
             return $result[0];

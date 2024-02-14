@@ -3,46 +3,43 @@
   "version": "1.0.0",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@fortawesome/fontawesome-free": "^5.7",
     "@types/datatables.net": "^1",
     "@types/jquery": "^3",
+    "autoprefixer": "*",
     "browserify": "^17.0.0",
-    "gulp": "^4.0.0",
-    "gulp-autoprefixer": "^8",
-    "gulp-babel": "^8.0.0",
-    "gulp-concat": "*",
-    "gulp-html-src": "*",
-    "gulp-if": "*",
+    "cssnano": "^6",
+    "gulp": "^4",
     "gulp-inline-css": "*",
-    "gulp-load-plugins": "*",
-    "gulp-rename": "*",
+    "gulp-postcss": "*",
     "gulp-replace": "*",
     "gulp-sass": "^5",
-    "gulp-sourcemaps": "^3",
-    "gulp-string-replace": "*",
     "gulp-typescript": "^5",
     "gulp-uglify": "^3",
+    "gulp-uglify-es": "*",
     "gulp-uncss": "*",
     "inky": "^1.3",
     "lazypipe": "^1.0",
     "panini": "^1.6",
-    "rimraf": "^3",
+    "postcss": "*",
+    "rimraf": "^5",
     "sass": "^1.49.7",
+    "sass-embedded": "*",
     "siphon-media-query": "^1.0",
     "tsify": "^5",
     "typescript": "~4",
     "vinyl-buffer": "^1.0",
     "vinyl-source-stream": "^2.0"
   },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.7"
+  },
   "scripts": {
     "gulp": "gulp"
   },
   "browserslist": [
-    "last 1 version",
-    "> 1%",
-    "maintained node versions",
-    "not dead"
+    "last 2 version",
+    "not dead",
+    "not IE 11",
+    "iOS >= 11"
   ]
 }

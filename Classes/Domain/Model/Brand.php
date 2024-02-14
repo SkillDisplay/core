@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -9,8 +10,7 @@
  *
  *  (c) 2016 Markus Klein
  *           Georg Ringer
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
@@ -19,95 +19,79 @@ use SkillDisplay\Skills\Service\CertoBot;
 use SkillDisplay\Skills\Service\Importer\ExportService;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
+use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
+use TYPO3\CMS\Extbase\Domain\Model\FileReference;
+use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Service\ImageService;
 
 class Brand extends AbstractEntity
 {
-    const JsonViewConfiguration = [
+    public const JsonViewConfiguration = [
         '_only' => [
-            'uid','name','logoPublicUrl', 'url', 'memberCount','members', 'firstCategoryTitle'
+            'uid', 'name', 'logoPublicUrl', 'url', 'memberCount', 'members', 'firstCategoryTitle',
         ],
         '_descend' => [
             'members' => [
                 '_descendAll' => User::JsonUserViewConfiguration,
-            ]
+            ],
         ],
     ];
 
-    const JsonViewMinimalConfiguration = [
+    public const JsonViewMinimalConfiguration = [
         '_only' => [
-            'uid','name','logoPublicUrl', 'url', 'memberCount', 'firstCategoryTitle'
+            'uid', 'name', 'logoPublicUrl', 'url', 'memberCount', 'firstCategoryTitle',
         ],
     ];
 
-    const TRANSLATE_FIELDS = [
+    public const TRANSLATE_FIELDS = [
         'name',
         'description',
-        'url'
+        'url',
     ];
 
     /**
      * name
      *
      * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $name = '';
-
-    /** @var string */
-    protected $description = '';
-
-    /** @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference> */
-    protected $logo = null;
-
-    /** @var \TYPO3\CMS\Extbase\Domain\Model\FileReference */
-    protected $banner = null;
-
-    /** @var \TYPO3\CMS\Extbase\Domain\Model\FileReference  */
-    protected $pixelLogo = null;
-
-    /** @var string */
-    protected $url = '';
+    protected string $name = '';
+    protected string $description = '';
+    /** @var ObjectStorage<FileReference> */
+    protected ObjectStorage $logo;
+    protected ?FileReference $banner = null;
+    protected ?FileReference $pixelLogo = null;
+    protected string $url = '';
 
     /**
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Category>
+     * @Lazy
      */
-    protected $categories = null;
-
-    /** @var int */
-    protected $partnerLevel = 0;
-
-    /** @var int */
-    protected $patronageLevel = 0;
+    protected ObjectStorage|LazyObjectStorage $categories;
+    protected int $partnerLevel = 0;
+    protected int $patronageLevel = 0;
 
     /**
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Brand>
+     * @Lazy
      */
-    protected $patronages = null;
-
-    /** @var bool */
-    protected $showNumOfCertificates = false;
+    protected ObjectStorage|LazyObjectStorage $patronages;
+    protected bool $showNumOfCertificates = false;
 
     /**
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\User>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<User>
+     * @Lazy
      */
-    protected $members = null;
+    protected ObjectStorage|LazyObjectStorage $members;
 
-    /** @var int */
-    protected $tstamp = 0;
-
-    /** @var string */
-    protected $uuid = '';
-
-    /** @var int */
-    protected $imported = 0;
-
+    protected int $tstamp = 0;
+    protected string $uuid = '';
+    protected int $imported = 0;
     protected string $createdByBrand = '';
     protected bool $creditOverdraw = false;
     protected bool $billable = true;
@@ -120,25 +104,29 @@ class Brand extends AbstractEntity
     public function __construct()
     {
         $this->uuid = CertoBot::uuid();
+        $this->logo = new ObjectStorage();
+        $this->members = new ObjectStorage();
+        $this->patronages = new ObjectStorage();
+        $this->categories = new ObjectStorage();
     }
 
-    public function getPatrons() : array
+    public function getPatrons(): array
     {
-        /** @var BrandRepository $brandRepo */
-        $brandRepo = GeneralUtility::makeInstance(ObjectManager::class)->get(BrandRepository::class);
+        $brandRepo = GeneralUtility::makeInstance(BrandRepository::class);
         return $brandRepo->findPatronsForBrand($this);
     }
 
     public function getLogoPublicUrl(): string
     {
         /** @var FileReference $file */
-        $file = $this->logo ? ($this->logo->toArray()[0] ?? null) : null;
+        $file = $this->logo->toArray()[0] ?? null;
         return $file && $file->getOriginalResource() ? (string)$file->getOriginalResource()->getPublicUrl() : '';
     }
 
-    public function getLogoForLocalProcessing(): string {
+    public function getLogoForLocalProcessing(): string
+    {
         /** @var FileReference $file */
-        $file = $this->logo ? ($this->logo->toArray()[0] ?? null) : null;
+        $file = $this->logo->toArray()[0] ?? null;
         return $file && $file->getOriginalResource() ? $file->getOriginalResource()->getForLocalProcessing(false) : '';
     }
 
@@ -150,17 +138,12 @@ class Brand extends AbstractEntity
         return (string)$this->getBannerScaled()->getPublicUrl();
     }
 
-    /**
-     * @return ProcessedFile|null
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
-     */
-    public function getBannerScaled()
+    public function getBannerScaled(): ?ProcessedFile
     {
         if (!$this->banner || !$this->banner->getOriginalResource()) {
             return null;
         }
-        /** @var ImageService $imageService */
-        $imageService = GeneralUtility::makeInstance(ObjectManager::class)->get(ImageService::class);
+        $imageService = GeneralUtility::makeInstance(ImageService::class);
         $processingInstructions = [
             'width' => '1100c',
             'height' => '220c',
@@ -174,8 +157,7 @@ class Brand extends AbstractEntity
         if (!$file || !$file->getOriginalResource()) {
             return null;
         }
-        /** @var ImageService $imageService */
-        $imageService = GeneralUtility::makeInstance(ObjectManager::class)->get(ImageService::class);
+        $imageService = GeneralUtility::makeInstance(ImageService::class);
         $processingInstructions = [
             'width' => '300c',
             'height' => '300c',
@@ -194,10 +176,10 @@ class Brand extends AbstractEntity
     public function getExportJson(): string
     {
         $data = [
-            "tstamp" => $this->tstamp,
-            "name" => $this->getName(),
-            "description" => $this->getDescription(),
-            "url" => $this->getUrl()
+            'tstamp' => $this->tstamp,
+            'name' => $this->getName(),
+            'description' => $this->getDescription(),
+            'url' => $this->getUrl(),
         ];
 
         $data['translations'] = ExportService::getTranslations('tx_skills_domain_model_brand', $this->getUid(), self::TRANSLATE_FIELDS);
@@ -206,7 +188,7 @@ class Brand extends AbstractEntity
             'uuid' => $this->uuid,
             'type' => get_class($this),
             'uid' => $this->getUid(),
-            'data' => $data
+            'data' => $data,
         ];
 
         /** @var FileReference $file */
@@ -249,9 +231,9 @@ class Brand extends AbstractEntity
     /**
      * Returns the logo
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference>
+     * @return ObjectStorage<FileReference>
      */
-    public function getLogo()
+    public function getLogo(): ObjectStorage
     {
         return $this->logo;
     }
@@ -259,9 +241,9 @@ class Brand extends AbstractEntity
     /**
      * Returns the logo for mails
      *
-     * @return \TYPO3\CMS\Extbase\Domain\Model\FileReference
+     * @return FileReference|null
      */
-    public function getPixelLogo(): ?\TYPO3\CMS\Extbase\Domain\Model\FileReference
+    public function getPixelLogo(): ?FileReference
     {
         return $this->pixelLogo;
     }
@@ -287,26 +269,36 @@ class Brand extends AbstractEntity
     }
 
     /**
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
+     * @return ObjectStorage<Category>
      */
-    public function getCategories()
+    public function getCategories(): ObjectStorage
     {
         return $this->categories;
     }
 
-    public function setCategories($categories): void
+    public function setCategories(ObjectStorage $categories): void
     {
         $this->categories = $categories;
     }
 
     public function getFirstCategory(): ?Category
     {
-        return $this->categories ? ($this->categories->toArray()[0] ?? null) : null;
+        return $this->categories->toArray()[0] ?? null;
     }
 
     public function getFirstCategoryTitle(): string
     {
-        return $this->getFirstCategory() ? $this->getFirstCategory()->getTitle() : '';
+        if (!$this->getFirstCategory()) {
+            return '';
+        }
+        $title = $this->getFirstCategory()->getTitle();
+        // use original language title only (ignore translation here)
+        if ($this->getFirstCategory()->_getProperty('_localizedUid') > 0) {
+            $categoryRepo = GeneralUtility::makeInstance(CategoryRepository::class);
+            $defaultCategory = $categoryRepo->findByUid($this->getFirstCategory()->getUid());
+            $title = $defaultCategory->getTitle();
+        }
+        return $title;
     }
 
     public function getPartnerLevel(): int
@@ -350,30 +342,27 @@ class Brand extends AbstractEntity
     }
 
     /**
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
+     * @return ObjectStorage<Brand>
      */
-    public function getPatronages()
+    public function getPatronages(): ObjectStorage
     {
         return $this->patronages;
     }
 
-    /**
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $patronages
-     */
-    public function setPatronages($patronages): void
+    public function setPatronages(ObjectStorage $patronages): void
     {
         $this->patronages = $patronages;
     }
 
     /**
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<User>
+     * @return ObjectStorage<User>
      */
-    public function getMembers()
+    public function getMembers(): ObjectStorage
     {
         return $this->members;
     }
 
-    public function setMembers($members): void
+    public function setMembers(ObjectStorage $members): void
     {
         $this->members = $members;
     }
@@ -385,7 +374,7 @@ class Brand extends AbstractEntity
 
     public function getMemberCount(): int
     {
-        return $this->members ? $this->members->count() : 0;
+        return $this->members->count();
     }
 
     public function getCreditOverdraw(): bool
@@ -428,17 +417,11 @@ class Brand extends AbstractEntity
         $this->apiKey = $apiKey;
     }
 
-    /**
-     * @return string
-     */
     public function getBillingAddress(): string
     {
         return $this->billingAddress;
     }
 
-    /**
-     * @param string $billingAddress
-     */
     public function setBillingAddress(string $billingAddress): void
     {
         $this->billingAddress = $billingAddress;

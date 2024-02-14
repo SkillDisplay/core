@@ -1,25 +1,25 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
 use DateTime;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Statement;
+use DateTimeImmutable;
+use Doctrine\DBAL\Driver\ResultStatement;
+use Doctrine\DBAL\ForwardCompatibility\Result;
 use Exception;
 use SkillDisplay\Skills\Domain\Model\Award;
 use SkillDisplay\Skills\Domain\Model\Brand;
-use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -30,12 +30,11 @@ use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class StatisticsService
@@ -44,43 +43,22 @@ class StatisticsService
         3 => 95,
         2 => 75,
         1 => 50,
-        0 => 25
+        0 => 25,
     ];
 
     protected QueryBuilder $qbAwards;
-    protected BrandRepository $brandRepository;
-    protected UserRepository $userRepository;
-    protected CertifierRepository $certifierRepository;
-    protected CertificationRepository $certificationRepository;
-    protected SkillPathRepository $skillSetRepository;
-    protected SkillRepository $skillRepository;
-    protected PersistenceManager $persistenceManager;
-    protected ConnectionPool $connectionPool;
 
     public function __construct(
-        BrandRepository $brandR,
-        UserRepository $userR,
-        CertifierRepository $certifierR,
-        CertificationRepository $certificationR,
-        SkillPathRepository $skillSetR,
-        SkillRepository $skillR,
-        PersistenceManager $persistenceManager
-    )
-    {
-        $this->brandRepository = $brandR;
-        $this->userRepository = $userR;
-        $this->certificationRepository = $certificationR;
-        $this->certifierRepository = $certifierR;
-        $this->skillSetRepository = $skillSetR;
-        $this->skillRepository = $skillR;
-        $this->persistenceManager = $persistenceManager;
-        $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
-    }
+        protected readonly BrandRepository $brandRepository,
+        protected readonly UserRepository $userRepository,
+        protected readonly CertifierRepository $certifierRepository,
+        protected readonly CertificationRepository $certificationRepository,
+        protected readonly SkillPathRepository $skillSetRepository,
+        protected readonly SkillRepository $skillRepository,
+        protected readonly PersistenceManager $persistenceManager,
+        protected readonly ConnectionPool $connectionPool,
+    ) {}
 
-    /**
-     * @throws DBALException
-     * @throws \Doctrine\DBAL\Driver\Exception
-     */
     public function run(): void
     {
         $connection = $this->connectionPool->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
@@ -98,43 +76,33 @@ class StatisticsService
         $this->calculateCoachMentorAwards(Award::TYPE_MENTOR);
     }
 
-    /**
-     * @throws \Doctrine\DBAL\Driver\Exception
-     */
     private function calculateVerifiedAwards(): void
     {
-        $qbCertifications = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_certification');
         $users = $this->userRepository->findAll();
-
-        /** @var Statement $statement */
-        $statement = null;
         /** @var User $user */
         foreach ($users as $user) {
-            if (!$statement) {
-                $statement = $qbCertifications
-                    ->select('s.uid as skill_id', 'sb.uid_foreign as brand', 'c.tier1', 'c.tier2', 'c.tier3', 'c.tier4')
-                    ->from('tx_skills_domain_model_certification', 'c')
-                    ->join('c', 'tx_skills_domain_model_skill', 's', 'c.skill = s.uid')
-                    ->join('s', 'tx_skills_skill_brand_mm', 'sb', 's.uid = sb.uid_local')
-                    ->where(
-                        $qbCertifications->expr()->eq('c.user', $qbCertifications->createPositionalParameter($user->getUid())),
-                        $qbCertifications->expr()->isNotNull('c.grant_date'),
-                        $qbCertifications->expr()->isNull('c.revoke_date')
-                    )->execute();
-            } else {
-                $statement->bindValue(1, $user->getUid());
-                $statement->execute();
-            }
+            $qbCertifications = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_certification');
+            $res = $qbCertifications
+                ->select('s.uid as skill_id', 'sb.uid_foreign as brand', 'c.tier1', 'c.tier2', 'c.tier3', 'c.tier4')
+                ->from('tx_skills_domain_model_certification', 'c')
+                ->join('c', 'tx_skills_domain_model_skill', 's', 'c.skill = s.uid')
+                ->join('s', 'tx_skills_skill_brand_mm', 'sb', 's.uid = sb.uid_local')
+                ->where(
+                    $qbCertifications->expr()->eq('c.user', $qbCertifications->createPositionalParameter($user->getUid())),
+                    $qbCertifications->expr()->isNotNull('c.grant_date'),
+                    $qbCertifications->expr()->isNull('c.revoke_date')
+                )
+                ->executeQuery();
 
             $groupedByBrandAndTier = [];
-            while ($cert = $statement->fetch()) {
+            while ($cert = $res->fetchAssociative()) {
                 $level = $cert['tier1'] ? 1 : ($cert['tier2'] ? 2 : ($cert['tier3'] ? 3 : ($cert['tier4'] ? 4 : 0)));
                 if ($level) {
                     $groupedByBrandAndTier[$cert['brand']][$level][] = $cert;
                 }
             }
 
-            $statement->closeCursor();
+            $res->free();
 
             foreach ($groupedByBrandAndTier as $brandId => $tiersOfBrand) {
                 $skillCountOfBrand = $this->brandRepository->getSkillCountForBrand((int)$brandId);
@@ -157,46 +125,36 @@ class StatisticsService
                                 'brand' => $brandId,
                                 'type' => Award::TYPE_VERIFICATIONS,
                                 'level' => $level,
-                                'rank' => $achievedRank
-                            ])->execute();
+                                'rank' => $achievedRank,
+                            ])
+                            ->execute();
                     }
                 }
             }
         }
     }
 
-    /**
-     * @throws \Doctrine\DBAL\Driver\Exception
-     */
     private function calculateMemberAwards(): void
     {
-        $qbCertifications = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_certification');
         $brands = $this->brandRepository->findAllWithMembers();
-
-        /** @var Statement $statement */
-        $statement = null;
         /** @var Brand $brand */
         foreach ($brands as $brand) {
             $memberRanking = [];
             $brandId = $brand->getUid();
             foreach ($brand->getMembers() as $member) {
-                if (!$statement) {
-                    $statement = $qbCertifications
-                        ->select('c.uid as uid', 's.uid as skill_id', 'c.user as user_id', 'c.tier1', 'c.tier2', 'c.tier3', 'c.tier4')
-                        ->from('tx_skills_domain_model_certification', 'c')
-                        ->join('c', 'tx_skills_domain_model_skill', 's', 'c.skill = s.uid')
-                        ->where(
-                            $qbCertifications->expr()->eq('c.user', $qbCertifications->createPositionalParameter($member->getUid(), Connection::PARAM_INT)),
-                            $qbCertifications->expr()->isNotNull('c.grant_date'),
-                            $qbCertifications->expr()->isNull('c.revoke_date')
-                        )
-                        ->execute();
-                } else {
-                    $statement->bindValue(1, $member->getUid());
-                    $statement->execute();
-                }
-                $certs = $statement->fetchAll();
-                $statement->closeCursor();
+                $qbCertifications = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_certification');
+                $statement = $qbCertifications
+                    ->select('c.uid as uid', 's.uid as skill_id', 'c.user as user_id', 'c.tier1', 'c.tier2', 'c.tier3', 'c.tier4')
+                    ->from('tx_skills_domain_model_certification', 'c')
+                    ->join('c', 'tx_skills_domain_model_skill', 's', 'c.skill = s.uid')
+                    ->where(
+                        $qbCertifications->expr()->eq('c.user', $qbCertifications->createPositionalParameter($member->getUid(), Connection::PARAM_INT)),
+                        $qbCertifications->expr()->isNotNull('c.grant_date'),
+                        $qbCertifications->expr()->isNull('c.revoke_date')
+                    )
+                    ->execute();
+                $certs = $statement->fetchAllAssociative();
+                $statement->free();
 
                 $skillPoints = 0;
                 foreach ($certs as $cert) {
@@ -210,20 +168,13 @@ class StatisticsService
         }
     }
 
-    /**
-     * @throws \Doctrine\DBAL\Driver\Exception
-     */
     private function calculateCoachMentorAwards(int $type): void
     {
         // If type == 2 / Coach
         // If type == 3 / Mentor
         $tierField = $type === Award::TYPE_COACH ? 'tier2' : 'tier4';
 
-        $qbCertifications = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_certification');
         $brands = $this->brandRepository->findAllWithMembers();
-
-        /** @var Statement $statement */
-        $statement = null;
         /** @var Brand $brand */
         foreach ($brands as $brand) {
             $brandId = $brand->getUid();
@@ -235,27 +186,22 @@ class StatisticsService
                     continue;
                 }
                 $certifierId = $certifier->getUid();
-                if (!$statement) {
-                    $statement = $qbCertifications
-                        ->count('c.uid')
-                        ->from('tx_skills_domain_model_certification', 'c')
-                        ->join('c', 'tx_skills_domain_model_skill', 's', 'c.skill = s.uid')
-                        ->join('s', 'tx_skills_skill_brand_mm', 'sb', 's.uid = sb.uid_local')
-                        ->where(
-                            $qbCertifications->expr()->eq('sb.uid_foreign', $qbCertifications->createPositionalParameter($brandId, Connection::PARAM_INT)),
-                            $qbCertifications->expr()->eq('c.certifier', $qbCertifications->createPositionalParameter($certifierId, Connection::PARAM_INT)),
-                            $qbCertifications->expr()->eq($tierField, 1),
-                            $qbCertifications->expr()->isNotNull('c.grant_date'),
-                            $qbCertifications->expr()->isNull('c.revoke_date')
-                        )
-                        ->execute();
-                } else {
-                    $statement->bindValue(1, $brandId);
-                    $statement->bindValue(2, $certifierId);
-                    $statement->execute();
-                }
-                $ranking[$certifier->getUser()->getUid()] = $statement->fetchColumn();
-                $statement->closeCursor();
+                $qbCertifications = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_certification');
+                $statement = $qbCertifications
+                    ->count('c.uid')
+                    ->from('tx_skills_domain_model_certification', 'c')
+                    ->join('c', 'tx_skills_domain_model_skill', 's', 'c.skill = s.uid')
+                    ->join('s', 'tx_skills_skill_brand_mm', 'sb', 's.uid = sb.uid_local')
+                    ->where(
+                        $qbCertifications->expr()->eq('sb.uid_foreign', $qbCertifications->createPositionalParameter($brandId, Connection::PARAM_INT)),
+                        $qbCertifications->expr()->eq('c.certifier', $qbCertifications->createPositionalParameter($certifierId, Connection::PARAM_INT)),
+                        $qbCertifications->expr()->eq($tierField, 1),
+                        $qbCertifications->expr()->isNotNull('c.grant_date'),
+                        $qbCertifications->expr()->isNull('c.revoke_date')
+                    )
+                    ->executeQuery();
+                $ranking[$certifier->getUser()->getUid()] = $statement->fetchOne();
+                $statement->free();
             }
             if (count($ranking) > 0) {
                 $this->createAwards($ranking, $type, $brandId);
@@ -284,8 +230,8 @@ class StatisticsService
                             'brand' => $brandId,
                             'type' => $type,
                             'level' => Skill::LevelTierMap['undefined'],
-                            'rank' => $achievedRank
-                        ])->execute();
+                            'rank' => $achievedRank,
+                        ])->executeStatement();
                 }
             }
             $i++;
@@ -294,18 +240,19 @@ class StatisticsService
 
     public static function getSkillPoints(array $cert): int
     {
-        if ($cert['tier1']) return 4;
-        if ($cert['tier3']) return 1;
+        if ($cert['tier1']) {
+            return 4;
+        }
+        if ($cert['tier3']) {
+            return 1;
+        }
         return 2;
     }
 
-    /**
-     * @throws DBALException
-     * @throws Exception
-     */
     public function calculateOrganisationStatistics(): void
     {
-        $now = new DateTime('@' . $GLOBALS['SIM_EXEC_TIME']);
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'full');
+
         $connection = $this->connectionPool->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
         $qbStatistics = $connection->createQueryBuilder();
 
@@ -315,19 +262,16 @@ class StatisticsService
 
         /** @var Brand[] $brands */
         $brands = $this->brandRepository->findAllWithMembers();
+        /** @var SkillPath[] $skillSets */
         $skillSets = $this->skillSetRepository->findAll();
 
         foreach ($brands as $brand) {
             $brandId = $brand->getUid();
+
             $certs = [];
             $totalScore = 0;
             $currentMonthUsers = 0;
             $lastMonthUsers = 0;
-            $currentMonthVerifications = 0;
-            $lastMonthVerifications = 0;
-            $currentMonthCertifiers = 0;
-            $lastMonthCertifiers = 0;
-            $monthly_scores = array_fill(1, 12, 0);
             $interests = [];
             $potential = [
                 'tier1' => [
@@ -349,9 +293,8 @@ class StatisticsService
                     'total' => 0,
                     'verified' => 0,
                     'potential' => 0,
-                ]
+                ],
             ];
-            $composition = [];
 
             $userIds = $this->getAllUserIdsForBrand($brandId);
             foreach ($userIds as $member) {
@@ -375,20 +318,20 @@ class StatisticsService
                         'total' => [],
                         'verified' => [],
                         'potential' => [],
-                    ]
+                    ],
                 ];
 
                 $statementVerifications->bindValue(1, $member['user']);
                 $statementVerifications->bindValue(2, $brandId);
                 $statementVerifications->execute();
-                $memberCerts = $statementVerifications->fetchAll();
-                $statementVerifications->closeCursor();
+                $memberCerts = $statementVerifications->fetchAllAssociative();
+                $statementVerifications->free();
 
                 $userIsActiveCurrent = false;
                 $userIsActiveLast = false;
                 $setsGroupedByTier = [];
                 foreach ($memberCerts as $cert) {
-                    array_push($certs, $cert);
+                    $certs[] = $cert;
 
                     // Calculate active users
                     $date = new DateTime($cert['grant_date']);
@@ -408,13 +351,20 @@ class StatisticsService
                     foreach ($this->skillSetRepository->findBySkill($skill) as $skillSet) {
                         $level = $cert['tier1'] ? 1 : ($cert['tier2'] ? 2 : ($cert['tier3'] ? 3 : ($cert['tier4'] ? 4 : 0)));
                         if ($level) {
+                            if (!isset($setsGroupedByTier['tier' . $level][$skillSet->getUid()]['verified_count'])) {
+                                $setsGroupedByTier['tier' . $level][$skillSet->getUid()]['verified_count'] = 0;
+                            }
                             $setsGroupedByTier['tier' . $level][$skillSet->getUid()]['verified_count']++;
                             $setsGroupedByTier['tier' . $level][$skillSet->getUid()]['skill_ids'][] = $skill->getUid();
                         }
                     }
                 }
-                if ($userIsActiveCurrent) $currentMonthUsers++;
-                if ($userIsActiveLast) $lastMonthUsers++;
+                if ($userIsActiveCurrent) {
+                    $currentMonthUsers++;
+                }
+                if ($userIsActiveLast) {
+                    $lastMonthUsers++;
+                }
 
                 foreach ($setsGroupedByTier as $level => $sets) {
                     foreach ($sets as $setId => $set) {
@@ -423,8 +373,12 @@ class StatisticsService
                         $setSkills = $setObject->getSkillIds();
                         $setSkillCount = $setObject->getSkillCount();
                         $verifiedCount = $set['verified_count'];
-                        if ($verifiedCount == $setSkillCount) break;
-                        foreach ($setSkills as $skillId) $potentialIds[$level]['total'][] = $skillId;
+                        if ($verifiedCount == $setSkillCount) {
+                            break;
+                        }
+                        foreach ($setSkills as $skillId) {
+                            $potentialIds[$level]['total'][] = $skillId;
+                        }
                         foreach ($set['skill_ids'] as $skillId) {
                             $potentialIds[$level]['verified'][] = $skillId;
                             /** @var Skill $skill */
@@ -450,26 +404,34 @@ class StatisticsService
                 }
 
                 // Member interests
-                /** @var SkillPath $skillSet */
                 foreach ($skillSets as $skillSet) {
                     $memberSkillCount = 0;
                     $skillIds = $skillSet->getSkillIds();
                     foreach ($memberCerts as $cert) {
-                        if (in_array($cert['skill_id'], $skillIds)) $memberSkillCount++;
+                        if (in_array($cert['skill_id'], $skillIds)) {
+                            $memberSkillCount++;
+                        }
                     }
                     $skillCount = $skillSet->getSkillCount();
                     if ($memberSkillCount > 0 && $memberSkillCount < $skillCount) {
+                        if (!isset($interests[$skillSet->getUid()])) {
+                            $interests[$skillSet->getUid()] = 0;
+                        }
                         $interests[$skillSet->getUid()]++;
                     }
                 }
 
                 arsort($interests);
             }
+
+            $currentMonthVerifications = 0;
+            $lastMonthVerifications = 0;
+            $composition = [];
             $lastYearCerts = [];
             $sumVerifications = 0;
             foreach ($certs as $cert) {
                 $totalScore += self::getSkillPoints($cert);
-                $sumVerifications += 1;
+                $sumVerifications++;
                 $date = new DateTime($cert['grant_date']);
                 $diff = $now->diff($date);
 
@@ -480,42 +442,43 @@ class StatisticsService
                 }
                 $numDaysToCompare = 365;
                 // Exclude days until end of current month of last year
-                if( $diff->days <= 365
+                if ($diff->days <= 365
                     && $now->format('m') == $date->format('m')
                     && $now->format('d') <= $date->format('d')) {
-                        $numDaysToCompare -= $now->format('t') - $now->format('d');
+                    $numDaysToCompare -= $now->format('t') - $now->format('d');
                 }
 
                 if ($diff->days <= $numDaysToCompare) {
-                    array_push($lastYearCerts, $cert);
+                    $lastYearCerts[] = $cert;
                 }
 
+                /** @var Skill $skill */
                 $skill = $this->skillRepository->findByUid($cert['skill_id']);
-                if (!$skill) {
-                    continue;
-                }
-                $brandsOfSkill = $skill->getBrands();
-                /** @var Brand $skillBrand */
-                foreach ($brandsOfSkill as $skillBrand) {
-                    $level = $cert['tier1'] ? 1 : ($cert['tier2'] ? 2 : ($cert['tier3'] ? 3 : ($cert['tier4'] ? 4 : 0)));
-                    if ($level) {
-                        $composition[$skillBrand->getUid()]['tier' . $level]++;
+                if ($skill) {
+                    foreach ($skill->getBrands() as $skillBrand) {
+                        $level = $cert['tier1'] ? 1 : ($cert['tier2'] ? 2 : ($cert['tier3'] ? 3 : ($cert['tier4'] ? 4 : 0)));
+                        if ($level) {
+                            if (!isset($composition[$skillBrand->getUid()]['tier' . $level])) {
+                                $composition[$skillBrand->getUid()]['tier' . $level] = 0;
+                            }
+                            $composition[$skillBrand->getUid()]['tier' . $level]++;
+                        }
                     }
                 }
             }
 
+            $currentMonthCertifiers = 0;
+            $lastMonthCertifiers = 0;
             $sumIssued = 0;
             $certifierList = [];
             // Get Verifications for Brand Certifiers
             // TODO only correct if certifier is never deleted from brand
             $certifiers = $this->certifierRepository->findByBrandId($brandId);
-            /** @var Certifier $certifier */
             foreach ($certifiers as $certifier) {
                 $certifierList[] = $certifier->getUid();
                 $certifierCerts = $this->certificationRepository->findAcceptedByCertifier($certifier);
-                /** @var Certification $cert */
                 foreach ($certifierCerts as $cert) {
-                    $sumIssued += 1;
+                    $sumIssued++;
                     $diff = $now->diff($cert->getGrantDate());
                     if ($diff->days <= 30) {
                         $currentMonthCertifiers++;
@@ -524,23 +487,7 @@ class StatisticsService
                     }
                 }
             }
-            $sumSupported = $this->getSupportedCount($certifierList);
 
-            // Calculate monthly verification stats
-            foreach ($lastYearCerts as $cert) {
-                $date = new DateTime($cert['grant_date']);
-                $month = $date->format('n');
-                $monthly_scores[$month] += 1;
-            }
-
-            for ($i = 1; $i <= $now->format('n'); $i++) {
-                $keys = array_keys($monthly_scores);
-                $val = $monthly_scores[$keys[0]];
-                unset($monthly_scores[$keys[0]]);
-                $monthly_scores[$keys[0]] = $val;
-            }
-
-            $brandExpertise = $this->getExpertiseForBrand($brandId);
             $qbStatistics->insert('tx_skills_domain_model_organisationstatistics')
                 ->values([
                     'brand' => $brandId,
@@ -551,27 +498,22 @@ class StatisticsService
                     'last_month_verifications' => $lastMonthVerifications,
                     'current_month_issued' => $currentMonthCertifiers,
                     'sum_verifications' => $sumVerifications,
-                    'sum_supported_skills' => $sumSupported,
+                    'sum_supported_skills' => $this->getSupportedCount($certifierList),
                     'sum_skills' => $this->skillRepository->findByBrand($brandId)->count(),
-                    'expertise' => json_encode($brandExpertise),
+                    'expertise' => json_encode($this->getExpertiseForBrand($brandId)),
                     'last_month_issued' => $lastMonthCertifiers,
                     'sum_issued' => $sumIssued,
-                    'monthly_scores' => json_encode($monthly_scores),
+                    'monthly_scores' => json_encode($this->calculateMonthlyVerificationStats($lastYearCerts, $now)),
                     'interests' => json_encode($interests),
                     'potential' => json_encode($potential),
-                    'composition' => json_encode($composition)
-                ])->execute();
+                    'composition' => json_encode($composition),
+                ])->executeStatement();
         }
     }
 
-    /**
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     * @throws Exception
-     */
     public function calculateUserActivityStatistics(): void
     {
-        $now = new DateTime('@' . $GLOBALS['SIM_EXEC_TIME']);
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'full');
         $users = $this->userRepository->findAll();
 
         $statementVerifications = $this->initCertificationsStatement();
@@ -581,7 +523,7 @@ class StatisticsService
             $monthlyScores = array_fill(1, 12, 0);
             $statementVerifications->bindValue(1, $user->getUid());
             $statementVerifications->execute();
-            $certs = $statementVerifications->fetchAll();
+            $certs = $statementVerifications->fetchAllAssociative();
 
             foreach ($certs as $cert) {
                 $date = new DateTime($cert['grant_date']);
@@ -611,7 +553,6 @@ class StatisticsService
             return 0;
         }
 
-        /** @var QueryBuilder $qb */
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_skills_domain_model_certifierpermission');
         $qb->select('p.skill')
             ->from('tx_skills_domain_model_certifierpermission', 'p')
@@ -621,13 +562,10 @@ class StatisticsService
             )
             ->groupBy('p.skill');
 
-        return count($qb->execute()->fetchAll());
+        return count($qb->executeQuery()->fetchAllAssociative());
     }
 
-    /**
-     * @return \Doctrine\DBAL\Driver\Statement|int
-     */
-    private function initCertificationsStatement()
+    private function initCertificationsStatement(): \Doctrine\DBAL\Driver\Statement|ResultStatement|Result|int
     {
         $qbCertifications = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tx_skills_domain_model_certification');
@@ -642,7 +580,7 @@ class StatisticsService
                 $qbCertifications->expr()->isNull('c.revoke_date')
             )
             ->orderBy('c.grant_date')
-            ->execute();
+            ->executeQuery();
     }
 
     private function getAllUserIdsForBrand(int $brandId): array
@@ -657,7 +595,7 @@ class StatisticsService
                 $qbHistory->expr()->eq('h.brand', $qbHistory->createNamedParameter($brandId, Connection::PARAM_INT)),
             )
             ->groupBy('c.user')
-            ->execute()->fetchAll();
+            ->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -686,10 +624,10 @@ class StatisticsService
             ->orderBy('c.uid')
             ->addOrderBy('sb_mm.sorting');
 
-        $result = $queryBuilder->execute();
+        $result = $queryBuilder->executeQuery();
         $mapping = [];
         $certificationsDone = [];
-        while ($data = $result->fetch()) {
+        while ($data = $result->fetchAssociative()) {
             if (isset($certificationsDone[$data['certification_uid']])) {
                 continue;
             }
@@ -703,5 +641,31 @@ class StatisticsService
         }
 
         return array_values($mapping);
+    }
+
+    /**
+     * Calculate monthly verification stats
+     *
+     * @param array $lastYearCerts
+     * @param DateTimeImmutable $now
+     * @return array
+     * @throws Exception
+     */
+    private function calculateMonthlyVerificationStats(array $lastYearCerts, DateTimeImmutable $now): array
+    {
+        $monthly_scores = array_fill(1, 12, 0);
+        foreach ($lastYearCerts as $cert) {
+            $date = new DateTime($cert['grant_date']);
+            $month = $date->format('n');
+            $monthly_scores[$month] += 1;
+        }
+
+        for ($i = 1; $i <= $now->format('n'); $i++) {
+            $keys = array_keys($monthly_scores);
+            $val = $monthly_scores[$keys[0]];
+            unset($monthly_scores[$keys[0]]);
+            $monthly_scores[$keys[0]] = $val;
+        }
+        return $monthly_scores;
     }
 }

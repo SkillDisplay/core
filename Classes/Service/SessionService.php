@@ -1,14 +1,14 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+/**
  * This file is part of the "Skills" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Markus Klein <support@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -19,17 +19,15 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class SessionService
 {
-    const SESSION_KEY = 'skills_ses_';
+    public const SESSION_KEY = 'skills_ses_';
 
     /**
      * Set session data.
      *
      * @param string $key Unique key
      * @param mixed $data Data to store
-     *
-     * @return void
      */
-    public static function set(string $key, $data): void
+    public static function set(string $key, mixed $data): void
     {
         self::getTypoScriptFrontendController()->fe_user->setAndSaveSessionData(self::SESSION_KEY . $key, $data);
     }
@@ -41,7 +39,7 @@ class SessionService
      *
      * @return mixed Data from session
      */
-    public static function get(string $key)
+    public static function get(string $key): mixed
     {
         return self::getTypoScriptFrontendController()->fe_user->getSessionData(self::SESSION_KEY . $key);
     }
@@ -51,10 +49,8 @@ class SessionService
      *
      * @param string $key Unique key
      * @param mixed $data Data to store
-     *
-     * @return void
      */
-    public static function setUser(string $key, $data)
+    public static function setUser(string $key, mixed $data): void
     {
         self::getTypoScriptFrontendController()->fe_user->setKey('user', self::SESSION_KEY . $key, $data);
         self::getTypoScriptFrontendController()->fe_user->storeSessionData();
@@ -67,7 +63,7 @@ class SessionService
      *
      * @return mixed Data from session
      */
-    public static function getUser(string $key)
+    public static function getUser(string $key): mixed
     {
         return self::getTypoScriptFrontendController()->fe_user->getKey('user', self::SESSION_KEY . $key);
     }
@@ -80,10 +76,7 @@ class SessionService
         self::getTypoScriptFrontendController()->fe_user->removeSessionData();
     }
 
-    /**
-     * @return TypoScriptFrontendController
-     */
-    protected static function getTypoScriptFrontendController()
+    protected static function getTypoScriptFrontendController(): TypoScriptFrontendController
     {
         return $GLOBALS['TSFE'];
     }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /***************************************************************
  *  Copyright notice
  *
@@ -33,35 +35,37 @@ use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Resource\Security\FileNameValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
+use TYPO3\CMS\Extbase\Domain\Model\AbstractFileFolder;
 use TYPO3\CMS\Extbase\Error\Error;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use TYPO3\CMS\Extbase\Property\Exception\TypeConverterException;
 use TYPO3\CMS\Extbase\Property\PropertyMappingConfigurationInterface;
 use TYPO3\CMS\Extbase\Property\TypeConverter\AbstractTypeConverter;
 use TYPO3\CMS\Extbase\Security\Cryptography\HashService;
+use TYPO3\CMS\Extbase\Security\Exception\InvalidArgumentForHashGenerationException;
+use TYPO3\CMS\Extbase\Security\Exception\InvalidHashException;
 
 /**
  * Class UploadedFileReferenceConverter
  */
 class UploadedFileReferenceConverter extends AbstractTypeConverter
 {
-
     /**
      * Folder where the file upload should go to (including storage).
      */
-    const CONFIGURATION_UPLOAD_FOLDER = 1;
+    public const CONFIGURATION_UPLOAD_FOLDER = 1;
 
     /**
      * How to handle a upload when the name of the uploaded file conflicts.
      */
-    const CONFIGURATION_UPLOAD_CONFLICT_MODE = 2;
+    public const CONFIGURATION_UPLOAD_CONFLICT_MODE = 2;
 
     /**
      * Whether to replace an already present resource.
      * Useful for "maxitems = 1" fields and properties
      * with no ObjectStorage annotation.
      */
-    const CONFIGURATION_ALLOWED_FILE_EXTENSIONS = 4;
+    public const CONFIGURATION_ALLOWED_FILE_EXTENSIONS = 4;
 
     /** @var string */
     protected $defaultUploadFolder = '1:/user_upload/';
@@ -95,8 +99,7 @@ class UploadedFileReferenceConverter extends AbstractTypeConverter
     /** @var PersistenceManager */
     protected $persistenceManager;
 
-    /** @var \TYPO3\CMS\Core\Resource\FileInterface[] */
-    protected $convertedResources = [];
+    protected array $convertedResources = [];
 
     public function __construct(HashService $hashService, PersistenceManager $persistenceManager, ResourceFactory $resourceFactory)
     {
@@ -112,9 +115,9 @@ class UploadedFileReferenceConverter extends AbstractTypeConverter
      * @param array $source
      * @param string $targetType
      * @param array $convertedChildProperties
-     * @param \TYPO3\CMS\Extbase\Property\PropertyMappingConfigurationInterface $configuration
+     * @param PropertyMappingConfigurationInterface $configuration
      * @throws \TYPO3\CMS\Extbase\Property\Exception
-     * @return \TYPO3\CMS\Extbase\Domain\Model\AbstractFileFolder|Error|string
+     * @return AbstractFileFolder|Error|string
      * @api
      */
     public function convertFrom(
@@ -130,12 +133,12 @@ class UploadedFileReferenceConverter extends AbstractTypeConverter
                     if (strpos($resourcePointer, 'file:') === 0) {
                         $fileUid = substr($resourcePointer, 5);
                         return $this->createFileReferenceFromFalFileObject($this->resourceFactory->getFileObject($fileUid));
-                    } else {
-                        return $this->createFileReferenceFromFalFileReferenceObject(
-                            $this->resourceFactory->getFileReferenceObject($resourcePointer),
-                            $resourcePointer
-                        );
                     }
+                    return $this->createFileReferenceFromFalFileReferenceObject(
+                        $this->resourceFactory->getFileReferenceObject($resourcePointer),
+                        $resourcePointer
+                    );
+
                 } catch (\InvalidArgumentException $e) {
                     // Nothing to do. No file is uploaded and resource pointer is invalid. Discard!
                 }
@@ -217,8 +220,8 @@ class UploadedFileReferenceConverter extends AbstractTypeConverter
      * @param PropertyMappingConfigurationInterface $configuration
      * @return \TYPO3\CMS\Extbase\Domain\Model\FileReference
      * @throws TypeConverterException
-     * @throws \TYPO3\CMS\Extbase\Security\Exception\InvalidArgumentForHashGenerationException
-     * @throws \TYPO3\CMS\Extbase\Security\Exception\InvalidHashException
+     * @throws InvalidArgumentForHashGenerationException
+     * @throws InvalidHashException
      */
     protected function importUploadedResource(array $uploadInfo, PropertyMappingConfigurationInterface $configuration): \TYPO3\CMS\Extbase\Domain\Model\FileReference
     {

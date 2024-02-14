@@ -1,89 +1,101 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
+use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
+use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
+use SkillDisplay\Skills\Domain\Repository\RequirementRepository;
+use SkillDisplay\Skills\Domain\Repository\RewardRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Domain\Repository\TagRepository;
 use SkillDisplay\Skills\Service\BackendPageAccessCheckService;
+use SkillDisplay\Skills\Service\VerificationService;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 
 class BackendVseController extends BackendController
 {
-    protected function initializeView(ViewInterface $view): void
-    {
+    public function __construct(
+        SkillPathRepository $skillPathRepository,
+        SkillRepository $skillRepo,
+        BrandRepository $brandRepository,
+        CertificationRepository $certificationRepository,
+        CertifierRepository $certifierRepository,
+        RewardRepository $rewardRepository,
+        RequirementRepository $requirementRepository,
+        PageRenderer $pageRenderer,
+        ModuleTemplateFactory $moduleTemplateFactory,
+        VerificationService $verificationService,
+        protected readonly TagRepository $tagRepository,
+    ) {
+        $this->menuItems = [];
+        parent::__construct(
+            $skillPathRepository,
+            $skillRepo,
+            $brandRepository,
+            $certificationRepository,
+            $certifierRepository,
+            $rewardRepository,
+            $requirementRepository,
+            $pageRenderer,
+            $moduleTemplateFactory,
+            $verificationService
+        );
     }
 
-    protected function generateMenu(): void
+    public function skillTreeAction(): ResponseInterface
     {
+        return $this->generateOutput();
     }
 
-    protected function generateButtons(): void
-    {
-    }
-
-    public function skillTreeAction()
-    {
-    }
-
-    public function ajaxTreeSources(ServerRequestInterface $request): ResponseInterface
+    public function ajaxTreeSources(): ResponseInterface
     {
         $accessCheck = new BackendPageAccessCheckService();
 
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-
-        $skillRepo = $objectManager->get(SkillRepository::class);
-        $skillRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
+        $this->skillRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
         $skills = [];
-        foreach ($skillRepo->findAll() as $skill) {
+        foreach ($this->skillRepo->findAll() as $skill) {
             /** @var Skill $skill */
             if ($accessCheck->readAccess($skill->getPid())) {
                 $skills[] = $skill;
             }
         }
 
-        $brandRepo = $objectManager->get(BrandRepository::class);
         $brands = [];
-        foreach ($brandRepo->findAllWithSkills() as $brand) {
-            /** @var Brand $brand */
+        foreach ($this->brandRepository->findAllWithSkills() as $brand) {
             if ($accessCheck->readAccess($brand->getPid())) {
                 $brands[] = $brand;
             }
         }
 
-        $pathRepo = $objectManager->get(SkillPathRepository::class);
         $paths = [];
-        foreach ($pathRepo->findAll() as $path) {
+        foreach ($this->skillPathRepository->findAll() as $path) {
             /** @var SkillPath $path */
             if ($accessCheck->readAccess($path->getPid())) {
                 $paths[] = $path;
             }
         }
 
-        $tagRepo = $objectManager->get(TagRepository::class);
-        $tagRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
-        $tags = $tagRepo->findAll();
+        $this->tagRepository->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
+        $tags = $this->tagRepository->findAll();
 
         $data_with_title = function ($elem) {
             return [
@@ -126,8 +138,6 @@ class BackendVseController extends BackendController
             'data_sources' => $dataSources,
             'highlight_sources' => $highlightSources,
         ];
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($response_data));
-        return $response;
+        return new JsonResponse($response_data);
     }
 }

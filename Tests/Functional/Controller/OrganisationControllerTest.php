@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Controller;
@@ -9,31 +10,47 @@ use SkillDisplay\Skills\Controller\OrganisationController;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\OrganisationStatistics;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
+use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
+use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
+use SkillDisplay\Skills\Domain\Repository\InvitationCodeRepository;
+use SkillDisplay\Skills\Domain\Repository\OrganisationStatisticsRepository;
+use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
+use SkillDisplay\Skills\Tests\Functional\SimulateLoginTrait;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\AccessibleObjectInterface;
 use TYPO3\TestingFramework\Core\Exception;
 
 class OrganisationControllerTest extends AbstractFunctionalControllerTestCaseBase
 {
-    /** @var OrganisationController|MockObject|AccessibleObjectInterface */
-    protected $subject = null;
+    use SimulateLoginTrait;
 
-    /** @var BrandRepository */
-    protected $brandRepository;
+    protected OrganisationController|MockObject|AccessibleObjectInterface $subject;
+
+    protected BrandRepository $brandRepository;
 
     /**
      * @throws DBALException
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
      */
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->brandRepository = $this->objectManager->get(BrandRepository::class);
+        $this->brandRepository = GeneralUtility::makeInstance(BrandRepository::class);
 
-        $this->subject = $this->getAccessibleMock(OrganisationController::class,
-            ['redirect', 'forward', 'addFlashMessage', 'getCurrentUser']);
-        $this->subject->injectObjectManager($this->objectManager);
-        $this->subject->_set('view', $this->view);
+        $this->subject = $this->getAccessibleMock(
+            OrganisationController::class,
+            ['addFlashMessage', 'getCurrentUser'],
+            [
+                $this->userRepository,
+                GeneralUtility::makeInstance(BrandRepository::class),
+                GeneralUtility::makeInstance(SkillPathRepository::class),
+                GeneralUtility::makeInstance(OrganisationStatisticsRepository::class),
+                GeneralUtility::makeInstance(CertificationRepository::class),
+                GeneralUtility::makeInstance(CertifierRepository::class),
+                GeneralUtility::makeInstance(InvitationCodeRepository::class),
+            ]
+        );
+        $this->initController($this->subject);
     }
 
     /**
@@ -59,6 +76,6 @@ class OrganisationControllerTest extends AbstractFunctionalControllerTestCaseBas
         /** @var OrganisationStatistics $stats */
         $stats = $this->view->_get('variables')['organisationStatistics'];
 
-        $this->assertCount(1, $stats->getInterestSets());
+        self::assertCount(1, $stats->getInterestSets());
     }
 }

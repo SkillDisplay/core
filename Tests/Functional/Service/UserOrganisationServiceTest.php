@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Service;
@@ -14,21 +15,15 @@ use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Service\UserOrganisationsService;
 use SkillDisplay\Skills\Tests\Functional\AbstractFunctionalTestCaseBase;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Exception;
 
 class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
 {
-    /** @var SkillPathRepository */
-    protected $skillSetRepository;
-
-    /** @var SkillRepository */
-    protected $skillRepository;
-
-    /** @var UserRepository */
-    protected $userRepository;
-
-    /** @var BrandRepository */
-    protected $brandRepository;
+    protected SkillPathRepository $skillSetRepository;
+    protected SkillRepository $skillRepository;
+    protected UserRepository $userRepository;
+    protected BrandRepository $brandRepository;
 
     /**
      * @throws DBALException
@@ -37,10 +32,10 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     public function setUp(): void
     {
         parent::setUp();
-        $this->skillSetRepository = $this->objectManager->get(SkillPathRepository::class);
-        $this->skillRepository = $this->objectManager->get(SkillRepository::class);
-        $this->userRepository = $this->objectManager->get(UserRepository::class);
-        $this->brandRepository = $this->objectManager->get(BrandRepository::class);
+        $this->skillSetRepository = GeneralUtility::makeInstance(SkillPathRepository::class);
+        $this->skillRepository = GeneralUtility::makeInstance(SkillRepository::class);
+        $this->userRepository = GeneralUtility::makeInstance(UserRepository::class);
+        $this->brandRepository = GeneralUtility::makeInstance(BrandRepository::class);
         $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
     }
 
@@ -53,7 +48,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $skillSet = $this->skillSetRepository->findByUid(2);
         /** @var User $user */
         $user = $this->userRepository->findByUid(2);
-        self::assertEquals(true, UserOrganisationsService::isSkillPathVisibleForUser($skillSet, $user));
+        self::assertTrue(UserOrganisationsService::isSkillPathVisibleForUser($skillSet, $user));
     }
 
     /**
@@ -65,7 +60,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $skillSet = $this->skillSetRepository->findByUid(1);
         /** @var User $user */
         $user = $this->userRepository->findByUid(1);
-        self::assertEquals(true, UserOrganisationsService::isSkillPathVisibleForUser($skillSet, $user));
+        self::assertTrue(UserOrganisationsService::isSkillPathVisibleForUser($skillSet, $user));
     }
 
     /**
@@ -77,7 +72,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $skillSet = $this->skillSetRepository->findByUid(1);
         /** @var User $user */
         $user = $this->userRepository->findByUid(2);
-        self::assertEquals(false, UserOrganisationsService::isSkillPathVisibleForUser($skillSet, $user));
+        self::assertFalse(UserOrganisationsService::isSkillPathVisibleForUser($skillSet, $user));
     }
 
     /**
@@ -89,7 +84,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $brand = $this->brandRepository->findByUid(1);
         /** @var User $user */
         $user = $this->userRepository->findByUid(2);
-        self::assertEquals(false, UserOrganisationsService::isUserMemberOfOrganisations([$brand], $user));
+        self::assertFalse(UserOrganisationsService::isUserMemberOfOrganisations([$brand], $user));
     }
 
     /**
@@ -101,7 +96,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $brand = $this->brandRepository->findByUid(1);
         /** @var User $user */
         $user = $this->userRepository->findByUid(1);
-        self::assertEquals(true, UserOrganisationsService::isUserMemberOfOrganisations([$brand], $user));
+        self::assertTrue(UserOrganisationsService::isUserMemberOfOrganisations([$brand], $user));
     }
 
     /**
@@ -113,7 +108,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $skill = $this->skillRepository->findByUid(2);
         /** @var User $user */
         $user = $this->userRepository->findByUid(2);
-        self::assertEquals(true, UserOrganisationsService::isSkillVisibleForUser($skill, $user));
+        self::assertTrue(UserOrganisationsService::isSkillVisibleForUser($skill, $user));
     }
 
     /**
@@ -123,7 +118,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(2);
-        self::assertEquals(true, UserOrganisationsService::isSkillVisibleForUser($skill, null));
+        self::assertTrue(UserOrganisationsService::isSkillVisibleForUser($skill, null));
     }
 
     /**
@@ -135,7 +130,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $skill = $this->skillRepository->findByUid(1);
         /** @var User $user */
         $user = $this->userRepository->findByUid(1);
-        self::assertEquals(true, UserOrganisationsService::isSkillVisibleForUser($skill, $user));
+        self::assertTrue(UserOrganisationsService::isSkillVisibleForUser($skill, $user));
     }
 
     /**
@@ -147,6 +142,6 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $skill = $this->skillRepository->findByUid(1);
         /** @var User $user */
         $user = $this->userRepository->findByUid(2);
-        self::assertEquals(false, UserOrganisationsService::isSkillVisibleForUser($skill, $user));
+        self::assertFalse(UserOrganisationsService::isSkillVisibleForUser($skill, $user));
     }
 }

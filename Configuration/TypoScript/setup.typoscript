@@ -38,7 +38,6 @@ plugin.tx_skills {
 
     feUserStoragePid = {$plugin.tx_skills.settings.feUserStoragePid}
     acceptedUserGroup = {$plugin.tx_skills.settings.acceptedUserGroup}
-    adminUserGroup = {$plugin.tx_skills.settings.adminUserGroup}
     avatarFolder = {$plugin.tx_skills.settings.avatarFolder}
     termsLink = {$plugin.tx_skills.settings.termsLink}
     privacyLink = {$plugin.tx_skills.settings.privacyLink}

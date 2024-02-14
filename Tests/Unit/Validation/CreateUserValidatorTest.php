@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Unit\Validation;
@@ -6,29 +7,23 @@ namespace SkillDisplay\Skills\Tests\Unit\Validation;
 use PHPUnit\Framework\MockObject\MockObject;
 use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Validation\Validator\CreateUserValidator;
-use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 use TYPO3\CMS\Extbase\Error\Error;
+use TYPO3\TestingFramework\Core\Unit\UnitTestCase;
 
-/**
- * Test case.
- *
- * @author Markus Klein <markus.klein@reelworx.at>
- */
 class CreateUserValidatorTest extends UnitTestCase
 {
-    protected $resetSingletonInstances = true;
+    protected bool $resetSingletonInstances = true;
 
-    /** @var CreateUserValidator|MockObject */
-    protected $subject;
+    protected CreateUserValidator|MockObject $subject;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->subject = $this->getMockBuilder(CreateUserValidator::class)->disableOriginalConstructor()->onlyMethods(['getErrorMessage'])->getMock();
-        $this->subject->expects($this->any())->method('getErrorMessage')->will($this->returnValue(''));
+        $this->subject->expects(self::any())->method('getErrorMessage')->willReturn('');
     }
 
-    public function isValidTestsPasswordsCorrectlyDataProvider() : array
+    public static function isValidTestsPasswordsCorrectlyDataProvider(): array
     {
         // min 8 chars and a digit
         return [
@@ -60,6 +55,6 @@ class CreateUserValidatorTest extends UnitTestCase
                 break;
             }
         }
-        $this->assertSame($valid, $pwdValid);
+        self::assertSame($valid, $pwdValid);
     }
 }

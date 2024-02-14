@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -9,47 +10,30 @@
  *
  *  (c) 2016 Markus Klein
  *           Georg Ringer
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
 use SkillDisplay\Skills\Service\CertoBot;
-use SkillDisplay\Skills\Service\Importer\ExportService;
+use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Link extends AbstractEntity
 {
     /**
-     * title
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $title = '';
+    protected string $title = '';
 
     /**
-     * url
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $url = '';
-
-    /** @var string */
-    protected $color = '';
-
-    /** @var int */
-    protected $tstamp = 0;
-
-    /** @var string */
-    protected $uuid = '';
-
-    /** @var string */
-    protected $tablename = '';
-
-    /** @var int */
-    protected $imported = 0;
+    protected string $url = '';
+    protected string $color = '';
+    protected int $tstamp = 0;
+    protected string $uuid = '';
+    protected string $tablename = '';
+    protected int $imported = 0;
 
     public function __construct()
     {
@@ -91,15 +75,15 @@ class Link extends AbstractEntity
         $link = [
             'uuid' => $this->uuid,
             'type' => get_class($this),
-            "uid" => $this->getUid(),
+            'uid' => $this->getUid(),
 
             'data' => [
-                "tstamp" => $this->tstamp,
-                "title" => $this->getTitle(),
-                "url" => $this->getUrl(),
-                "color" => $this->getColor(),
-                "tablename" => $this->tablename,
-            ]
+                'tstamp' => $this->tstamp,
+                'title' => $this->getTitle(),
+                'url' => $this->getUrl(),
+                'color' => $this->getColor(),
+                'tablename' => $this->tablename,
+            ],
         ];
 
         return json_encode($link);

@@ -1,34 +1,29 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Model;
 
+use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Password extends AbstractEntity
 {
     /**
-     * Password
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $password;
+    protected string $password = '';
 
     /**
      * Repetition of Password
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $passwordRepeat;
+    protected string $passwordRepeat = '';
 
     /**
-     * Old password
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $oldPassword;
+    protected string $oldPassword = '';
 
     public function getPassword(): string
     {

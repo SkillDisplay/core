@@ -1,45 +1,37 @@
-<?php declare(strict_types=1);
-namespace SkillDisplay\Skills\Domain\Model;
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
-/**
- * Shortlink
- */
-class Shortlink extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
+namespace SkillDisplay\Skills\Domain\Model;
+
+use TYPO3\CMS\Extbase\Annotation\Validate;
+use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+
+class Shortlink extends AbstractEntity
 {
     /**
-     * hash
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $hash = '';
+    protected string $hash = '';
 
     /**
-     * action
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $action = '';
+    protected string $action = '';
 
     /**
-     * parameters
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $parameters = '';
+    protected string $parameters = '';
 
     public function getHash(): string
     {

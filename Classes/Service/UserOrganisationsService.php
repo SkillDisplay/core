@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service;
@@ -25,11 +26,11 @@ class UserOrganisationsService
     }
 
     /**
-     * @param array|ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand> $brands
-     * @param User $user
+     * @param array|ObjectStorage<Brand> $brands
+     * @param User|null $user
      * @return bool
      */
-    public static function isUserMemberOfOrganisations($brands, ?User $user): bool
+    public static function isUserMemberOfOrganisations(ObjectStorage|array $brands, ?User $user): bool
     {
         $organisations = [];
         foreach (UserOrganisationsService::getOrganisationsOrEmpty($user) as $organisation) {
@@ -56,7 +57,7 @@ class UserOrganisationsService
             || UserOrganisationsService::isUserMemberOfOrganisations($path->getBrands(), $user);
     }
 
-    static public function isSkillVisibleForUser(Skill $skill, ?User $user): bool
+    public static function isSkillVisibleForUser(Skill $skill, ?User $user): bool
     {
         return $skill->getVisibility() === Skill::VISIBILITY_PUBLIC
             || UserOrganisationsService::isUserMemberOfOrganisations($skill->getBrands(), $user);

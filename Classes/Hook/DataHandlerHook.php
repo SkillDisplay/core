@@ -1,19 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skills" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein <support@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Hook;
 
-use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Connection as ConnectionAlias;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Repository\RecommendedSkillSetRepository;
@@ -22,10 +22,15 @@ use SkillDisplay\Skills\Service\SkillSetRelationService;
 use SkillDisplay\Skills\Service\TranslatedUuidService;
 use SkillDisplay\Skills\Service\UserService;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
+use TYPO3\CMS\Core\Context\Exception\AspectPropertyNotFoundException;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Log\LogManager;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -36,7 +41,7 @@ class DataHandlerHook
         &$incomingFieldArray,
         $table,
         $id,
-        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+        DataHandler $dataHandler
     ) {
         if ($table === 'tx_skills_domain_model_skill' && isset($incomingFieldArray['visibility']) &&
             (int)$incomingFieldArray['visibility'] === Skill::VISIBILITY_ORGANISATION) {
@@ -49,7 +54,7 @@ class DataHandlerHook
             (int)$incomingFieldArray['visibility'] === SkillPath::VISIBILITY_PUBLIC) {
             if ($this->skillPathHasPrivateSkills((int)$id)) {
                 $incomingFieldArray['visibility'] = SkillPath::VISIBILITY_ORGANISATION;
-                $this->generateFlashMessage('Cannot make SkillSet public due to non-public skills', 'Warning', FlashMessage::WARNING);
+                $this->generateFlashMessage('Cannot make SkillSet public due to non-public skills', 'Warning', AbstractMessage::WARNING);
             }
         }
     }
@@ -59,12 +64,17 @@ class DataHandlerHook
      * @param string $table
      * @param int|string $id
      * @param array $fieldArray
+     * @param DataHandler $dataHandler
+     * @throws AspectNotFoundException
+     * @throws AspectPropertyNotFoundException
      */
-    public function processDatamap_postProcessFieldArray(string $status, string $table, $id, array &$fieldArray)
+    public function processDatamap_postProcessFieldArray(string $status, string $table, int|string $id, array &$fieldArray, DataHandler $dataHandler)
     {
         if ($table === 'fe_users') {
             if (isset($fieldArray['username'])) {
                 $fieldArray['email'] = $fieldArray['username'];
+            } elseif (!empty($fieldArray['email'])) {
+                $fieldArray['username'] = $fieldArray['email'];
             }
         }
         if ($table === 'tx_skills_domain_model_brand' && isset($fieldArray['credit_overdraw'])) {
@@ -77,27 +87,28 @@ class DataHandlerHook
         if ($table === 'tx_skills_domain_model_verificationcreditpack') {
             if ($status === 'new') {
                 $fieldArray['current_points'] = $fieldArray['initial_points'];
-                if ($fieldArray['price_charged'] == "0.00") {
+                if ($fieldArray['price_charged'] == '0.00') {
                     $fieldArray['price_charged'] = $fieldArray['price'];
                 }
             }
             if ($fieldArray['valid_thru'] && $fieldArray['valid_thru'] < $fieldArray['valuta']) {
-                $this->generateFlashMessage('Valuta has to be before Valid thru!', 'Error', FlashMessage::ERROR);
+                $this->generateFlashMessage('Valuta has to be before Valid thru!', 'Error', AbstractMessage::ERROR);
             }
-            if ($fieldArray['initial_points'] == 0 && $fieldArray['valuta'] > $GLOBALS['EXEC_TIME']) {
-                $this->generateFlashMessage('Valuta cannot be in the future!', 'Error', FlashMessage::ERROR);
+            $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
+            if ($fieldArray['initial_points'] == 0 && $fieldArray['valuta'] > $now) {
+                $this->generateFlashMessage('Valuta cannot be in the future!', 'Error', AbstractMessage::ERROR);
             }
         }
         if (in_array($table, TranslatedUuidService::UUID_TABLES, true)) {
-            if ($status === 'new') {
+            if ($status === 'new' && !$dataHandler->isImporting) {
                 // make sure there is no initial uuid when a new record is created
-                // the afterDatabase hook will take care of setting a uuid
+                // the afterDatabase hook will take care of setting a UUID
                 $fieldArray['uuid'] = '';
             }
         }
     }
 
-    private function generateFlashMessage(string $messageText, string $messsageTitle, $type)
+    private function generateFlashMessage(string $messageText, string $messsageTitle, $type): void
     {
         /** @var FlashMessage $message */
         $message = GeneralUtility::makeInstance(
@@ -117,7 +128,7 @@ class DataHandlerHook
         string $table,
         string $id,
         array $fieldArray,
-        \TYPO3\CMS\Core\DataHandling\DataHandler $dataHandler
+        DataHandler $dataHandler
     ) {
         $realId = $status === 'new' ? (int)$dataHandler->substNEWwithIDs[$id] : (int)$id;
 
@@ -133,7 +144,7 @@ class DataHandlerHook
                     $qb->update($table)
                        ->set('uuid', $uuid, false)
                        ->where('uid = ' . $realId)
-                       ->execute();
+                       ->executeStatement();
                 }
             }
         }
@@ -161,7 +172,7 @@ class DataHandlerHook
                 ->where(
                     $qb->expr()->eq('credit_pack', $qb->createNamedParameter($id, Connection::PARAM_INT)),
                 )
-                ->execute()->fetchColumn();
+                ->execute()->fetchOne();
             if (!$usages) {
                 $this->balanceOpenVerifications($row);
             }
@@ -224,8 +235,8 @@ class DataHandlerHook
             ->where(
                 $qb->expr()->eq('uid_local', $skillId)
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     /**
@@ -243,8 +254,8 @@ class DataHandlerHook
             ->where(
                 $qb->expr()->eq('uid_local', $skillSetId)
             )
-            ->execute()
-            ->fetchAll(FetchMode::COLUMN);
+            ->executeQuery()
+            ->fetchFirstColumn();
     }
 
     private function addBrandsToSkill(int $skillId, array $brandIds): void
@@ -261,7 +272,7 @@ class DataHandlerHook
                    'uid_foreign' => $brandId,
                    'sorting' => $count++,
                ])
-               ->execute();
+               ->executeStatement();
         }
     }
 
@@ -278,7 +289,7 @@ class DataHandlerHook
                 'uid_foreign' => $brandId,
                 'sorting' => $count++,
             ])
-               ->execute();
+               ->executeStatement();
         }
     }
 
@@ -289,9 +300,9 @@ class DataHandlerHook
         $qb->delete('tx_skills_skillset_brand_mm')
            ->where(
                $qb->expr()->eq('uid_local', $skillSetId),
-               $qb->expr()->in('uid_foreign', $qb->createNamedParameter($brandIds, Connection::PARAM_INT_ARRAY))
+               $qb->expr()->in('uid_foreign', $qb->createNamedParameter($brandIds, ConnectionAlias::PARAM_INT_ARRAY))
            )
-           ->execute();
+           ->executeStatement();
     }
 
     private function skillHasPublicSkillSet(int $skillId): bool
@@ -301,13 +312,17 @@ class DataHandlerHook
 
         $qb = $qb->select('sp.uid')
                  ->from('tx_skills_domain_model_skillpath', 'sp')
-                 ->join('sp', 'tx_skills_skillpath_skill_mm', 'mm',
-                     'mm.uid_local = sp.uid and mm.uid_foreign=' . $skillId)
+                 ->join(
+                     'sp',
+                     'tx_skills_skillpath_skill_mm',
+                     'mm',
+                     'mm.uid_local = sp.uid and mm.uid_foreign=' . $skillId
+                 )
                  ->where(
                      $qb->expr()->eq('sp.visibility', SkillPath::VISIBILITY_PUBLIC)
                  );
 
-        $result = $qb->execute()->fetchAll();
+        $result = $qb->executeQuery()->fetchAllAssociative();
 
         return count($result) > 0;
     }
@@ -326,7 +341,7 @@ class DataHandlerHook
                      $qb->expr()->eq('s.visibility', Skill::VISIBILITY_ORGANISATION)
                  );
 
-        $result = $qb->execute()->fetchAll();
+        $result = $qb->executeQuery()->fetchAllAssociative();
 
         return count($result) > 0;
     }
@@ -344,25 +359,26 @@ class DataHandlerHook
                          $qb->expr()->isNull('u.uid')
                      )
                      ->orderBy('c.grant_date', 'ASC')
-                     ->execute();
+                     ->executeQuery();
         $qb->resetQueryParts();
         $qb->insert('tx_skills_domain_model_verificationcreditusage');
 
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
         $credit = $pack['price'];
-        while ($verification = $result->fetch()) {
+        while ($verification = $result->fetchAssociative()) {
             if ($credit < $verification['price']) {
                 continue;
             }
 
             $qb->values([
                 'pid' => $verification['pid'],
-                'crdate' => $GLOBALS['EXEC_TIME'],
-                'tstamp' => $GLOBALS['EXEC_TIME'],
+                'crdate' => $now,
+                'tstamp' => $now,
                 'credit_pack' => $pack['uid'],
                 'verification' => $verification['uid'],
                 'points' => $verification['points'],
-                'price' => $verification['price']
-            ])->execute();
+                'price' => $verification['price'],
+            ])->executeStatement();
             $credit -= $verification['price'];
         }
     }
@@ -378,5 +394,14 @@ class DataHandlerHook
             return GeneralUtility::intExplode(',', $brandIdList);
         }
         return [];
+    }
+
+    public function clearProgressCache(array $params)
+    {
+        if ($params['table'] === 'tx_skills_domain_model_skillpath') {
+            /** @var CacheManager $cacheManager */
+            $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+            $cacheManager->flushCachesByTag('tx_skills_domain_model_skillpath_' . $params['uid']);
+        }
     }
 }

@@ -1,15 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
@@ -17,7 +17,6 @@ use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 class OrganisationStatistics extends AbstractEntity
 {
@@ -45,11 +44,11 @@ class OrganisationStatistics extends AbstractEntity
             'brand' => Brand::JsonViewMinimalConfiguration,
             'monthlyScores' => [],
             'interestSets' => [
-                '_descendAll' => SkillPath::JsonViewConfiguration
+                '_descendAll' => SkillPath::JsonViewConfiguration,
             ],
             'potential' => [],
             'composition' => [],
-        ]
+        ],
     ];
 
     protected ?Brand $brand = null;
@@ -187,14 +186,10 @@ class OrganisationStatistics extends AbstractEntity
 
     public function getComposition(): array
     {
-        /** @var ObjectManager $om */
-        $om = GeneralUtility::makeInstance(ObjectManager::class);
-        /** @var SkillPathRepository $skillSetRepository */
-        $brandRepository = $om->get(BrandRepository::class);
-
+        $brandRepository = GeneralUtility::makeInstance(BrandRepository::class);
         $compositionWithBrandName = [];
         $composition = (array)json_decode($this->composition, true);
-        foreach ($composition as $brandId => $tiers){
+        foreach ($composition as $brandId => $tiers) {
             $compositionWithBrandName[$brandRepository->findByUid($brandId)->getName()] = $tiers;
         }
         return $compositionWithBrandName;
@@ -237,14 +232,11 @@ class OrganisationStatistics extends AbstractEntity
 
     public function getInterestSets(): array
     {
-        /** @var ObjectManager $om */
-        $om = GeneralUtility::makeInstance(ObjectManager::class);
-        /** @var SkillPathRepository $skillSetRepository */
-        $skillSetRepository = $om->get(SkillPathRepository::class);
+        $skillSetRepository = GeneralUtility::makeInstance(SkillPathRepository::class);
 
         $skillSets = [];
-        foreach ($this->getInterests() as $id => $count){
-            if (empty($this->limitInterestToSkillSets) || array_search((int)$id, $this->limitInterestToSkillSets, true) !== false) {
+        foreach ($this->getInterests() as $id => $count) {
+            if (empty($this->limitInterestToSkillSets) || in_array((int)$id, $this->limitInterestToSkillSets, true)) {
                 $skillSets[] = $skillSetRepository->findByUid($id);
             }
         }

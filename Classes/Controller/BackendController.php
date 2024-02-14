@@ -1,22 +1,26 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
+use DateTime;
+use Doctrine\DBAL\DBALException;
+use JetBrains\PhpStorm\NoReturn;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certification;
+use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Requirement;
 use SkillDisplay\Skills\Domain\Model\Reward;
 use SkillDisplay\Skills\Domain\Model\Set;
@@ -25,32 +29,39 @@ use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
+use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
 use SkillDisplay\Skills\Domain\Repository\RequirementRepository;
 use SkillDisplay\Skills\Domain\Repository\RewardRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
-use SkillDisplay\Skills\Domain\Repository\TagRepository;
+use SkillDisplay\Skills\Hook\DataHandlerHook;
 use SkillDisplay\Skills\Service\BackendPageAccessCheckService;
 use SkillDisplay\Skills\Service\CsvService;
-use SkillDisplay\Skills\Service\VerifierPermissionService;
 use SkillDisplay\Skills\Service\TestSystemProviderService;
+use SkillDisplay\Skills\Service\VerificationService;
+use SkillDisplay\Skills\Service\VerifierPermissionService;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Backend\Template\Components\ButtonBar;
-use TYPO3\CMS\Backend\View\BackendTemplateView;
+use TYPO3\CMS\Backend\Template\ModuleTemplate;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
-use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
+use TYPO3\CMS\Extbase\Object\Exception;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidNumberOfConstraintsException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
@@ -59,236 +70,124 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class BackendController extends ActionController
 {
-    /**
-     * Backend Template Container
-     *
-     * @var string
-     */
-    protected $defaultViewObjectName = BackendTemplateView::class;
-
-    /**
-     * BackendTemplateContainer
-     *
-     * @var BackendTemplateView
-     */
-    protected $view;
+    protected BackendPageAccessCheckService $accessCheck;
+    protected ModuleTemplate $moduleTemplate;
 
     protected int $storagePid = 0;
 
     protected array $defaultBrands = [];
 
-    protected BackendPageAccessCheckService $accessCheck;
+    protected array $menuItems = [
+        'skillUpSplitting' => [
+            'controller' => 'Backend',
+            'action' => 'skillUpSplitting',
+            'label' => 'backend.skillUpSplitting',
+        ],
+        'reporting' => [
+            'controller' => 'Backend',
+            'action' => 'reporting',
+            'label' => 'backend.reporting',
+        ],
+    ];
 
-    protected DataMapper $dataMapper;
+    public function __construct(
+        protected readonly SkillPathRepository $skillPathRepository,
+        protected readonly SkillRepository $skillRepo,
+        protected readonly BrandRepository $brandRepository,
+        protected readonly CertificationRepository $certificationRepository,
+        protected readonly CertifierRepository $certifierRepository,
+        protected readonly RewardRepository $rewardRepository,
+        protected readonly RequirementRepository $requirementRepository,
+        protected readonly PageRenderer $pageRenderer,
+        protected readonly ModuleTemplateFactory $moduleTemplateFactory,
+        protected readonly VerificationService $verificationService,
+    ) {}
 
-    protected SkillPathRepository $skillPathRepository;
-
-    protected SkillRepository $skillRepo;
-
-    protected BrandRepository $brandRepository;
-
-    public function __construct(DataMapper $dataMapper,
-                                ObjectManager $objectManager,
-                                SkillRepository $skillRepo,
-                                BrandRepository $brandRepository,
-                                SkillPathRepository $skillPathRepository)
-    {
-        $this->dataMapper = $dataMapper;
-        $this->objectManager = $objectManager;
-        $this->skillRepo = $skillRepo;
-        $this->brandRepository = $brandRepository;
-        $this->skillPathRepository = $skillPathRepository;
-    }
-
-    /**
-     * Set up the doc header properly here
-     *
-     * @param ViewInterface $view
-     * @return void
-     */
-    protected function initializeView(ViewInterface $view): void
-    {
-        /** @var BackendTemplateView $view */
-        parent::initializeView($view);
-        if ($view instanceof BackendTemplateView) {
-            $this->generateMenu();
-            $this->generateButtons();
-            $this->view->getModuleTemplate()->setFlashMessageQueue($this->controllerContext->getFlashMessageQueue());
-        }
-    }
-
-    protected function initializeAction()
+    protected function initializeAction(): void
     {
         parent::initializeAction();
-        $userTsConfig = $GLOBALS['BE_USER']->getTSConfig();
 
+        $this->initializeSettings();
+
+        $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $this->moduleTemplate->setFlashMessageQueue($this->getFlashMessageQueue());
+    }
+
+    protected function initializeSettings(): void
+    {
+        $userTsConfig = $GLOBALS['BE_USER']->getTSConfig();
         if (isset($userTsConfig['defaultSkillStoragePid'])) {
             $this->storagePid = (int)$userTsConfig['defaultSkillStoragePid'];
         } else {
-            $configurationManager = $this->objectManager->get(ConfigurationManager::class);
-            $settings = $configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_FULL_TYPOSCRIPT)['module.']['tx_skills.']['settings.'];
+            $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
+            $settings = $configurationManager->getConfiguration(
+                ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
+            )['module.']['tx_skills.']['settings.'];
             $this->storagePid = (int)$settings['storagePid'];
         }
 
-        if (isset($userTsConfig['TCAdefaults.']['tx_skills_domain_model_skill.']['brands'])) {
-            $this->defaultBrands = GeneralUtility::intExplode(',',
-                $userTsConfig['TCAdefaults.']['tx_skills_domain_model_skill.']['brands']);
-        }
+        $this->defaultBrands = DataHandlerHook::getDefaultBrandIdsOfBackendUser();
+
     }
 
     protected function generateMenu(): void
     {
-        $menuItems = [];
-        $menuItems['skillUpSplitting'] = [
-            'controller' => 'Backend',
-            'action' => 'skillUpSplitting',
-            'label' => 'backend.skillUpSplitting',
-        ];
-        $menuItems['reporting'] = [
-            'controller' => 'Backend',
-            'action' => 'reporting',
-            'label' => 'backend.reporting',
-        ];
+        if (!$this->menuItems) {
+            return;
+        }
 
-        $menu = $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
+        $menu = $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
         $menu->setIdentifier('SkillsModuleMenu');
 
-        foreach ($menuItems as $menuItemConfig) {
+        foreach ($this->menuItems as $menuItemConfig) {
             $isActive = $this->request->getControllerName() === $menuItemConfig['controller']
                 && $this->request->getControllerActionName() === $menuItemConfig['action'];
             $menuItem = $menu->makeMenuItem()
-                ->setTitle($this->translate($menuItemConfig['label']))
+                ->setTitle(self::translate($menuItemConfig['label']))
                 ->setHref($this->getHref($menuItemConfig['controller'], $menuItemConfig['action']))
                 ->setActive($isActive);
             $menu->addMenuItem($menuItem);
         }
 
-        $this->view->getModuleTemplate()->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
+        $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
     }
 
-    protected function generateButtons(): void
-    {
-        $buttonBar = $this->view->getModuleTemplate()->getDocHeaderComponent()->getButtonBar();
-        $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-
-        $buttons = [];
-
-        $storagePid = $this->settings['storagePid'];
-
-        $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
-        foreach ($buttons as $button) {
-            $table = $button['table'];
-            $title = $this->translate($button['label']);
-            $icon = $button['icon'];
-            $url = $uriBuilder->buildUriFromRoute('record_edit', [
-                'edit' => [
-                    $table => [
-                        $storagePid => 'new',
-                    ],
-                ],
-                'returnUrl' => GeneralUtility::getIndpEnv('REQUEST_URI'),
-            ]);
-
-            $viewButton = $buttonBar->makeLinkButton()
-                ->setHref((string)$url)
-                ->setDataAttributes([
-                    'toggle' => 'tooltip',
-                    'placement' => 'bottom',
-                    'title' => $title,
-                ])
-                ->setTitle($title)
-                ->setIcon($iconFactory->getIcon($icon, Icon::SIZE_SMALL));
-            $buttonBar->addButton($viewButton, ButtonBar::BUTTON_POSITION_LEFT);
-        }
-    }
-
-    public function skillUpSplittingAction()
+    public function skillUpSplittingAction(): ResponseInterface
     {
         $this->skillRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
         $this->view->assign('skills', $this->skillRepo->findAll());
+        return $this->generateOutput();
     }
 
     /**
+     * Moves all verifications on $source skill to the successor skills $targets
+     *
      * @param Skill $source
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Skill> $targets
-     * @throws StopActionException
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
      */
-    public function moveCertificationsAction(Skill $source, $targets)
+    public function moveCertificationsAction(Skill $source, $targets): ResponseInterface
     {
-        $certRepo = $this->objectManager->get(CertificationRepository::class);
-        $setGroup = count($targets) > 1;
-        $certs = $certRepo->findBySkill($source);
-        /** @var Certification $cert */
-        foreach ($certs as $cert) {
-            if (!$cert->getRequestGroup() && $setGroup) {
-                $cert->setRequestGroup('skillSplit-' . time());
-            }
-            $newCert = $cert;
-            /** @var Skill $target */
-            foreach ($targets as $target) {
-                $newCert->setSkill($target);
-                $certRepo->add($newCert);
-                $newCert = $cert->copy();
-            }
-        }
-        $this->redirect('skillUpSplitting');
+        // Attention: do not add a typehint for $targets and do not shorten the FQCN in the phpdoc!
+
+        $this->verificationService->moveVerifications($source, $targets->toArray());
+
+        $uri = $this->uriBuilder->reset()->setCreateAbsoluteUri(true)
+            ->uriFor('skillUpSplitting', null, 'Backend');
+        return new RedirectResponse($this->addBaseUriIfNecessary($uri), 303);
     }
 
-    protected function prepareTreeSourceData(): void
+    /**
+     * @throws InvalidQueryException
+     */
+    public function reportingAction(): ResponseInterface
     {
-        $this->skillRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
-        $skills = $this->skillRepo->findAll();
-
-        $brands = $this->brandRepository->findAllWithSkills();
-        $paths = $this->skillPathRepository->findAll();
-
-        $rewardRepo = $this->objectManager->get(RewardRepository::class);
-        $rewardRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
-        $rewards = $rewardRepo->findAllBackend();
-
-        $tagRepo = $this->objectManager->get(TagRepository::class);
-        $tagRepo->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
-        $tags = $tagRepo->findAll();
-
-        $dataSources[] = [
-            'label' => 'Rewards',
-            'key' => 'r',
-            'data' => $rewards,
-        ];
-        $dataSources[] = [
-            'label' => 'SkillSets',
-            'key' => 'p',
-            'data' => $paths,
-        ];
-        $dataSources[] = [
-            'label' => 'Brands',
-            'key' => 'b',
-            'data' => $brands,
-        ];
-        $dataSources[] = [
-            'label' => 'Skills',
-            'key' => 's',
-            'data' => $skills,
-        ];
-
-        $highlightSources = $dataSources;
-        $highlightSources[] = [
-            'label' => 'Tags',
-            'key' => 't',
-            'data' => $tags,
-        ];
-
-        $this->view->assign('dataSources', $dataSources);
-        $this->view->assign('highlightSources', $highlightSources);
-    }
-
-    public function reportingAction()
-    {
-        GeneralUtility::makeInstance(PageRenderer::class)->loadRequireJsModule("TYPO3/CMS/Skills/ReportingBackend");
+        $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Skills/ReportingBackend');
 
         $this->view->assign('brands', $this->brandRepository->findAllWithMembers()->toArray());
         $this->view->assign('skillSets', $this->skillPathRepository->findAll()->toArray());
+        return $this->generateOutput();
     }
 
     /**
@@ -296,20 +195,25 @@ class BackendController extends ActionController
      * @param array $skillSets
      * @param string $dateFrom
      * @param string $dateTo
+     * @throws InvalidNumberOfConstraintsException
+     * @throws UnexpectedTypeException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      */
-    public function generateReportAction(array $brands, array $skillSets, string $dateFrom, string $dateTo)
+    #[NoReturn]
+    public function generateReportAction(array $brands, array $skillSets, string $dateFrom, string $dateTo): void
     {
         $lines = [];
 
-        $certRepo = $this->objectManager->get(CertificationRepository::class);
         $fromDate = $this->convertDate($dateFrom . ' 00:00:00');
         $toDate = $this->convertDate($dateTo . ' 23:59:59');
 
-        $certifications = $certRepo->findByGrantDateAndBrandsAndSkillSets($fromDate, $toDate, $brands, $skillSets);
+        $certifications = $this->certificationRepository->findByGrantDateAndBrandsAndSkillSets($fromDate, $toDate, $brands, $skillSets);
 
         /** @var Certification $certification */
         foreach ($certifications as $certification) {
             $skill = $certification->getSkill();
+            /** @var Brand $brand */
+            $brand = $skill && $skill->getBrands()->count() ? $skill->getBrands()[0] : null;
             $lines[] = [
                 date('Y-m-d H:i', $certification->getCrdate()),
                 $certification->getGrantDate()->format('Y-m-d H:i'),
@@ -323,10 +227,12 @@ class BackendController extends ActionController
                 $certification->getUser() ? $certification->getUser()->getLastName() : 'deleted user',
                 $certification->getCertifier() ? ($certification->getCertifier()->getUser()
                     ? $certification->getCertifier()->getUser()->getUsername()
-                    : ($certification->getCertifier()->getTestSystem() ? $certification->getCertifier()->getTestSystem() : 'deleted user'))
+                    : ($certification->getCertifier()->getTestSystem() ?: 'deleted user'))
                     : 'CertoBot',
                 $certification->getBrand() ? $certification->getBrand()->getName() : '',
                 $certification->getCampaign() ? $certification->getCampaign()->getTitle() : '',
+                $brand ? $brand->getName() : '',
+                $brand ? $brand->getPartnerLevel() : '',
             ];
         }
 
@@ -345,6 +251,8 @@ class BackendController extends ActionController
             'Certifier',
             'Organisation',
             'Campaign',
+            'Skill Brand',
+            'Skill Brand Partner Level',
         ]);
 
         $filename = 'Verifications_' . date('YmdHi') . '.csv';
@@ -352,13 +260,21 @@ class BackendController extends ActionController
         CsvService::sendCSVFile($lines, $filename);
     }
 
-    private function convertDate(string $date): ?\DateTime
+    private function convertDate(string $date): ?DateTime
     {
         $format = LocalizationUtility::translate('backend.date.date_format-presentation', 'Skills') . ' G:i:s';
-        $date = \DateTime::createFromFormat($format, $date);
+        $date = DateTime::createFromFormat($format, $date);
         return $date === false ? null : $date;
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws DBALException
+     * @throws InvalidQueryException
+     * @throws RouteNotFoundException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     */
     public function ajaxTreeData(ServerRequestInterface $request): ResponseInterface
     {
         $sourceId = $request->getQueryParams()['sourceId'] ?? '0';
@@ -376,14 +292,18 @@ class BackendController extends ActionController
         foreach ($this->getSkillIdsByCombinedSource($sourceId) as $skillId) {
             $this->getTreeDataForSkill($skillId, $highlightIds, $result);
         }
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws RouteNotFoundException
+     */
     public function ajaxAddSkill(ServerRequestInterface $request): ResponseInterface
     {
-        $this->initializeAction();
+        $this->initializeSettings();
         $result = [
             'success' => false,
             'skill' => null,
@@ -437,14 +357,18 @@ class BackendController extends ActionController
                 'brands' => $skill->getBrands(),
             ];
         }
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
     public function ajaxAddLink(ServerRequestInterface $request): ResponseInterface
     {
-        $this->initializeAction();
+        $this->initializeSettings();
         $result = [
             'success' => false,
             'link' => null,
@@ -530,21 +454,37 @@ class BackendController extends ActionController
         } else {
             $result['error'] = 'Missing source or target.';
         }
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
     public function ajaxSetSkillDormant(ServerRequestInterface $request): ResponseInterface
     {
         return $this->deleteOrDormant('dormant', $request);
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
     public function ajaxDeleteSkill(ServerRequestInterface $request): ResponseInterface
     {
         return $this->deleteOrDormant('delete', $request);
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
     public function ajaxRemoveSkillFromReward(ServerRequestInterface $request): ResponseInterface
     {
         $result = [
@@ -557,9 +497,7 @@ class BackendController extends ActionController
 
         if (!$id || !$rewardId) {
             $result['error'] = 'Missing id parameter.';
-            $response = new JsonResponse();
-            $response->getBody()->write(json_encode($result));
-            return $response;
+            return new JsonResponse($result);
         }
 
         /** @var Skill $skill */
@@ -573,9 +511,8 @@ class BackendController extends ActionController
         }
 
         if ($valid) {
-            $rewardRepository = $this->objectManager->get(RewardRepository::class);
             /** @var Reward $reward */
-            $reward = $rewardRepository->findByUid($rewardId);
+            $reward = $this->rewardRepository->findByUid($rewardId);
 
             foreach ($reward->getPrerequisites() as $pre) {
                 if ($pre->getSkill()->getUid() === $id) {
@@ -583,16 +520,21 @@ class BackendController extends ActionController
                     break;
                 }
             }
-            $rewardRepository->update($reward);
+            $this->rewardRepository->update($reward);
             $this->persistAll();
 
             $result['success'] = true;
         }
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
+    /**
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws UnknownObjectException
+     */
     public function ajaxRemoveRequirement(ServerRequestInterface $request): ResponseInterface
     {
         $result = [
@@ -602,15 +544,9 @@ class BackendController extends ActionController
 
         $setSkillId = (int)($request->getQueryParams()['id'] ?? 0);
         if ($setSkillId) {
-            $reqRepo = $this->objectManager->get(RequirementRepository::class);
-            $requirement = $reqRepo->findBySetSkillId($setSkillId);
-            $valid = false;
+            $requirement = $this->requirementRepository->findBySetSkillId($setSkillId);
             $this->accessCheck = new BackendPageAccessCheckService();
-            if ($this->accessCheck->writeAccess($requirement->getPid())) {
-                $valid = true;
-            }
-
-            if ($valid && $requirement) {
+            if ($requirement && $this->accessCheck->writeAccess($requirement->getPid())) {
                 $done = false;
                 $sets = $requirement->getSets();
                 /** @var Set $set */
@@ -623,9 +559,9 @@ class BackendController extends ActionController
                             if (!$setSkills->count()) {
                                 $requirement->removeSet($set);
                             }
-                            $reqRepo->update($requirement);
+                            $this->requirementRepository->update($requirement);
                             if (!$sets->count()) {
-                                $reqRepo->remove($requirement);
+                                $this->requirementRepository->remove($requirement);
                             }
                             $done = true;
                             break;
@@ -641,12 +577,15 @@ class BackendController extends ActionController
         } else {
             $result['error'] = 'Missing setSkillId.';
         }
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
-    public function syllabusForSetAction(SkillPath $skillSet)
+    /**
+     * @param SkillPath $skillSet
+     * @throws FileDoesNotExistException
+     */
+    #[NoReturn]
+    public function syllabusForSetAction(SkillPath $skillSet): void
     {
         $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
         $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/SyllabusForSet.html');
@@ -659,10 +598,14 @@ class BackendController extends ActionController
         $pdfView->assign('skills', $skills);
         $pdfView->assign('set', $skillSet);
         $pdfView->render();
-        exit();
     }
 
-    public function syllabusAction(Reward $reward)
+    /**
+     * @param Reward $reward
+     * @throws FileDoesNotExistException
+     */
+    #[NoReturn]
+    public function syllabusAction(Reward $reward): void
     {
         $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
         $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/Syllabus.html');
@@ -685,10 +628,14 @@ class BackendController extends ActionController
         $pdfView->assign('skills', $skills);
         $pdfView->assign('reward', $reward);
         $pdfView->render();
-        exit();
     }
 
-    public function completeDownloadAction(Reward $reward)
+    /**
+     * @param Reward $reward
+     * @throws FileDoesNotExistException
+     */
+    #[NoReturn]
+    public function completeDownloadAction(Reward $reward): void
     {
         $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
         $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/FullDownload.html');
@@ -708,10 +655,14 @@ class BackendController extends ActionController
         $pdfView->assign('skills', $skills);
         $pdfView->assign('reward', $reward);
         $pdfView->render();
-        exit();
     }
 
-    public function completeDownloadForSetAction(SkillPath $skillSet)
+    /**
+     * @param SkillPath $skillSet
+     * @throws FileDoesNotExistException
+     */
+    #[NoReturn]
+    public function completeDownloadForSetAction(SkillPath $skillSet): void
     {
         $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
         $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/FullDownloadSkillSet.html');
@@ -724,14 +675,12 @@ class BackendController extends ActionController
         $pdfView->assign('skills', $skills);
         $pdfView->assign('set', $skillSet);
         $pdfView->render();
-        exit();
     }
 
-    public function verifierPermissionsAction()
+    public function verifierPermissionsAction(): ResponseInterface
     {
-        $certifierRepository = $this->objectManager->get(CertifierRepository::class);
         $verifierList = [];
-        foreach ($certifierRepository->findAll()->toArray() as $certifier) {
+        foreach ($this->certifierRepository->findAll()->toArray() as $certifier) {
             /** @var Certifier $certifier */
             $verifierList[$certifier->getUid()] = $certifier->getBrand()->getName() .
             ' / ' .
@@ -743,6 +692,7 @@ class BackendController extends ActionController
         asort($verifierList);
         $this->view->assign('skillSets', $this->skillPathRepository->findAll()->toArray());
         $this->view->assign('verifiers', $verifierList);
+        return $this->generateOutput();
     }
 
     /**
@@ -752,7 +702,8 @@ class BackendController extends ActionController
      * @param string $tier1
      * @param string $tier2
      * @param string $tier4
-     * @throws StopActionException
+     * @return ResponseInterface
+     * @throws Exception
      */
     public function modifyPermissionsAction(
         array $verifiers,
@@ -761,8 +712,7 @@ class BackendController extends ActionController
         string $tier1,
         string $tier2,
         string $tier4
-    )
-    {
+    ): ResponseInterface {
         $permissions = [];
         if ($tier1 === '1') {
             $permissions['tier1'] = 1;
@@ -776,25 +726,24 @@ class BackendController extends ActionController
 
         if (count($verifiers) === 0 || count($skillSets) === 0 || $permissions === []) {
             $this->addFlashMessage('Invalid selection', 'Error', AbstractMessage::ERROR);
-        } else {
-            if ($submitType === 'grant') {
-                $count = VerifierPermissionService::grantPermissions($verifiers, $skillSets, $permissions);
-                $this->addFlashMessage('Granted permissions to ' . $count . ' skill/verifier combinations.');
-            } elseif ($submitType === 'revoke') {
-                $count = VerifierPermissionService::revokePermissions($verifiers, $skillSets, $permissions);
-                $this->addFlashMessage('Revoked permissions from ' . $count . '  skill/verifier combinations.');
-            }
+        } elseif ($submitType === 'grant') {
+            $count = VerifierPermissionService::grantPermissions(array_map('intval', $verifiers), array_map('intval', $skillSets), $permissions);
+            $this->addFlashMessage('Granted permissions to ' . $count . ' skill/verifier combinations.');
+        } elseif ($submitType === 'revoke') {
+            $count = VerifierPermissionService::revokePermissions(array_map('intval', $verifiers), array_map('intval', $skillSets), $permissions);
+            $this->addFlashMessage('Revoked permissions from ' . $count . '  skill/verifier combinations.');
         }
 
-        $this->redirect('verifierPermissions');
+        $uri = $this->uriBuilder->reset()->setCreateAbsoluteUri(true)
+            ->uriFor('verifierPermissions', null, 'Backend');
+        return new RedirectResponse($this->addBaseUriIfNecessary($uri), 303);
     }
 
     private function getSkillsOfReward(int $rewardId): array
     {
         $skillIds = [];
-        $rewardRepo = $this->objectManager->get(RewardRepository::class);
         /** @var Reward $reward */
-        $reward = $rewardRepo->findByUid($rewardId);
+        $reward = $this->rewardRepository->findByUid($rewardId);
 
         if (!$this->accessCheck->readAccess($reward->getPid())) {
             return [];
@@ -809,6 +758,9 @@ class BackendController extends ActionController
         return array_unique($skillIds);
     }
 
+    /**
+     * @throws InvalidQueryException
+     */
     private function getSkillsOfBrand(int $brandId): array
     {
         $skillIds = [];
@@ -822,6 +774,11 @@ class BackendController extends ActionController
         return array_unique($skillIds);
     }
 
+    /**
+     * @param int $tagId
+     * @return array
+     * @throws InvalidQueryException
+     */
     private function getSkillsByTag(int $tagId): array
     {
         $skillIds = [];
@@ -853,31 +810,32 @@ class BackendController extends ActionController
         return array_unique($skillIds);
     }
 
+    /**
+     * @param string $combinedId
+     * @return array
+     * @throws InvalidQueryException
+     */
     private function getSkillIdsByCombinedSource(string $combinedId): array
     {
         $id = (int)substr($combinedId, 1);
-        switch ($combinedId[0]) {
-            case 's':
-                $skillIds = [$id];
-                break;
-            case 'b':
-                $skillIds = $this->getSkillsOfBrand($id);
-                break;
-            case 'r':
-                $skillIds = $this->getSkillsOfReward($id);
-                break;
-            case 't':
-                $skillIds = $this->getSkillsByTag($id);
-                break;
-            case 'p':
-                $skillIds = $this->getSkillsBySet($id);
-                break;
-            default:
-                $skillIds = [];
-        }
-        return $skillIds;
+        return match ($combinedId[0]) {
+            's' => [$id],
+            'b' => $this->getSkillsOfBrand($id),
+            'r' => $this->getSkillsOfReward($id),
+            't' => $this->getSkillsByTag($id),
+            'p' => $this->getSkillsBySet($id),
+            default => [],
+        };
     }
 
+    /**
+     * @param int $skillId
+     * @param array $highlightIds
+     * @param array $treeData
+     * @throws RouteNotFoundException
+     * @throws DBALException
+     * @throws \Doctrine\DBAL\Driver\Exception
+     */
     private function getTreeDataForSkill(int $skillId, array $highlightIds, array &$treeData): void
     {
         if (!$skillId) {
@@ -889,7 +847,7 @@ class BackendController extends ActionController
         });
         if (!empty($filteredNodes)) {
             return;
-        };
+        }
 
         /** @var Skill $skill */
         $skill = $this->skillRepo->findByUid($skillId);
@@ -902,15 +860,24 @@ class BackendController extends ActionController
             ->getQueryBuilderForTable('tx_skills_domain_model_skill');
         $qb->getRestrictions()->removeAll();
         $qb
-            ->select('skill.uid', 'setskill.uid as linkid', 'skill.title', 'skill.icon', 'setskill.skill',
-                'skill.dormant', 'skill.description', 'skill.goals', 'skill.pid')
+            ->select(
+                'skill.uid',
+                'setskill.uid as linkid',
+                'skill.title',
+                'skill.icon',
+                'setskill.skill',
+                'skill.dormant',
+                'skill.description',
+                'skill.goals',
+                'skill.pid'
+            )
             ->from('tx_skills_domain_model_skill', 'skill')
             ->leftJoin('skill', 'tx_skills_domain_model_requirement', 'req', 'req.skill = skill.uid')
             ->leftJoin('req', 'tx_skills_domain_model_set', 'set', 'set.requirement = req.uid')
             ->leftJoin('set', 'tx_skills_domain_model_setskill', 'setskill', 'setskill.tx_set = set.uid')
             ->leftJoin('setskill', 'tx_skills_domain_model_skill', 'child', 'setskill.skill = child.uid')
             ->where('skill.uid = ' . $skillId, 'skill.deleted = 0', '(child.uid IS NULL or child.deleted = 0)');
-        $children = $qb->execute()->fetchAll();
+        $children = $qb->executeQuery()->fetchAllAssociative();
 
         if (empty($children)) {
             return;
@@ -923,7 +890,7 @@ class BackendController extends ActionController
         }
 
         $icon = $children[0]['icon'];
-        if (substr($icon, 0, 2) !== 'fa') {
+        if (!str_starts_with($icon, 'fa')) {
             $icon = 'fa-' . $icon;
         }
 
@@ -988,9 +955,9 @@ class BackendController extends ActionController
      * @param array $parameters
      * @return string
      */
-    protected function getHref($controller, $action, $parameters = []): string
+    protected function getHref(string $controller, string $action, array $parameters = []): string
     {
-        $uriBuilder = $this->objectManager->get(\TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder::class);
+        $uriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder::class);
         $uriBuilder->setRequest($this->request);
         return $uriBuilder->reset()->uriFor($action, $parameters, $controller);
     }
@@ -1000,6 +967,13 @@ class BackendController extends ActionController
         return LocalizationUtility::translate($label, 'skills');
     }
 
+    /**
+     * @param string $type
+     * @param ServerRequestInterface $request
+     * @return ResponseInterface
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
+     */
     private function deleteOrDormant(string $type, ServerRequestInterface $request): ResponseInterface
     {
         $result = [
@@ -1009,9 +983,7 @@ class BackendController extends ActionController
         $id = (int)($request->getQueryParams()['id'] ?? 0);
 
         if (!$id) {
-            $response = new JsonResponse();
-            $response->getBody()->write(json_encode($result));
-            return $response;
+            return new JsonResponse($result);
         }
 
         /** @var Skill $skill */
@@ -1025,10 +997,10 @@ class BackendController extends ActionController
         }
 
         if ($valid) {
-            $skill->setRequirements($this->objectManager->get(ObjectStorage::class));
+            $skill->setRequirements(new ObjectStorage());
 
             if ($type === 'dormant') {
-                $skill->setDormant(new \DateTime());
+                $skill->setDormant(new DateTime());
                 $this->skillRepo->update($skill);
             } elseif ($type === 'delete') {
                 $this->skillRepo->remove($skill);
@@ -1065,13 +1037,18 @@ class BackendController extends ActionController
 
             $result['success'] = true;
         }
-        $response = new JsonResponse();
-        $response->getBody()->write(json_encode($result));
-        return $response;
+        return new JsonResponse($result);
     }
 
     protected function persistAll(): void
     {
-        $this->objectManager->get(PersistenceManager::class)->persistAll();
+        GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
+    }
+
+    protected function generateOutput(): ResponseInterface
+    {
+        $this->generateMenu();
+        $this->moduleTemplate->setContent($this->view->render());
+        return $this->htmlResponse($this->moduleTemplate->renderContent());
     }
 }

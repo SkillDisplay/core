@@ -26,7 +26,7 @@ return [
                 'renderType' => 'inputDateTime',
                 'size' => 15,
                 'eval' => 'required,datetime',
-            ]
+            ],
         ],
         'valid_thru' => [
             'exclude' => false,
@@ -37,7 +37,7 @@ return [
                 'size' => 15,
                 'eval' => 'datetime',
                 'default' => 0,
-            ]
+            ],
         ],
         'brand' => [
             'exclude' => false,
@@ -75,7 +75,7 @@ return [
                 'type' => 'input',
                 'size' => 10,
                 'max' => 50,
-                'eval' => 'required,int'
+                'eval' => 'required,int',
             ],
         ],
         'price' => [
@@ -117,9 +117,9 @@ return [
                 'foreign_table' => 'fe_users',
                 'foreign_table_where' => 'ORDER BY fe_users.username',
                 'items' => [
-                    ['', 0]
+                    ['', 0],
                 ],
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'invoice_number' => [

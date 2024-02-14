@@ -2,8 +2,14 @@
 *.bak
 *.map
 .DS_Store
-/.idea
-/node_modules/
-/Resources/Private/MailTemplates/app.css
-/.Build/
 /composer.lock
+/.php-cs-fixer.cache
+/.php-cs-fixer.php
+
+/.Build/
+/node_modules/
+
+# Sonar Lint
+.idea/sonarlint
+
+/Resources/Private/MailTemplates/app.css

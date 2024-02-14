@@ -47,8 +47,6 @@ plugin.tx_skills.settings {
   feUserStoragePid = {$pids.fe_users}
   # cat=plugin.tx_skills//d; type=int+; label=FE user group for accepted FE users
   acceptedUserGroup = 1
-  # cat=plugin.tx_skills//e; type=int+; label=FE user group for admins
-  adminUserGroup =
   # cat=plugin.tx_skills//f; type=string; label=Combined identifier for FE user avatar storage
   avatarFolder = 1:/avatars/
   # cat=plugin.tx_skills//g; type=string; label=TypoLink to terms and conditions document/page

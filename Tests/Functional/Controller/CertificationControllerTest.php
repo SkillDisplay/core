@@ -1,47 +1,59 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Controller;
 
-use Doctrine\DBAL\DBALException;
 use PHPUnit\Framework\MockObject\MockObject;
 use SkillDisplay\Skills\Controller\CertificationController;
 use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\Certifier;
+use SkillDisplay\Skills\Domain\Repository\BrandRepository;
+use SkillDisplay\Skills\Domain\Repository\CampaignRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
-use TYPO3\CMS\Extbase\Object\Exception;
+use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
+use SkillDisplay\Skills\Domain\Repository\SkillRepository;
+use SkillDisplay\Skills\Domain\Repository\VerificationCreditPackRepository;
+use SkillDisplay\Skills\Domain\Repository\VerificationCreditUsageRepository;
+use SkillDisplay\Skills\Service\VerificationService;
+use SkillDisplay\Skills\Tests\Functional\SimulateLoginTrait;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\AccessibleObjectInterface;
+use TYPO3\TestingFramework\Core\Exception;
 
 class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBase
 {
-    /** @var CertificationController|MockObject|AccessibleObjectInterface */
-    protected $subject = null;
+    use SimulateLoginTrait;
 
-    /** @var CertificationRepository */
-    protected $certificationRepository;
+    protected CertificationController|MockObject|AccessibleObjectInterface $subject;
 
-    /** @var CertifierRepository */
-    protected $certifierRepository;
+    protected CertificationRepository $certificationRepository;
+    protected CertifierRepository $certifierRepository;
 
-    /**
-     * @throws DBALException
-     * @throws Exception
-     */
     protected function setUp(): void
     {
         parent::setUp();
 
-        // disable file processing for tests
-        unset($GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['DeferredBackendImageProcessor']);
+        $this->certificationRepository = GeneralUtility::makeInstance(CertificationRepository::class);
+        $this->certifierRepository = GeneralUtility::makeInstance(CertifierRepository::class);
 
-        $this->certificationRepository = $this->objectManager->get(CertificationRepository::class);
-        $this->certifierRepository = $this->objectManager->get(CertifierRepository::class);
-
-        $this->subject = $this->getAccessibleMock(CertificationController::class,
-            ['redirect', 'forward', 'addFlashMessage', 'getCurrentUser'], [$this->certificationRepository]);
-        $this->subject->injectObjectManager($this->objectManager);
-        $this->subject->_set('view', $this->view);
+        $this->subject = $this->getAccessibleMock(
+            CertificationController::class,
+            ['addFlashMessage', 'getCurrentUser'],
+            [
+                $this->userRepository,
+                GeneralUtility::makeInstance(CertifierRepository::class),
+                $this->certificationRepository,
+                GeneralUtility::makeInstance(BrandRepository::class),
+                GeneralUtility::makeInstance(VerificationCreditPackRepository::class),
+                GeneralUtility::makeInstance(VerificationCreditUsageRepository::class),
+                GeneralUtility::makeInstance(SkillPathRepository::class),
+                GeneralUtility::makeInstance(SkillRepository::class),
+                GeneralUtility::makeInstance(CampaignRepository::class),
+                GeneralUtility::makeInstance(VerificationService::class),
+            ]
+        );
         $this->subject->_set('settings', ['credits' => [
             'price' => 0.1,
             'tier4' => 2,
@@ -49,14 +61,16 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
             'tier2' => 3,
             'tier1' => 4,
         ]]);
+        $this->initController($this->subject);
     }
 
     /**
-     * @throws \TYPO3\TestingFramework\Core\Exception
+     * @throws Exception
      */
     protected function setUpDatabase(): void
     {
-        $this->setUpBackendUserFromFixture(1);
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/be_users.csv');
+        $this->setUpBackendUser(1);
         $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
     }
 
@@ -72,7 +86,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
 
         $verification = $this->view->_get('variables')['verification'];
 
-        $this->assertEquals(1, $verification['uid']);
+        self::assertSame(1, $verification['uid']);
     }
 
     /**
@@ -86,9 +100,9 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->showAction($certification);
         $verification = $this->view->_get('variables')['verification'];
 
-        $this->assertNull($verification['verifier']);
-        $this->assertEmpty($verification['reason']);
-        $this->assertEmpty($verification['comment']);
+        self::assertNull($verification['verifier']);
+        self::assertEmpty($verification['reason']);
+        self::assertEmpty($verification['comment']);
     }
 
     /**
@@ -101,8 +115,8 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $success = $this->view->_get('variables')['success'];
         $error = $this->view->_get('variables')['error'];
 
-        $this->assertEquals('', $error);
-        $this->assertEquals(true, $success);
+        self::assertSame('', $error);
+        self::assertTrue($success);
     }
 
     /**
@@ -115,8 +129,8 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $success = $this->view->_get('variables')['success'];
         $error = $this->view->_get('variables')['error'];
 
-        $this->assertNotEquals('', $error);
-        $this->assertEquals(false, $success);
+        self::assertNotEquals('', $error);
+        self::assertFalse($success);
     }
 
     /**
@@ -129,8 +143,8 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $success = $this->view->_get('variables')['success'];
         $error = $this->view->_get('variables')['error'];
 
-        $this->assertNotEquals('', $error);
-        $this->assertEquals(false, $success);
+        self::assertNotEquals('', $error);
+        self::assertFalse($success);
     }
 
     /**
@@ -142,7 +156,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->userCancelAction([4]);
         $success = $this->view->_get('variables')['success'];
 
-        $this->assertEquals(true, $success);
+        self::assertTrue($success);
     }
 
     /**
@@ -154,7 +168,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->userCancelAction([4]);
         $success = $this->view->_get('variables')['success'];
 
-        $this->assertEquals(false, $success);
+        self::assertFalse($success);
     }
 
     /**
@@ -166,7 +180,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->userCancelAction([4]);
         $success = $this->view->_get('variables')['success'];
 
-        $this->assertEquals(false, $success);
+        self::assertFalse($success);
     }
 
     /**
@@ -177,7 +191,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->recentAction();
         $verifications = $this->view->_get('variables')['verifications'];
 
-        $this->assertEquals([], $verifications);
+        self::assertSame([], $verifications);
     }
 
     /**
@@ -189,7 +203,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->recentAction();
         $verifications = $this->view->_get('variables')['verifications'];
 
-        $this->assertCount(2, $verifications);
+        self::assertCount(2, $verifications);
     }
 
     /**
@@ -203,7 +217,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->listForVerifierAction($verifier);
         $verifications = $this->view->_get('variables')['verifications'];
 
-        $this->assertEquals([], $verifications);
+        self::assertSame([], $verifications);
     }
 
     /**
@@ -217,7 +231,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->listForVerifierAction($verifier);
         $verifications = $this->view->_get('variables')['verifications'];
 
-        $this->assertEquals([], $verifications);
+        self::assertSame([], $verifications);
     }
 
     /**
@@ -231,6 +245,6 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
         $this->subject->listForVerifierAction($verifier);
         $verifications = $this->view->_get('variables')['verifications'];
 
-        $this->assertCount(1, $verifications);
+        self::assertCount(1, $verifications);
     }
 }

@@ -1,23 +1,28 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+**/
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
+use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\GrantedReward;
 use SkillDisplay\Skills\Domain\Model\Reward;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Model\User;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
@@ -26,46 +31,62 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  */
 class RewardRepository extends BaseRepository
 {
-
-    public function findAllBackend() : QueryResultInterface
+    public function findAllBackend(): QueryResultInterface
     {
         $q = $this->createQuery();
         $q->getQuerySettings()->setIgnoreEnableFields(true);
         return $q->execute();
     }
 
-    public function findForSkillSets(User $user, string $level)
+    /**
+     * @param User $user
+     * @param string $level
+     * @return Reward[]|QueryResultInterface
+     */
+    public function findForSkillSets(User $user, string $level): QueryResultInterface|array
     {
         $q = $this->createQuery();
         $constraints = $this->getAvailabilityConstraints($q, $user, false);
-        $constraints[] = $q->logicalOr($q->logicalNot($q->equals('skillpath', 0)));
-        $constraints[] = $q->logicalOr($q->equals('level', $level));
-        $q->matching($q->logicalAnd($constraints));
+        $constraints[] = $q->logicalNot($q->equals('skillpath', 0));
+        $constraints[] = $q->equals('level', $level);
+        $q->matching($q->logicalAnd(...$constraints));
         return $q->execute();
     }
 
+    /**
+     * @param Certification $cert
+     * @return QueryResultInterface
+     */
     public function findByCertification(Certification $cert): QueryResultInterface
     {
         $q = $this->createQuery();
         $constraints = $this->getAvailabilityConstraints($q, $cert->getUser());
         $constraints[] = $q->equals('prerequisites.level', $cert->getLevelNumber());
-        $brand = [
-            $q->equals('prerequisites.brand', 0)
+        $brandConstraints = [
+            $q->equals('prerequisites.brand', 0),
         ];
         if ($cert->getBrand()) {
-            $brand[] = $q->equals('prerequisites.brand', $cert->getBrand()->getUid());
+            $brandConstraints[] = $q->equals('prerequisites.brand', $cert->getBrand()->getUid());
         }
-        $constraints[] = $q->logicalOr($brand);
-        $q->matching(
-            $q->logicalAnd($constraints)
-        );
+        if (count($brandConstraints) > 1) {
+            $constraints[] = $q->logicalOr(...$brandConstraints);
+        } else {
+            $constraints[] = $brandConstraints[0];
+        }
+        $q->matching($q->logicalAnd(...$constraints));
         return $q->execute();
     }
 
-    public function findAvailableForUser(User $user, Skill $skill = null): array
+    /**
+     * @param User $user
+     * @param Skill|null $skill
+     * @return Reward[]
+     * @throws InvalidQueryException
+     */
+    public function findAvailableForUser(User $user, ?Skill $skill = null): array
     {
-        $grantedRepo = $this->objectManager->get(GrantedRewardRepository::class);
-        $certRepo = $this->objectManager->get(CertificationRepository::class);
+        $grantedRepo = GeneralUtility::makeInstance(GrantedRewardRepository::class);
+        $certRepo = GeneralUtility::makeInstance(CertificationRepository::class);
 
         $grantedRewardIds = array_map(
             function (GrantedReward $reward) {
@@ -80,9 +101,9 @@ class RewardRepository extends BaseRepository
             $constraints[] = $q->logicalNot($q->in('uid', $grantedRewardIds));
         }
         if ($skill) {
-            $constraints[] = $q->equals('prerequisites.skill', $skill);
+            $constraints[] = $q->equals('prerequisites.skill', $skill->getUid());
         }
-        $q->matching($q->logicalAnd($constraints));
+        $q->matching($q->logicalAnd(...$constraints));
         $availableRewards = $q->execute();
 
         $rewardsToTakeByMissingSkills = [];
@@ -108,46 +129,62 @@ class RewardRepository extends BaseRepository
         return $rewardsToTake;
     }
 
-    private function getAvailabilityConstraints(QueryInterface $q, User $user = null, bool $withSkill = true): array
+    private function getAvailabilityConstraints(QueryInterface $q, ?User $user = null, bool $withSkill = true): array
     {
         $orgaConstraint = [
-            $q->equals('validForOrganisation', 0)
+            $q->equals('validForOrganisation', 0),
         ];
         if ($user && $user->getOrganisations()->count()) {
-            $orgaConstraint[] = $q->in('validForOrganisation', $user->getOrganisations());
+            $organisationIds = array_map(function (Brand $b) {
+                return $b->getUid();
+            }, $user->getOrganisations()->toArray());
+            $orgaConstraint[] = $q->in('validForOrganisation', $organisationIds);
         }
-        $now = time();
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
         $constraints = [
-            $q->logicalOr([
+            $q->logicalOr(
                 $q->equals('availabilityStart', 0),
-                $q->lessThanOrEqual('availabilityStart', $now),
-            ]),
-            $q->logicalOr([
+                $q->lessThanOrEqual('availabilityStart', $now)
+            ),
+            $q->logicalOr(
                 $q->equals('availabilityEnd', 0),
                 $q->greaterThan('availabilityEnd', $now),
-            ]),
-            $q->logicalOr($orgaConstraint)
+            ),
         ];
+        if (count($orgaConstraint) > 1) {
+            $constraints[] = $q->logicalOr(...$orgaConstraint);
+        } else {
+            $constraints[] = $orgaConstraint[0];
+        }
         if ($withSkill) {
             $constraints[] = $q->logicalNot($q->equals('prerequisites.skill', 0));
         }
         return $constraints;
     }
 
+    /**
+     * @param User $user
+     * @param SkillPath $set
+     * @return Reward[]
+     */
     public function getAllForSkillPath(User $user, SkillPath $set): array
     {
         $q = $this->createQuery();
         $constraints = $this->getAvailabilityConstraints($q, $user, false);
-        $constraints[] = $q->logicalOr($q->equals('skillpath', $set));
-        $q->matching($q->logicalAnd($constraints));
+        $constraints[] = $q->equals('skillpath', $set);
+        $q->matching($q->logicalAnd(...$constraints));
         return $q->execute()->toArray();
     }
 
+    /**
+     * @param SkillPath $set
+     * @return Reward[]
+     */
     public function getAllForSkillSetWithoutConstraints(SkillPath $set): array
     {
         $q = $this->createQuery();
-        $constraints[] = $q->logicalOr($q->equals('skillpath', $set));
-        $q->matching($q->logicalAnd($constraints));
+        $constraints[] = $q->equals('skillpath', $set);
+        $q->matching($q->logicalAnd(...$constraints));
         return $q->execute()->toArray();
     }
 }

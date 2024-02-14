@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -9,170 +10,135 @@
  *
  *  (c) 2016 Markus Klein
  *           Georg Ringer
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
+use DateTime;
+use JsonSerializable;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Domain\Model\FrontendUser;
-use TYPO3\CMS\Extbase\Domain\Model\FrontendUserGroup;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Persistence\QueryInterface;
-use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3\CMS\Core\Utility\PathUtility;
+use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
+use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
+use TYPO3\CMS\Extbase\Annotation\Validate;
+use TYPO3\CMS\Extbase\Domain\Model\FileReference;
+use TYPO3\CMS\Extbase\Domain\Model\FrontendUser;
+use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+use TYPO3\CMS\Extbase\Service\ImageService;
 
-class User extends FrontendUser implements \JsonSerializable
+class User extends FrontendUser implements JsonSerializable
 {
-    const JsonUserViewConfiguration = [
+    public const JsonUserViewConfiguration = [
         '_only' => [
-            'uid', 'firstName', 'lastName', 'email', 'userAvatar'
-        ]
+            'uid', 'firstName', 'lastName', 'email', 'userAvatar',
+        ],
     ];
 
-    const JsonViewConfiguration = [
+    public const JsonViewConfiguration = [
         'managedOrganizations' => [
             '_descendAll' => Brand::JsonViewConfiguration,
         ],
     ];
 
-    /** @var bool */
-    protected $disable = false;
+    protected bool $disable = false;
 
     /**
-     * publishSkills
-     *
-     * @var bool
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $publishSkills = false;
+    protected bool $publishSkills = false;
 
     /**
      * virtual not stored
-     *
-     * @var string
      */
-    protected $passwordRepeat = '';
+    protected string $passwordRepeat = '';
 
     /** @var bool */
-    protected $newsletter = false;
+    protected bool $newsletter = false;
 
     /**
-     * avatar
-     *
-     * @var \TYPO3\CMS\Extbase\Domain\Model\FileReference
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Cascade("remove")
+     * @Cascade("remove")
      */
-    protected $avatar = null;
+    protected ?FileReference $avatar = null;
 
-    /** @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Certifier> */
-    protected $favouriteCertifiers = null;
+    /** @var ObjectStorage<Certifier> */
+    protected ObjectStorage $favouriteCertifiers;
 
     /**
      * Brands the user is a manager for.
      *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Brand>
+     * @Lazy
      */
-    protected $managedBrands = null;
+    protected ObjectStorage|LazyObjectStorage $managedBrands;
 
     /**
      * Brands the user is member of
      *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Brand>
+     * @Lazy
      */
-    protected $organisations = null;
+    protected ObjectStorage|LazyObjectStorage $organisations;
 
-    /** @var bool */
-    protected $mailPush = false;
-
-    /** @var string */
-    protected $mailLanguage = 'en';
+    protected bool $mailPush = false;
+    protected string $mailLanguage = 'en';
 
     /**
      * virtual property
-     *
-     * @var bool
      */
-    protected $terms = false;
+    protected bool $terms = false;
+    protected string $linkedin = '';
+    protected string $xing = '';
+    protected string $github = '';
+    protected string $twitter = '';
+    protected string $pendingEmail = '';
+    protected string $profileLink = '';
 
-    /** @var string */
-    protected $linkedin = '';
-
-    /** @var string */
-    protected $xing = '';
-
-    /** @var string */
-    protected $github = '';
-
-    /** @var string */
-    protected $twitter = '';
-
-    /** @var string */
-    protected $pendingEmail = '';
-
-    /** @var string */
-    protected $profileLink = '';
-
-    /** @var \DateTime|null */
-    protected $termsAccepted;
-
-    /** @var \DateTime|null */
-    protected $dataSync;
-
-    /** @var int */
-    protected $adminGroupId = 0;
-
-    /** @var bool */
-    protected $locked = false;
-
-    /** @var bool */
-    protected $anonymous = false;
-
-    /** @var string */
-    protected $monthlyActivity = '';
-
-    /** @var string */
-    protected $foreignUsername = '';
+    protected ?DateTime $termsAccepted = null;
+    protected ?DateTime $dataSync = null;
+    protected bool $locked = false;
+    protected bool $anonymous = false;
+    protected string $monthlyActivity = '';
+    protected string $foreignUsername = '';
 
     public function __construct()
     {
         parent::__construct();
-        $this->favouriteCertifiers = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
-        $this->managedBrands = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
-        $this->organisations = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+        $this->favouriteCertifiers = new ObjectStorage();
+        $this->managedBrands = new ObjectStorage();
+        $this->organisations = new ObjectStorage();
     }
 
     public function getPendingCertifications(): array
     {
-        return GeneralUtility::makeInstance(ObjectManager::class)->get(CertificationRepository::class)->findPending($this);
+        return GeneralUtility::makeInstance(CertificationRepository::class)->findPending($this);
     }
 
     public function getAcceptedCertifications(): array
     {
-        return GeneralUtility::makeInstance(ObjectManager::class)->get(CertificationRepository::class)->findAccepted($this);
+        return GeneralUtility::makeInstance(CertificationRepository::class)->findAccepted($this);
     }
 
     public function getDeclinedCertifications(): array
     {
-        return GeneralUtility::makeInstance(ObjectManager::class)->get(CertificationRepository::class)->findDeclined($this);
+        return GeneralUtility::makeInstance(CertificationRepository::class)->findDeclined($this);
     }
 
     public function getRevokedCertifications(): array
     {
-        return GeneralUtility::makeInstance(ObjectManager::class)->get(CertificationRepository::class)->findRevoked($this);
+        return GeneralUtility::makeInstance(CertificationRepository::class)->findRevoked($this);
     }
 
-    public function hasRewardPrerequisite(RewardPrerequisite $prerequisite) : bool
+    public function hasRewardPrerequisite(RewardPrerequisite $prerequisite): bool
     {
-        $certificationRepository = GeneralUtility::makeInstance(ObjectManager::class)->get(CertificationRepository::class);
+        $certificationRepository = GeneralUtility::makeInstance(CertificationRepository::class);
         $userCerts = $certificationRepository->findBySkillsAndUser([$prerequisite->getSkill()], $this, false);
         $hasPrerequisites = false;
         foreach ($userCerts as $reachedCert) {
@@ -191,11 +157,11 @@ class User extends FrontendUser implements \JsonSerializable
      * Specify data which should be serialized to JSON
      *
      * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
-     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * @return array data which can be serialized by <b>json_encode</b>,
      * which is a value of any type other than a resource.
      * @since 5.4.0
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toJsonData();
     }
@@ -207,7 +173,7 @@ class User extends FrontendUser implements \JsonSerializable
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
             'email' => $this->email,
-            'userAvatar' => $this->getUserAvatar()
+            'userAvatar' => $this->getUserAvatar(),
         ];
     }
 
@@ -221,28 +187,28 @@ class User extends FrontendUser implements \JsonSerializable
             'userAvatar' => $this->getUserAvatar(),
             'isVerifier' => $this->isCertifier(),
             'isVerified' => $this->isLocked(),
-            'level'=> $this->isLocked() ? 2 : 1,
+            'level' => $this->isLocked() ? 2 : 1,
             'organizations' => $this->getOrganisationsJsonData(),
             'managedOrganizations' => $this->getManagedBrands(),
-            'company'=> $this->company,
-            'address'=> $this->address,
-            'city'=> $this->city,
-            'zipCode'=> $this->zip,
-            'country'=> $this->country,
-            'website'=> $this->www,
-            'twitter'=> $this->twitter,
-            'linkedin'=> $this->linkedin,
-            'xing'=> $this->xing,
-            'github'=> $this->github,
-            'publicAchievements'=> $this->isPublishSkills(),
-            'receiveEmails'=> $this->isNewsletter(),
-            'receiveNotifications'=> $this->isMailPush(),
-            'language'=> $this->mailLanguage,
-            'locked' => $this->locked
+            'company' => $this->company,
+            'address' => $this->address,
+            'city' => $this->city,
+            'zipCode' => $this->zip,
+            'country' => $this->country,
+            'website' => $this->www,
+            'twitter' => $this->twitter,
+            'linkedin' => $this->linkedin,
+            'xing' => $this->xing,
+            'github' => $this->github,
+            'publicAchievements' => $this->isPublishSkills(),
+            'receiveEmails' => $this->isNewsletter(),
+            'receiveNotifications' => $this->isMailPush(),
+            'language' => $this->mailLanguage,
+            'locked' => $this->locked,
         ];
     }
 
-    public function toJsonBaseData() : array
+    public function toJsonBaseData(): array
     {
         $userData = [];
         $userData['uid'] = $this->getUid();
@@ -278,7 +244,7 @@ class User extends FrontendUser implements \JsonSerializable
         $this->publishSkills = $publishSkills;
     }
 
-    public function getAvatarRaw(): ?\TYPO3\CMS\Extbase\Domain\Model\FileReference
+    public function getAvatarRaw(): ?FileReference
     {
         return $this->avatar;
     }
@@ -286,9 +252,9 @@ class User extends FrontendUser implements \JsonSerializable
     /**
      * Returns the avatar
      *
-     * @return \TYPO3\CMS\Extbase\Domain\Model\FileReference|File
+     * @return FileReference|File
      */
-    public function getAvatar()
+    public function getAvatar(): File|FileReference
     {
         if (!$this->avatar || !$this->avatar->getOriginalResource()) {
             $placeholder = PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName('EXT:skills/Resources/Public/Images/anonymoususer.png'));
@@ -300,8 +266,8 @@ class User extends FrontendUser implements \JsonSerializable
     public function getAvatarScaled(): ProcessedFile
     {
         $avatarFile = $this->getAvatar();
-        $userImage = $avatarFile instanceof \TYPO3\CMS\Extbase\Domain\Model\FileReference ? $avatarFile->getOriginalResource() : $avatarFile;
-        $imageService = GeneralUtility::makeInstance(ObjectManager::class)->get(ImageService::class);
+        $userImage = $avatarFile instanceof FileReference ? $avatarFile->getOriginalResource() : $avatarFile;
+        $imageService = GeneralUtility::makeInstance(ImageService::class);
         $processingInstructions = [
             'width' => '300c',
             'height' => '300c',
@@ -309,23 +275,36 @@ class User extends FrontendUser implements \JsonSerializable
         return $imageService->applyProcessingInstructions($userImage, $processingInstructions);
     }
 
-    public function getUserAvatar() : string
+    public function getUserAvatar(): string
     {
         return (string)$this->getAvatarScaled()->getPublicUrl();
     }
 
-    public function getSkillUpStats() : array
+    public function getSkillUpStats(): array
     {
-        $stats = [0,0,0,0,0];
-        $certs = GeneralUtility::makeInstance(ObjectManager::class)->get(CertificationRepository::class)->findAcceptedForUser($this);
+        $cacheIdentifier = 'userverifications_' . $this->uid;
+        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('skill_progress');
+        $result = $cache->get($cacheIdentifier);
+        if ($result) {
+            return $result;
+        }
+
+        $cacheTags = [];
+        $stats = [0, 0, 0, 0, 0];
+        $certs = GeneralUtility::makeInstance(CertificationRepository::class)->findAcceptedForUser($this);
         /** @var Certification $cert */
         foreach ($certs as $cert) {
             $stats[$cert->getLevelNumber()]++;
+            if ($cert->getSkill()) {
+                $cacheTags[] = $cert->getSkill()->getCacheTag($this->uid);
+            }
         }
+
+        $cache->set($cacheIdentifier, $stats, $cacheTags);
         return $stats;
     }
 
-    public function setAvatar(\TYPO3\CMS\Extbase\Domain\Model\FileReference $avatar = null): void
+    public function setAvatar(FileReference $avatar = null): void
     {
         $this->avatar = $avatar;
     }
@@ -340,10 +319,7 @@ class User extends FrontendUser implements \JsonSerializable
         $this->disable = $disable;
     }
 
-    /**
-     * @param string $username
-     */
-    public function setUsername($username)
+    public function setUsername($username): void
     {
         parent::setUsername($username);
         $this->setEmail($username);
@@ -362,9 +338,9 @@ class User extends FrontendUser implements \JsonSerializable
     /**
      * Returns the favouriteCertifiers
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Certifier>
+     * @return ObjectStorage<Certifier>
      */
-    public function getFavouriteCertifiers()
+    public function getFavouriteCertifiers(): ObjectStorage
     {
         return $this->favouriteCertifiers;
     }
@@ -372,10 +348,9 @@ class User extends FrontendUser implements \JsonSerializable
     /**
      * Sets the favouriteCertifiers
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Certifier> $favouriteCertifiers
-     * @return void
+     * @param ObjectStorage<Certifier> $favouriteCertifiers
      */
-    public function setFavouriteCertifiers(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $favouriteCertifiers): void
+    public function setFavouriteCertifiers(ObjectStorage $favouriteCertifiers): void
     {
         $this->favouriteCertifiers = $favouriteCertifiers;
     }
@@ -393,9 +368,9 @@ class User extends FrontendUser implements \JsonSerializable
     /**
      * Returns the managedBrands
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
+     * @return ObjectStorage<Brand>
      */
-    public function getManagedBrands()
+    public function getManagedBrands(): ObjectStorage
     {
         return $this->managedBrands;
     }
@@ -403,10 +378,9 @@ class User extends FrontendUser implements \JsonSerializable
     /**
      * Sets the managedBrands
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand> $managedBrands
-     * @return void
+     * @param ObjectStorage<Brand> $managedBrands
      */
-    public function setManagedBrands(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $managedBrands): void
+    public function setManagedBrands(ObjectStorage $managedBrands): void
     {
         $this->managedBrands = $managedBrands;
     }
@@ -424,9 +398,9 @@ class User extends FrontendUser implements \JsonSerializable
     /**
      * Returns the managedBrands
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
+     * @return ObjectStorage<Brand>
      */
-    public function getOrganisations()
+    public function getOrganisations(): ObjectStorage
     {
         return $this->organisations;
     }
@@ -442,10 +416,9 @@ class User extends FrontendUser implements \JsonSerializable
     }
 
     /**
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand> $orgas
-     * @return void
+     * @param ObjectStorage<Brand> $orgas
      */
-    public function setOrganisations(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $orgas): void
+    public function setOrganisations(ObjectStorage $orgas): void
     {
         $this->organisations = $orgas;
     }
@@ -560,52 +533,25 @@ class User extends FrontendUser implements \JsonSerializable
         $this->profileLink = $profileLink;
     }
 
-    public function getTermsAccepted(): ?\DateTime
+    public function getTermsAccepted(): ?DateTime
     {
         return $this->termsAccepted;
     }
 
-    public function setTermsAccepted(?\DateTime $termsAccepted): void
+    public function setTermsAccepted(?DateTime $termsAccepted): void
     {
         $this->termsAccepted = $termsAccepted;
     }
 
-    public function isTermsAccepted() : bool
+    public function isTermsAccepted(): bool
     {
         return $this->termsAccepted && $this->termsAccepted->getTimestamp() > 0;
     }
 
-    public function isCertifier() : bool
+    public function isCertifier(): bool
     {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        /** @var QueryInterface $certifiers */
-        $certifiers = $objectManager->get(CertifierRepository::class)->findByUser($this);
-        $count = $certifiers->count();
+        $count = GeneralUtility::makeInstance(CertifierRepository::class)->countByUser($this);
         return $count > 0;
-    }
-
-    public function isAdmin(): bool
-    {
-        if (!$this->adminGroupId) {
-            return false;
-        }
-        /** @var FrontendUserGroup $usergroup */
-        foreach ($this->usergroup as $usergroup) {
-            if ($usergroup->getUid() === $this->adminGroupId) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public function getAdminGroupId(): int
-    {
-        return $this->adminGroupId;
-    }
-
-    public function setAdminGroupId(int $adminGroupId): void
-    {
-        $this->adminGroupId = $adminGroupId;
     }
 
     public function isLocked(): bool
@@ -638,12 +584,12 @@ class User extends FrontendUser implements \JsonSerializable
         $this->foreignUsername = $foreignUsername;
     }
 
-    public function getDataSync(): ?\DateTime
+    public function getDataSync(): ?DateTime
     {
         return $this->dataSync;
     }
 
-    public function setDataSync(?\DateTime $dataSync): void
+    public function setDataSync(?DateTime $dataSync): void
     {
         $this->dataSync = $dataSync;
     }
@@ -691,7 +637,7 @@ class User extends FrontendUser implements \JsonSerializable
                 'url' => $organisation->getUrl(),
                 'memberCount' => $organisation->getMemberCount(),
                 'firstCategoryTitle' => $organisation->getFirstCategoryTitle(),
-                'managers' => $managers
+                'managers' => $managers,
             ];
         }
         return $data;

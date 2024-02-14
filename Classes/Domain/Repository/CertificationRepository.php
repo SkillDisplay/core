@@ -1,19 +1,21 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
 use DateTime;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\Exception;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Campaign;
 use SkillDisplay\Skills\Domain\Model\Certification;
@@ -22,11 +24,14 @@ use SkillDisplay\Skills\Domain\Model\RewardPrerequisite;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Model\User;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
+use TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidNumberOfConstraintsException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Query;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -40,34 +45,40 @@ class CertificationRepository extends BaseRepository
      * @param Skill[] $skills
      * @param User $user
      * @param bool $includePending
-     * @return Certification[]|QueryResultInterface
+     * @return QueryResultInterface
      * @throws InvalidQueryException
      */
-    public function findBySkillsAndUser(array $skills, User $user, bool $includePending = true)
+    public function findBySkillsAndUser(array $skills, User $user, bool $includePending = true): QueryResultInterface
     {
         $q = $this->getQuery();
 
+        // this is a workaround for Extbase which uses the localizedUid of the skill
+        // see Typo3DbQueryParser::createTypedNamedParameter
+        $skillIds = array_map(function (Skill $s) {
+            return $s->getUid();
+        }, $skills);
+
         $constraints = [
-            $q->in('skill', $skills),
+            $q->in('skill', $skillIds),
             $q->equals('user', $user),
             $q->equals('revokeDate', null),
             $q->equals('denyDate', null),
-            $q->logicalOr([
+            $q->logicalOr(
                 $q->equals('expireDate', null),
-                $q->greaterThan('expireDate', date('Y-m-d H:i:s', $GLOBALS['EXEC_TIME'])),
-            ]),
+                $q->greaterThan('expireDate', $this->getCurrentTimeForConstraint())
+            ),
         ];
         if (!$includePending) {
             $constraints[] = $q->logicalNot($q->equals('grantDate', null));
         }
-        return $q->matching($q->logicalAnd($constraints))->execute();
+        return $q->matching($q->logicalAnd(...$constraints))->execute();
     }
 
     /**
-     * @param QueryResultInterface|Certification[] $certifications
+     * @param Certification[]|QueryResultInterface $certifications
      * @return array
      */
-    protected function splitCertificationInGroups($certifications): array
+    protected function splitCertificationInGroups(QueryResultInterface|array $certifications): array
     {
         $list = [];
         $group = null;
@@ -97,14 +108,16 @@ class CertificationRepository extends BaseRepository
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('user', $user),
-                $q->equals('grantDate', null),
-                $q->equals('denyDate', null),
-                $q->equals('revokeDate', null),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups(
+            $q->matching(
+                $q->logicalAnd(
+                    $q->equals('user', $user),
+                    $q->equals('grantDate', null),
+                    $q->equals('denyDate', null),
+                    $q->equals('revokeDate', null),
+                )
+            )->execute()
+        );
     }
 
     public function findPendingByCertifier(Certifier $certifier): array
@@ -114,14 +127,16 @@ class CertificationRepository extends BaseRepository
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('certifier', $certifier),
-                $q->equals('grantDate', null),
-                $q->equals('denyDate', null),
-                $q->equals('revokeDate', null),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups(
+            $q->matching(
+                $q->logicalAnd(
+                    $q->equals('certifier', $certifier),
+                    $q->equals('grantDate', null),
+                    $q->equals('denyDate', null),
+                    $q->equals('revokeDate', null),
+                )
+            )->execute()
+        );
     }
 
     public function findCompletedByCertifier(Certifier $certifier): array
@@ -131,16 +146,18 @@ class CertificationRepository extends BaseRepository
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('certifier', $certifier),
-                $q->logicalOr([
-                    $q->logicalNot($q->equals('grantDate', null)),
-                    $q->logicalNot($q->equals('denyDate', null)),
-                    $q->logicalNot($q->equals('revokeDate', null)),
-                ]),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups(
+            $q->matching(
+                $q->logicalAnd(
+                    $q->equals('certifier', $certifier),
+                    $q->logicalOr(
+                        $q->logicalNot($q->equals('grantDate', null)),
+                        $q->logicalNot($q->equals('denyDate', null)),
+                        $q->logicalNot($q->equals('revokeDate', null))
+                    ),
+                )
+            )->execute()
+        );
     }
 
     public function findAccepted(User $user): array
@@ -148,20 +165,24 @@ class CertificationRepository extends BaseRepository
         return $this->splitCertificationInGroups($this->findAcceptedForUser($user));
     }
 
-    public function findAcceptedForUser(User $user): QueryResultInterface
+    /**
+     * @param User $user
+     * @return Certification[]|QueryResultInterface
+     */
+    public function findAcceptedForUser(User $user): array|QueryResultInterface
     {
         $q = $this->getQuery();
         $q->setOrderings([
             'grantDate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $q->matching($q->logicalAnd(
-            [
+        return $q->matching(
+            $q->logicalAnd(
                 $q->equals('user', $user),
                 $q->logicalNot($q->equals('grantDate', null)),
                 $q->equals('revokeDate', null),
-            ]
-        ))->execute();
+            )
+        )->execute();
     }
 
     public function findDeclined(User $user): array
@@ -171,12 +192,14 @@ class CertificationRepository extends BaseRepository
             'denyDate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('user', $user),
-                $q->logicalNot($q->equals('denyDate', null)),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups(
+            $q->matching(
+                $q->logicalAnd(
+                    $q->equals('user', $user),
+                    $q->logicalNot($q->equals('denyDate', null)),
+                )
+            )->execute()
+        );
     }
 
     public function findRevoked(User $user): array
@@ -186,14 +209,27 @@ class CertificationRepository extends BaseRepository
             'revokeDate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('user', $user),
-                $q->logicalNot($q->equals('revokeDate', null)),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups(
+            $q->matching(
+                $q->logicalAnd(
+                    $q->equals('user', $user),
+                    $q->logicalNot($q->equals('revokeDate', null)),
+                )
+            )->execute()
+        );
     }
 
+    /**
+     * @param Skill $skill
+     * @param User $user
+     * @param int $tier
+     * @param string $comment
+     * @param Certifier|null $certifier
+     * @param Campaign|null $campaign
+     * @param string $group
+     * @return Certification
+     * @throws IllegalObjectTypeException
+     */
     public function addTier(
         Skill $skill,
         User $user,
@@ -215,23 +251,26 @@ class CertificationRepository extends BaseRepository
         $verification->setRewardable($certifier && $certifier->getBrand()->getBillable());
         if ($certifier) {
             if ($certifier->getUser()) {
-                $verification->setVerifierName("{$certifier->getUser()->getFirstName()} {$certifier->getUser()->getLastName()}");
+                $verification->setVerifierName(
+                    "{$certifier->getUser()->getFirstName()} {$certifier->getUser()->getLastName()}"
+                );
             } else {
                 $verification->setVerifierName($certifier->getTestSystem());
             }
         }
-        $verification->setBrand($certifier ? $certifier->getBrand() : null);
-        $verification->setBrandName($certifier ? $certifier->getBrand()->getName() : "");
+        $verification->setBrand($certifier?->getBrand());
+        $verification->setBrandName($certifier ? $certifier->getBrand()->getName() : '');
         $verification->setRequestGroup($group);
         $parent = $verification->getRequestGroupParent();
-        $verification->setGroupName($parent ? $parent->getName() : "");
+        $verification->setGroupName($parent ? $parent->getName() : '');
 
         if ($campaign) {
             $verification->setCampaign($campaign);
         }
         $verification->setComment($comment);
         // dirty workaround as extbase fails to handle crdate correctly
-        $verification->setCrdate($GLOBALS['EXEC_TIME']);
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
+        $verification->setCrdate($now);
 
         switch ($tier) {
             case 4:
@@ -252,29 +291,46 @@ class CertificationRepository extends BaseRepository
         return $verification;
     }
 
+    /**
+     * @param RewardPrerequisite $prerequisite
+     * @param User $user
+     * @return QueryResultInterface
+     * @throws InvalidQueryException
+     */
     public function findByPrerequisiteAndUser(RewardPrerequisite $prerequisite, User $user): QueryResultInterface
     {
         $q = $this->createQuery();
 
         $constraints = [
             $q->equals('user', $user),
-            $q->equals('skill', $prerequisite->getSkill()),
+            $q->equals('skill', $prerequisite->getSkill()->getUid()),
             $q->equals('tier' . $prerequisite->getLevel(), 1),
             $q->logicalNot($q->equals('grantDate', null)),
             $q->equals('revokeDate', null),
-            $q->logicalOr([
+            $q->logicalOr(
                 $q->equals('expireDate', null),
-                $q->greaterThan('expireDate', date('Y-m-d H:i:s', $GLOBALS['EXEC_TIME'])),
-            ]),
+                $q->greaterThan('expireDate', $this->getCurrentTimeForConstraint())
+            ),
         ];
         if ($prerequisite->getBrand()) {
-            $constraints[] = $q->equals('brand', $prerequisite->getBrand());
+            $constraints[] = $q->equals('brand', $prerequisite->getBrand()->getUid());
         }
-        $q->matching($q->logicalAnd($constraints));
+        $q->matching($q->logicalAnd(...$constraints));
 
         return $q->execute();
     }
 
+    /**
+     * @param DateTime|null $from
+     * @param DateTime|null $to
+     * @param Brand[]|int[] $brands
+     * @param SkillPath[]|int[] $skillSets
+     * @param User|null $user
+     * @param int $level
+     * @return QueryResultInterface
+     * @throws InvalidNumberOfConstraintsException
+     * @throws UnexpectedTypeException
+     */
     public function findByGrantDateAndBrandsAndSkillSets(
         ?DateTime $from,
         ?DateTime $to,
@@ -288,10 +344,10 @@ class CertificationRepository extends BaseRepository
         $constraints = [
             $q->equals('revokeDate', null),
             $q->equals('denyDate', null),
-            $q->logicalOr([
+            $q->logicalOr(
                 $q->equals('expireDate', null),
-                $q->lessThanOrEqual('expireDate', date('Y-m-d H:i:s', $GLOBALS['EXEC_TIME'])),
-            ]),
+                $q->lessThanOrEqual('expireDate', $this->getCurrentTimeForConstraint())
+            ),
         ];
         if ($from) {
             $constraints[] = $q->greaterThanOrEqual('grantDate', $from->format('Y-m-d H:i:s'));
@@ -303,11 +359,17 @@ class CertificationRepository extends BaseRepository
             $constraints[] = $q->logicalNot($q->equals('grantDate', null));
         }
         if ($brands) {
-            $constraints[] = $q->in('brand', $brands);
+            $brandIds = array_map(function ($s) {
+                if ($s instanceof Brand) {
+                    return $s->getUid();
+                }
+                return (int)$s;
+            }, $brands);
+            $constraints[] = $q->in('brand', $brandIds);
         }
         if ($skillSets) {
-            $skillSetRepo = $this->objectManager->get(SkillPathRepository::class);
-            $skills = [];
+            $skillSetRepo = GeneralUtility::makeInstance(SkillPathRepository::class);
+            $skillIds = [];
             foreach ($skillSets as $setId) {
                 if ($setId instanceof SkillPath) {
                     $set = $setId;
@@ -317,13 +379,10 @@ class CertificationRepository extends BaseRepository
                 $setSkillsIds = array_map(function (Skill $skill) {
                     return $skill->getUid();
                 }, $set->getSkills()->toArray());
-                foreach ($setSkillsIds as $skillId) {
-                    if (!in_array($skillId, $skills)) {
-                        $skills[] = $skillId;
-                    }
-                }
+                $skillIds = array_merge($skillIds, $setSkillsIds);
             }
-            $constraints[] = $q->in('skill', $skills);
+            $skillIds = array_unique($skillIds, SORT_NUMERIC);
+            $constraints[] = $q->in('skill', $skillIds);
         }
         if ($user) {
             $constraints[] = $q->equals('user', $user);
@@ -331,47 +390,27 @@ class CertificationRepository extends BaseRepository
         if ($level) {
             $constraints[] = $q->equals('tier' . $level, 1);
         }
-        $q->matching($q->logicalAnd($constraints));
-        return $q->execute();
-    }
-
-    public function findCompletedByOrganisationMembership(
-        int $brandId,
-        DateTime $from,
-        DateTime $to
-    ): QueryResultInterface {
-        $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
-        $q->matching($q->logicalAnd([
-            //$q->contains('user.organisations', $brandId),
-            $q->greaterThanOrEqual('grantDate', $from->format('Y-m-d H:i:s')),
-            $q->lessThanOrEqual('grantDate', $to->format('Y-m-d H:i:s')),
-            $q->equals('revokeDate', null),
-            $q->equals('denyDate', null),
-            $q->logicalOr([
-                $q->equals('expireDate', null),
-                $q->lessThanOrEqual('expireDate', date('Y-m-d H:i:s', $GLOBALS['EXEC_TIME'])),
-            ]),
-        ]));
+        $q->matching($q->logicalAnd(...$constraints));
         return $q->execute();
     }
 
     public function findPendingByCertifierUser(User $user, int $limit = 0): array
     {
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
         $q->setOrderings([
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        $groups = $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('certifier.user', $user),
-                $q->equals('grantDate', null),
-                $q->equals('denyDate', null),
-                $q->equals('revokeDate', null),
-            ]
-        ))->execute());
+        $groups = $this->splitCertificationInGroups(
+            $q->matching(
+                $q->logicalAnd(
+                    $q->equals('certifier.user', $user),
+                    $q->equals('grantDate', null),
+                    $q->equals('denyDate', null),
+                    $q->equals('revokeDate', null),
+                )
+            )->execute()
+        );
         if ($limit) {
             array_splice($groups, $limit);
         }
@@ -381,33 +420,33 @@ class CertificationRepository extends BaseRepository
     public function findByCertifier(Certifier $certifier): array
     {
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
         $q->setOrderings([
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('certifier', $certifier),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups(
+            $q->matching(
+                $q->equals('certifier', $certifier)
+            )->execute()
+        );
     }
 
     public function findByUser(User $user): array
     {
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
         $q->setOrderings([
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $this->splitCertificationInGroups($q->matching($q->logicalAnd(
-            [
-                $q->equals('user', $user),
-            ]
-        ))->execute());
+        return $this->splitCertificationInGroups($q->matching($q->equals('user', $user))->execute());
     }
 
+    /**
+     * @param string $searchWord
+     * @param User $user
+     * @return array
+     * @throws InvalidQueryException
+     */
     public function findBySearchWord(string $searchWord, User $user): array
     {
         $q = $this->getQuery();
@@ -419,7 +458,7 @@ class CertificationRepository extends BaseRepository
             $q->equals('user', $user),
         ];
 
-        $skillSets = $this->objectManager->get(SkillPathRepository::class)->findBySearchWord($searchWord, []);
+        $skillSets = GeneralUtility::makeInstance(SkillPathRepository::class)->findBySearchWord($searchWord, []);
         $likeParts = array_map(function (SkillPath $s) {
             return 'skillpath-' . $s->getUid() . '%';
         }, $skillSets);
@@ -444,48 +483,53 @@ class CertificationRepository extends BaseRepository
                 $q->like('certifier.user.lastName', '%' . $searchWordLike . '%'),
             ];
 
-            $subConstraints[] = $q->logicalOr($subConditions);
+            $subConstraints[] = $q->logicalOr(...$subConditions);
         }
         if ($requestGroupLike) {
-            $subConstraints[] = $q->logicalOr($requestGroupLike);
+            $subConstraints[] = $q->logicalOr(...$requestGroupLike);
         }
-        $constraints[] = $q->logicalOr($subConstraints);
-        if (!empty($constraints)) {
-            $q->matching($q->logicalAnd($constraints));
+        if ($subConstraints) {
+            $constraints[] = $q->logicalOr(...$subConstraints);
+        }
+        if (count($constraints) > 1) {
+            $q->matching($q->logicalAnd(...$constraints));
+        } else {
+            $q->matching($constraints[0]);
         }
 
         return $this->splitCertificationInGroups($q->execute());
     }
 
+    /**
+     * @param Certifier $verifier
+     * @return Certification[]
+     */
     public function findAcceptedByCertifier(Certifier $verifier): array
     {
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
         $q->setOrderings([
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $q->matching($q->logicalAnd(
-            [
+        return $q->matching(
+            $q->logicalAnd(
                 $q->equals('certifier', $verifier),
                 $q->logicalNot($q->equals('grant_date', null)),
-            ]
-        ))->execute()->toArray();
+            )
+        )->execute()->toArray();
     }
 
     public function findAcceptedOrDeniedByUser(?User $user, ?Certifier $verifier): array
     {
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
         $q->setOrderings([
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
         $constraints = [
-            $q->logicalOr([
-                $q->logicalNot($q->equals('grant_date', null)),
-                $q->logicalNot($q->equals('deny_date', null)),
-            ]),
+            $q->logicalNot($q->equals('grantDate', null)),
+            $q->equals('denyDate', null),
+            $q->equals('revokeDate', null),
         ];
         if ($user) {
             $constraints[] = $q->equals('user', $user);
@@ -493,48 +537,86 @@ class CertificationRepository extends BaseRepository
         if ($verifier) {
             $constraints[] = $q->equals('certifier', $verifier);
         }
-        return $q->matching($q->logicalAnd($constraints))->execute()->toArray();
+        return $q->matching($q->logicalAnd(...$constraints))->execute()->toArray();
     }
 
     /**
      * @param Brand $organisation
      * @return Certification[]
+     * @throws DBALException
+     * @throws Exception
      */
     public function findUnbalanced(Brand $organisation): array
     {
-        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_skills_domain_model_certification');
+        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(
+            'tx_skills_domain_model_certification'
+        );
         $rows = $qb->select('c.*')
-                     ->from('tx_skills_domain_model_certification', 'c')
-                     ->leftJoin('c', 'tx_skills_domain_model_verificationcreditusage', 'u', 'u.verification = c.uid')
-                     ->where(
-                         $qb->expr()->eq('c.brand', $qb->createNamedParameter($organisation->getUid(), Connection::PARAM_INT)),
-                         $qb->expr()->neq('c.price', $qb->createNamedParameter(0, Connection::PARAM_INT)),
-                         $qb->expr()->isNotNull('c.grant_date'),
-                         $qb->expr()->isNull('u.uid')
-                     )
-                     ->execute()->fetchAll();
-        if ($rows) {
-            $dataMapper = $this->objectManager->get(DataMapper::class);
-            return $dataMapper->map(Certification::class, $rows);
-        }
-        return [];
+            ->from('tx_skills_domain_model_certification', 'c')
+            ->leftJoin('c', 'tx_skills_domain_model_verificationcreditusage', 'u', 'u.verification = c.uid')
+            ->where(
+                $qb->expr()->eq('c.brand', $qb->createNamedParameter($organisation->getUid(), Connection::PARAM_INT)),
+                $qb->expr()->neq('c.price', $qb->createNamedParameter(0, Connection::PARAM_INT)),
+                $qb->expr()->isNotNull('c.grant_date'),
+                $qb->expr()->isNull('u.uid')
+            )
+            ->executeQuery()->fetchAllAssociative();
+        return $this->mapRows($rows);
     }
 
+    /**
+     * @param Brand $organisation
+     * @param DateTime $from
+     * @param DateTime $to
+     * @return array
+     * @throws InvalidQueryException
+     */
     public function findAcceptedByOrganisation(Brand $organisation, DateTime $from, DateTime $to): array
     {
+
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false);
-        $q->matching($q->logicalAnd([
-            $q->equals('brand', $organisation),
-            $q->greaterThanOrEqual('grantDate', $from->format('Y-m-d H:i:s')),
-            $q->lessThanOrEqual('grantDate', $to->format('Y-m-d H:i:s')),
-            $q->equals('revokeDate', null),
-            $q->equals('denyDate', null),
-            $q->logicalOr([
-                $q->equals('expireDate', null),
-                $q->lessThanOrEqual('expireDate', date('Y-m-d H:i:s', $GLOBALS['EXEC_TIME'])),
-            ]),
-        ]));
+        $q->matching(
+            $q->logicalAnd(
+                $q->equals('brand', $organisation->getUid()),
+                $q->greaterThanOrEqual('grantDate', $from->format('Y-m-d H:i:s')),
+                $q->lessThanOrEqual('grantDate', $to->format('Y-m-d H:i:s')),
+                $q->equals('revokeDate', null),
+                $q->equals('denyDate', null),
+                $q->logicalOr(
+                    $q->equals('expireDate', null),
+                    $q->lessThanOrEqual('expireDate', $this->getCurrentTimeForConstraint())
+                ),
+            )
+        );
         return $this->splitCertificationInGroups($q->execute());
+    }
+
+    public function findByRequestGroup(string $group): array|QueryResultInterface
+    {
+        $q = $this->createQuery();
+        $q->matching($q->equals('requestGroup', $group));
+        return $q->execute();
+    }
+
+    public function countByBrand(Brand $brand): int
+    {
+        $query = $this->createQuery();
+        return $query->matching($query->equals('brand', $brand))->execute()->count();
+    }
+
+    /**
+    * @param Skill $skill
+    * @return Certification[]|QueryResultInterface
+    */
+    public function findBySkill(Skill $skill): array|QueryResultInterface
+    {
+        $query = $this->createQuery();
+        return $query->matching($query->equals('skill', $skill))->execute();
+    }
+
+    protected function getCurrentTimeForConstraint(): string
+    {
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
+        return date('Y-m-d H:i:s', $now);
     }
 }

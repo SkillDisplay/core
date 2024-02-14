@@ -1,20 +1,21 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
 use SkillDisplay\Skills\Domain\Model\Award;
 use SkillDisplay\Skills\Domain\Model\User;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 
 /**
@@ -22,14 +23,17 @@ use TYPO3\CMS\Extbase\Persistence\QueryInterface;
  */
 class AwardRepository extends BaseRepository
 {
+    /**
+     * @throws InvalidQueryException
+     */
     public function getBestThreeAwardsForUser(User $user): array
     {
         $q = $this->createQuery();
         $q->matching(
-            $q->logicalAnd([
+            $q->logicalAnd(
                 $q->equals('user', $user),
-                $q->equals('type', Award::TYPE_VERIFICATIONS)
-            ])
+                $q->equals('type', Award::TYPE_VERIFICATIONS),
+            )
         );
         $q->setOrderings(['rank' => QueryInterface::ORDER_DESCENDING]);
         $q->setLimit(3);
@@ -38,10 +42,10 @@ class AwardRepository extends BaseRepository
 
         $q = $this->createQuery();
         $q->matching(
-            $q->logicalAnd([
+            $q->logicalAnd(
                 $q->equals('user', $user),
-                $q->equals('type', Award::TYPE_MEMBER)
-            ])
+                $q->equals('type', Award::TYPE_MEMBER),
+            )
         );
         $q->setOrderings(['rank' => QueryInterface::ORDER_DESCENDING]);
         /** @var Award $member */
@@ -49,10 +53,10 @@ class AwardRepository extends BaseRepository
 
         $q = $this->createQuery();
         $q->matching(
-            $q->logicalAnd([
+            $q->logicalAnd(
                 $q->equals('user', $user),
                 $q->in('type', [Award::TYPE_MENTOR, Award::TYPE_COACH]),
-            ])
+            )
         );
         $q->setOrderings(['rank' => QueryInterface::ORDER_DESCENDING]);
         /** @var Award $mentor */
@@ -65,11 +69,9 @@ class AwardRepository extends BaseRepository
         if ($mentor != null && $member != null) {
             $awards[] = $member;
             $awards[] = $mentor;
-        }
-        elseif ($mentor == null && $member == null) {
+        } elseif ($mentor == null && $member == null) {
             $awards = array_merge($awards, $verified);
-        }
-        else {
+        } else {
             if ($verified) {
                 $awards[] = array_shift($verified);
             }
@@ -83,9 +85,9 @@ class AwardRepository extends BaseRepository
     {
         $q = $this->createQuery();
         $q->matching(
-                $q->equals('type', $type)
+            $q->equals('type', $type)
         );
-       return $q->execute()->toArray();
+        return $q->execute()->toArray();
     }
 
     public function getAwardsByUserId(int $userId): array

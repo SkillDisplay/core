@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -9,26 +10,27 @@
  *
  *  (c) 2016 Markus Klein
  *           Georg Ringer
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
+use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Set extends AbstractEntity
 {
     /**
      * skills
      *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\SetSkill>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Cascade("remove")
+     * @var ObjectStorage<SetSkill>
+     * @Cascade("remove")
      */
-    protected $skills = null;
+    protected ObjectStorage $skills;
 
     public function __construct()
     {
-        $this->skills = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+        $this->skills = new ObjectStorage();
     }
 
     public function addSkill(SetSkill $skill): void
@@ -42,16 +44,14 @@ class Set extends AbstractEntity
     }
 
     /**
-     * Returns the skills
-     *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\SetSkill>
+     * @return ObjectStorage<SetSkill>
      */
-    public function getSkills()
+    public function getSkills(): ObjectStorage
     {
         return $this->skills;
     }
 
-    public function setSkills(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $skills): void
+    public function setSkills(ObjectStorage $skills): void
     {
         $this->skills = $skills;
     }

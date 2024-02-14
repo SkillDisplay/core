@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service\Importer;
 
@@ -9,21 +11,20 @@ abstract class AbstractImportExportService
 {
     protected const VERSION = '5';
 
-    /** @var array|null */
-    private static $languageMapping = null;
+    private static ?array $languageMapping = null;
 
     protected static function getLanguageMapping(): array
     {
         if (self::$languageMapping === null) {
             self::$languageMapping = [];
             $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
-            $results = $qb->select('*')->from('sys_language')->execute();
-            while ($row = $results->fetch()) {
+            $results = $qb->select('*')->from('sys_language')->executeQuery();
+            while ($row = $results->fetchAssociative()) {
                 if ($row['language_isocode']) {
                     self::$languageMapping[(int)$row['uid']] = $row['language_isocode'];
                 }
             }
-            $results->closeCursor();
+            $results->free();
         }
         return self::$languageMapping;
     }
@@ -37,7 +38,7 @@ abstract class AbstractImportExportService
     {
         return json_encode([
             'hash' => $hash,
-            'version' => self::VERSION
+            'version' => self::VERSION,
         ]);
     }
 

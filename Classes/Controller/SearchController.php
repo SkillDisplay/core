@@ -1,18 +1,19 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2019 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
+use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\Skill;
@@ -21,45 +22,29 @@ use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
+use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Mvc\View\JsonView;
 use SkillDisplay\Skills\Service\UserOrganisationsService;
 
 class SearchController extends AbstractController
 {
-    protected SkillRepository $skillRepo;
-
-    protected SkillPathRepository $skillSetRepo;
-
-    protected CertificationRepository $verificationRepo;
-
-    protected BrandRepository $brandRepository;
-
     public function __construct(
-        SkillRepository $skillRepository,
-        SkillPathRepository $skillPathRepository,
-        CertificationRepository $certificationRepository,
-        BrandRepository $brandRepository
+        UserRepository $userRepository,
+        protected readonly SkillRepository $skillRepo,
+        protected readonly SkillPathRepository $skillSetRepo,
+        protected readonly CertificationRepository $verificationRepo,
+        protected readonly BrandRepository $brandRepository
     ) {
-        $this->skillRepo = $skillRepository;
-        $this->skillSetRepo = $skillPathRepository;
-        $this->verificationRepo = $certificationRepository;
-        $this->brandRepository = $brandRepository;
+        parent::__construct($userRepository);
     }
 
-    /**
-     * @param string $searchWord
-     * @param bool $skillSearch
-     * @param bool $skillSetSearch
-     * @param bool $verificationSearch
-     * @param bool $brandSearch
-     */
     public function searchAction(
         string $searchWord,
         bool $skillSearch = true,
         bool $skillSetSearch = true,
         bool $verificationSearch = true,
         bool $brandSearch = true
-    ) {
+    ): ResponseInterface {
         $skills = [];
         $skillSets = [];
         $verifications = [];
@@ -71,18 +56,21 @@ class SearchController extends AbstractController
             $user = $this->getCurrentUser();
 
             if ($skillSearch) {
-                $skills = $this->skillRepo->findBySearchWord($searchWord,
-                    UserOrganisationsService::getOrganisationsOrEmpty($user));
+                $skills = $this->skillRepo->findBySearchWord(
+                    $searchWord,
+                    UserOrganisationsService::getOrganisationsOrEmpty($user)
+                );
                 if ($user) {
-                    /** @var Skill $skill */
                     foreach ($skills as $skill) {
                         $skill->setUserForCompletedChecks($user);
                     }
                 }
             }
             if ($skillSetSearch) {
-                $skillSets = $this->skillSetRepo->findBySearchWord($searchWord,
-                    UserOrganisationsService::getOrganisationsOrEmpty($user));
+                $skillSets = $this->skillSetRepo->findBySearchWord(
+                    $searchWord,
+                    UserOrganisationsService::getOrganisationsOrEmpty($user)
+                );
                 if ($user) {
                     /** @var SkillPath $skillSet */
                     foreach ($skillSets as $skillSet) {
@@ -95,11 +83,8 @@ class SearchController extends AbstractController
             }
             if ($user && $verificationSearch) {
                 $groups = $this->verificationRepo->findBySearchWord($searchWord, $user);
-                /** @var Certification $verification */
-                foreach ($verifications as $verification) {
-                    if ($verification->getSkill()) {
-                        $verification->getSkill()->setUserForCompletedChecks($user);
-                    }
+                foreach ($groups as $group) {
+                    $group['certs'][0]->getSkill()?->setUserForCompletedChecks($user);
                 }
                 $verifications = CertificationController::convertGroupsToJson($groups);
             }
@@ -127,5 +112,6 @@ class SearchController extends AbstractController
         }
 
         $this->view->assignMultiple($data);
+        return $this->createResponse();
     }
 }

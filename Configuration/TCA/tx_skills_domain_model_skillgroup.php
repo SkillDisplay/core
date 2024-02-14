@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillgroup',
@@ -9,24 +10,20 @@ return [
         'languageField' => 'sys_language_uid',
         'transOrigPointerField' => 'l10n_parent',
         'transOrigDiffSourceField' => 'l10n_diffsource',
-		'delete' => 'deleted',
+        'delete' => 'deleted',
         'searchFields' => 'name,description',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_skillpath.png',
     ],
     'types' => [
         1 => ['showitem' => '
-            sys_language_uid, l10n_parent, l10n_diffsource, name, description, links, skills, skillup_comment_placeholder, skillup_comment_preset'
-        ]
+            sys_language_uid, l10n_parent, l10n_diffsource, name, description, links, skills, skillup_comment_placeholder, skillup_comment_preset',
+        ],
     ],
     'columns' => [
         'sys_language_uid' => [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language',
-            'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'special' => 'languages'
-            ],
+            'config' => ['type' => 'language'],
         ],
         'l10n_parent' => [
             'displayCond' => 'FIELD:sys_language_uid:>:0',
@@ -39,7 +36,7 @@ return [
                 ],
                 'foreign_table' => 'tx_skills_domain_model_skillpath',
                 'foreign_table_where' => 'AND tx_skills_domain_model_skillpath.pid=###CURRENT_PID### AND tx_skills_domain_model_skillpath.sys_language_uid IN (-1,0)',
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'l10n_diffsource' => [
@@ -47,32 +44,32 @@ return [
                 'type' => 'passthrough',
             ],
         ],
-	    'name' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.name',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 30,
+        'name' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.name',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
-	    'description' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.description',
-	        'config' => [
-			    'type' => 'text',
-			    'cols' => 40,
-			    'rows' => 15,
-			    'eval' => 'trim,required',
+                'eval' => 'trim,required',
+            ],
+        ],
+        'description' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.description',
+            'config' => [
+                'type' => 'text',
+                'cols' => 40,
+                'rows' => 15,
+                'eval' => 'trim,required',
                 'enableRichtext' => true,
             ],
-	    ],
-	    'skills' => [
-	        'exclude' => false,
-	        'l10n_mode' => 'exclude',
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.skills',
-	        'config' => [
+        ],
+        'skills' => [
+            'exclude' => false,
+            'l10n_mode' => 'exclude',
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.skills',
+            'config' => [
                 'type' => 'select',
                 'renderType' => 'selectMultipleSideBySide',
                 'foreign_table' => 'tx_skills_domain_model_skill',
@@ -83,7 +80,7 @@ return [
                 'maxitems' => 9999,
                 'multiple' => 0,
             ],
-	    ],
+        ],
         'links' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.links',
@@ -101,7 +98,7 @@ return [
                     'showSynchronizationLink' => 1,
                     'showPossibleLocalizationRecords' => 1,
                     'useSortable' => 1,
-                    'showAllLocalizationLink' => 1
+                    'showAllLocalizationLink' => 1,
                 ],
             ],
         ],
@@ -112,7 +109,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim'
+                'eval' => 'trim',
             ],
         ],
         'skillup_comment_preset' => [
@@ -122,7 +119,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim'
+                'eval' => 'trim',
             ],
         ],
     ],

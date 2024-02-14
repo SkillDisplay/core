@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_campaign',
@@ -7,22 +8,22 @@ return [
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_campaign.png',
-        'searchFields' => 'title,user'
+        'searchFields' => 'title,user',
     ],
     'types' => [
         ['showitem' => 'title,user'],
     ],
     'columns' => [
-	    'title' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_campaign.title',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 30,
+        'title' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_campaign.title',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
+                'eval' => 'trim,required',
+            ],
+        ],
         'user' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_campaign.user',

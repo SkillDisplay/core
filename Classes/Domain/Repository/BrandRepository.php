@@ -1,25 +1,26 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
+use Doctrine\DBAL\Driver\Exception;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
-use SkillDisplay\Skills\Domain\Model\User;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
@@ -28,7 +29,21 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  */
 class BrandRepository extends BaseRepository
 {
-    public function findAllByCategory(int $categoryId): QueryResultInterface
+    public function findAll(): QueryResultInterface
+    {
+        $q = $this->createQuery();
+        $q->setOrderings([
+            'name' => QueryInterface::ORDER_ASCENDING,
+        ]);
+        return $q->execute();
+    }
+
+    /**
+     * @param int $categoryId
+     * @return Brand[]|QueryResultInterface
+     * @throws InvalidQueryException
+     */
+    public function findAllByCategory(int $categoryId): array|QueryResultInterface
     {
         $q = $this->createQuery();
         $q->matching($q->contains('categories', $categoryId));
@@ -39,27 +54,41 @@ class BrandRepository extends BaseRepository
         return $q->execute();
     }
 
-    public function findPatronsForBrand(Brand $brand) : array
+    /**
+     * @param Brand $brand
+     * @return Brand[]
+     * @throws Exception
+     */
+    public function findPatronsForBrand(Brand $brand): array
     {
-        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_skills_domain_model_brand');
-        $rows = $qb
+        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(
+            'tx_skills_domain_model_brand'
+        );
+        $qb
             ->select('*')
             ->from('tx_skills_domain_model_brand', 'b')
             ->join('b', 'tx_skills_patron_mm', 'mm', 'b.uid = mm.uid_local')
-            ->where($qb->expr()->eq('mm.uid_foreign', $qb->createNamedParameter($brand->getUid(), Connection::PARAM_INT)))
-            ->andWhere($qb->expr()->eq('b.sys_language_uid', 0))
-            ->execute()->fetchAll();
-        if ($rows) {
-            $dataMapper = $this->objectManager->get(DataMapper::class);
-            return $dataMapper->map(Brand::class, $rows);
-        }
-        return [];
+            ->where(
+                $qb->expr()->eq('mm.uid_foreign', $qb->createNamedParameter($brand->getUid(), Connection::PARAM_INT))
+            )
+            ->andWhere($qb->expr()->eq('b.sys_language_uid', 0));
+        return $this->mapRows($qb->executeQuery()->fetchAllAssociative());
     }
 
-    public function findVerifierBrandsForPath(SkillPath $path, int $level) : array
+    /**
+     * @param SkillPath $path
+     * @param int $level
+     * @return Brand[]
+     * @throws Exception
+     */
+    public function findVerifierBrandsForPath(SkillPath $path, int $level): array
     {
-        $skillIds = array_map(function(Skill $skill) { return $skill->getUid();}, $path->getSkills()->toArray());
-        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_skills_domain_model_brand');
+        $skillIds = array_map(function (Skill $skill) {
+            return $skill->getUid();
+        }, $path->getSkills()->toArray());
+        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(
+            'tx_skills_domain_model_brand'
+        );
         $qb
             ->select('b.*')
             ->from('tx_skills_domain_model_brand', 'b')
@@ -72,17 +101,18 @@ class BrandRepository extends BaseRepository
         if ($level) {
             $qb->andWhere($qb->expr()->eq('p.tier' . $level, 1));
         }
-        $rows = $qb->execute()->fetchAll();
-        if ($rows) {
-            $dataMapper = $this->objectManager->get(DataMapper::class);
-            return $dataMapper->map(Brand::class, $rows);
-        }
-        return [];
+        return $this->mapRows($qb->executeQuery()->fetchAllAssociative());
     }
 
+    /**
+     * @return Brand[]
+     * @throws Exception
+     */
     public function findAllWithSkills(): array
     {
-        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_skills_domain_model_brand');
+        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(
+            'tx_skills_domain_model_brand'
+        );
         $qb
             ->select('b.*')
             ->from('tx_skills_domain_model_brand', 'b')
@@ -92,36 +122,47 @@ class BrandRepository extends BaseRepository
             ->andWhere($qb->expr()->eq('s.deleted', 0))
             ->orderBy('b.name')
             ->groupBy('b.uid');
-        $rows = $qb->execute()->fetchAll();
-        if ($rows) {
-            $dataMapper = $this->objectManager->get(DataMapper::class);
-            return $dataMapper->map(Brand::class, $rows);
-        }
-        return [];
+        return $this->mapRows($qb->executeQuery()->fetchAllAssociative());
     }
 
+    /**
+     * @return QueryResultInterface
+     * @throws InvalidQueryException
+     */
     public function findAllWithMembers(): QueryResultInterface
     {
         $q = $this->createQuery();
-        $q->greaterThan('members',0);
+        $q->greaterThan('members', 0);
         $q->setOrderings([
             'name' => QueryInterface::ORDER_ASCENDING,
         ]);
         return $q->execute();
     }
 
+    /**
+     * @param int $brandId
+     * @return int
+     * @throws Exception
+     */
     public function getSkillCountForBrand(int $brandId): int
     {
-        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tx_skills_domain_model_brand');
+        $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(
+            'tx_skills_domain_model_brand'
+        );
         return (int)$qb
             ->count('sb.uid_local')
             ->from('tx_skills_domain_model_brand', 'b')
             ->join('b', 'tx_skills_skill_brand_mm', 'sb', 'b.uid = sb.uid_foreign')
             ->where($qb->expr()->eq('b.uid', $brandId))
-            ->execute()->fetchColumn();
+            ->executeQuery()->fetchFirstColumn();
     }
 
-    public function findBySearchWord(string $searchWord) : array
+    /**
+     * @param string $searchWord
+     * @return Brand[]
+     * @throws InvalidQueryException
+     */
+    public function findBySearchWord(string $searchWord): array
     {
         $q = $this->getQuery();
         $constraints = [];
@@ -135,39 +176,26 @@ class BrandRepository extends BaseRepository
                 $q->like('description', '%' . $searchWordLike . '%'),
                 $q->like('url', '%' . $searchWordLike . '%'),
             ];
-            $constraints[] = $q->logicalOr($subConditions);
+            $constraints[] = $q->logicalOr(...$subConditions);
         }
+
         $constraints[] = $q->equals('show_in_search', '1');
-        if (!empty($constraints)) {
-            $q->matching($q->logicalAnd($constraints));
+
+        if (count($constraints) > 1) {
+            $q->matching($q->logicalAnd(...$constraints));
+        } else {
+            $q->matching($constraints[0]);
         }
         return $q->execute()->toArray();
-    }
-
-    public function findAllForPublicStats()
-    {
-        $q = $this->createQuery();
-        $q->setOrderings([
-            'name' => QueryInterface::ORDER_ASCENDING,
-        ]);
-        return $q->execute();
     }
 
     public function findByApiKey(string $apiKey): ?Brand
     {
         $q = $this->createQuery();
-        $q->getQuerySettings()->setRespectStoragePage(false)->setRespectSysLanguage(false);
+        $q->getQuerySettings()->setRespectSysLanguage(false);
         $q->matching($q->equals('apiKey', $apiKey));
         /** @var Brand $brand */
         $brand = $q->execute()->getFirst();
         return $brand;
-    }
-
-    public function findAllSortedAlphabetically() {
-        $q = $this->createQuery();
-        $q->setOrderings([
-            'name' => QueryInterface::ORDER_ASCENDING,
-        ]);
-        return $q->execute();
     }
 }

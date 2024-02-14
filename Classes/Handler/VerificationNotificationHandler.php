@@ -25,16 +25,13 @@ class VerificationNotificationHandler implements NotificationHandlerInterface
     private function getMessageForType(string $type, Certification $verification): string
     {
         $title = $verification->getGroupName() ?: $verification->getSkillTitle();
-        switch ($type) {
-            case Notification::TYPE_VERIFICATION_GRANTED:
-                return 'Your verification request for ' . $title . ' has been granted.';
-            case Notification::TYPE_VERIFICATION_REVOKED:
-                return 'Your verification request for ' . $title . ' has been revoked.';
-            case Notification::TYPE_VERIFICATION_REJECTED:
-                return 'Your verification request for ' . $title . ' has been rejected.';
-            case Notification::TYPE_VERIFICATION_REQUESTED:
-                return 'You have a new verification request for ' . $title;
-        }
-        return '';
+        $message = match ($type) {
+            Notification::TYPE_VERIFICATION_GRANTED => 'Your verification request for %s has been granted.',
+            Notification::TYPE_VERIFICATION_REVOKED => 'Your verification request for %s has been revoked.',
+            Notification::TYPE_VERIFICATION_REJECTED => 'Your verification request for %s has been rejected.',
+            Notification::TYPE_VERIFICATION_REQUESTED => 'You have a new verification request for %s',
+            default => '',
+        };
+        return sprintf($message, $title);
     }
 }

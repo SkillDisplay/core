@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Command;
@@ -27,12 +28,18 @@ class UuidController extends Command
 
         foreach (TranslatedUuidService::UUID_TABLES as $table) {
             $qb = $connection->createQueryBuilder();
+            $hasLanguageField = (bool)$GLOBALS['TCA'][$table]['ctrl']['languageField'] ?? false;
             // create uuid for all default language records
+            $conditions = [
+                'uuid = \'\' or uuid is null',
+            ];
+            if ($hasLanguageField) {
+                $conditions[] = 'sys_language_uid = 0';
+            }
             $qb->update($table)->set('uuid', 'uuid()', false)
-                ->where('uuid = \'\' or uuid is null', 'sys_language_uid = 0')
-                ->execute();
-
-            if (empty($GLOBALS['TCA'][$table]['ctrl']['languageField'])) {
+                ->where(...$conditions)
+                ->executeStatement();
+            if (!$hasLanguageField) {
                 continue;
             }
             $qb->resetQueryParts();
@@ -41,7 +48,7 @@ class UuidController extends Command
                 ->from($table, 'c')
                 ->join('c', $table, 'p', 'p.uid = c.l10n_parent')
                 ->where('c.l10n_parent > 0')
-                ->execute();
+                ->executeQuery();
             while ($row = $res->fetchAssociative()) {
                 $isoCode = $iso[$row['sys_language_uid']] ?? ($iso[$row['sys_language_uid']] = TranslatedUuidService::getLanguageIsoCode((int)$row['sys_language_uid']));
                 $translationUuid = TranslatedUuidService::getTranslatedUuid($row['parent_uuid'], $isoCode);
@@ -51,6 +58,6 @@ class UuidController extends Command
                 }
             }
         }
-        return 0;
+        return Command::SUCCESS;
     }
 }

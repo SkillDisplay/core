@@ -9,7 +9,7 @@ von {user.username}
 auf {user.pendingEmail}
 ändern möchtest, klicke zur Bestätigung einfach auf den folgenden Link.
 
-<f:uri.page pageUid="{settings.pids.shortLink}" absolute="1" additionalParams="{code:code, L:1}" noCacheHash="1"/>
+<f:uri.page pageUid="{settings.pids.shortLink}" absolute="1" additionalParams="{regcode:code, L:1}"/>
 
 Dein SkillDisplay Team
 

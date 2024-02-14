@@ -1,32 +1,71 @@
 <?php
-defined('TYPO3_MODE') || die('Access denied.');
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerTypeConverter(SkillDisplay\Skills\TypeConverter\UploadedFileReferenceConverter::class);
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerTypeConverter(SkillDisplay\Skills\TypeConverter\ObjectStorageConverter::class);
+declare(strict_types=1);
+
+defined('TYPO3') || die('Access denied.');
+
+use Psr\Log\LogLevel;
+use SkillDisplay\Skills\Controller\CampaignController;
+use SkillDisplay\Skills\Controller\CertificationController;
+use SkillDisplay\Skills\Controller\NotificationController;
+use SkillDisplay\Skills\Controller\OrganisationController;
+use SkillDisplay\Skills\Controller\PaymentController;
+use SkillDisplay\Skills\Controller\PortalController;
+use SkillDisplay\Skills\Controller\SearchController;
+use SkillDisplay\Skills\Controller\ShortLinkController;
+use SkillDisplay\Skills\Controller\SkillController;
+use SkillDisplay\Skills\Controller\SkillPathController;
+use SkillDisplay\Skills\Controller\UserController;
+use SkillDisplay\Skills\Controller\VerificationCreditController;
+use SkillDisplay\Skills\Controller\VerifierController;
+use SkillDisplay\Skills\Domain\Model\FileReference;
+use SkillDisplay\Skills\Domain\Model\Notification;
+use SkillDisplay\Skills\Domain\Repository\SkillGroupRepository;
+use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
+use SkillDisplay\Skills\Handler\VerificationNotificationHandler;
+use SkillDisplay\Skills\Hook\DataHandlerHook;
+use SkillDisplay\Skills\Routing\RestApiEnhancer;
+use SkillDisplay\Skills\Routing\UidMapper;
+use SkillDisplay\Skills\Service\NotificationService;
+use SkillDisplay\Skills\Service\ShortLinkService;
+use SkillDisplay\Skills\TypeConverter\ObjectStorageConverter;
+use SkillDisplay\Skills\TypeConverter\UploadedFileReferenceConverter;
+use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
+use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
+use TYPO3\CMS\Core\Log\Writer\FileWriter;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\Container\Container;
+use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
+
+ExtensionUtility::registerTypeConverter(UploadedFileReferenceConverter::class);
+ExtensionUtility::registerTypeConverter(ObjectStorageConverter::class);
 
 // these controller/action combinations must be allowed also in the ShortLink plugin below!
-\SkillDisplay\Skills\Service\ShortLinkService::addHandler('userConfirm', ['User', 'confirm']);
-\SkillDisplay\Skills\Service\ShortLinkService::addHandler('emailConfirm', ['User', 'confirmEmail']);
+ShortLinkService::addHandler('userConfirm', ['User', 'confirm']);
+ShortLinkService::addHandler('emailConfirm', ['User', 'confirmEmail']);
 
-\SkillDisplay\Skills\Service\NotificationService::registerHandler(\SkillDisplay\Skills\Domain\Model\Notification::TYPE_VERIFICATION_GRANTED, \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\SkillDisplay\Skills\Handler\VerificationNotificationHandler::class));
-\SkillDisplay\Skills\Service\NotificationService::registerHandler(\SkillDisplay\Skills\Domain\Model\Notification::TYPE_VERIFICATION_REJECTED, \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\SkillDisplay\Skills\Handler\VerificationNotificationHandler::class));
-\SkillDisplay\Skills\Service\NotificationService::registerHandler(\SkillDisplay\Skills\Domain\Model\Notification::TYPE_VERIFICATION_REVOKED, \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\SkillDisplay\Skills\Handler\VerificationNotificationHandler::class));
-\SkillDisplay\Skills\Service\NotificationService::registerHandler(\SkillDisplay\Skills\Domain\Model\Notification::TYPE_VERIFICATION_REQUESTED, \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\SkillDisplay\Skills\Handler\VerificationNotificationHandler::class));
+$notificationHandler = GeneralUtility::makeInstance(VerificationNotificationHandler::class);
+NotificationService::registerHandler(Notification::TYPE_VERIFICATION_GRANTED, $notificationHandler);
+NotificationService::registerHandler(Notification::TYPE_VERIFICATION_REJECTED, $notificationHandler);
+NotificationService::registerHandler(Notification::TYPE_VERIFICATION_REVOKED, $notificationHandler);
+NotificationService::registerHandler(Notification::TYPE_VERIFICATION_REQUESTED, $notificationHandler);
 
-$GLOBALS['EXTCONF']['skills']['SkillGroups']['skillPath'] = \SkillDisplay\Skills\Domain\Repository\SkillPathRepository::class;
-$GLOBALS['EXTCONF']['skills']['SkillGroups']['skillGroup'] = \SkillDisplay\Skills\Domain\Repository\SkillGroupRepository::class;
+$GLOBALS['EXTCONF']['skills']['SkillGroups']['skillPath'] = SkillPathRepository::class;
+$GLOBALS['EXTCONF']['skills']['SkillGroups']['skillGroup'] = SkillGroupRepository::class;
 
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = DataHandlerHook::class;
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = DataHandlerHook::class;
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clearPageCacheEval']['skills'] = DataHandlerHook::class . '->clearProgressCache';
 
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] = \SkillDisplay\Skills\Hook\DataHandlerHook::class;
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] = \SkillDisplay\Skills\Hook\DataHandlerHook::class;
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['enhancers']['RestApi'] = RestApiEnhancer::class;
+$GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['aspects']['UidMapper'] = UidMapper::class;
 
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['enhancers']['RestApi'] = \SkillDisplay\Skills\Routing\RestApiEnhancer::class;
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['aspects']['UidMapper'] = \SkillDisplay\Skills\Routing\UidMapper::class;
+GeneralUtility::makeInstance(Container::class)
+    ->registerImplementation(\TYPO3\CMS\Extbase\Domain\Model\FileReference::class, FileReference::class);
 
-\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Object\Container\Container::class)
-    ->registerImplementation(\TYPO3\CMS\Extbase\Domain\Model\FileReference::class, \SkillDisplay\Skills\Domain\Model\FileReference::class);
-
-\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTypoScriptSetup(trim('
+ExtensionManagementUtility::addTypoScriptSetup(trim(
+    '
     config.pageTitleProviders {
         skills {
             provider = SkillDisplay\Skills\Seo\PageTitleProvider
@@ -35,83 +74,81 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['aspects']['UidMapper'] = \SkillDi
     }'
 ));
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'Skills',
     [
-        \SkillDisplay\Skills\Controller\SkillPathController::class => 'listByBrand, show',
-        \SkillDisplay\Skills\Controller\SkillController::class => 'show',
+        SkillPathController::class => 'listByBrand, show',
+        SkillController::class => 'show',
     ],
     // non-cacheable actions
     [
+        SkillPathController::class => 'listByBrand',
     ]
 );
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'Users',
     [
-        \SkillDisplay\Skills\Controller\UserController::class => 'new, create, confirm, confirmEmail, success, terms, acceptTerms'
+        UserController::class => 'new, create, confirm, confirmEmail, success, terms, acceptTerms',
     ],
     // non-cacheable actions
     [
-        \SkillDisplay\Skills\Controller\UserController::class => 'new, create, confirm, confirmEmail, terms, acceptTerms'
+        UserController::class => 'new, create, confirm, confirmEmail, terms, acceptTerms',
     ]
 );
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'ShortLink',
     [
-        \SkillDisplay\Skills\Controller\ShortLinkController::class => 'handle',
-        \SkillDisplay\Skills\Controller\UserController::class => 'confirm,confirmEmail',
+        ShortLinkController::class => 'handle',
+        UserController::class => 'confirm,confirmEmail',
     ],
     // non-cacheable actions
     [
-        \SkillDisplay\Skills\Controller\ShortLinkController::class => 'handle',
-        \SkillDisplay\Skills\Controller\UserController::class => 'confirm,confirmEmail',
+        ShortLinkController::class => 'handle',
+        UserController::class => 'confirm,confirmEmail',
     ]
 );
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'Routing',
     [
-        \SkillDisplay\Skills\Controller\UserController::class => 'route',
+        UserController::class => 'route',
     ],
     // non-cacheable actions
     [
-        \SkillDisplay\Skills\Controller\UserController::class => 'route',
+        UserController::class => 'route',
     ]
 );
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'Organisations',
     [
-        \SkillDisplay\Skills\Controller\OrganisationController::class => 'list,show',
-    ],
-    // non-cacheable actions
-    [
+        OrganisationController::class => 'list,show',
     ]
 );
 
 $apiActions = [
-    \SkillDisplay\Skills\Controller\CertificationController::class => 'recent,recentRequests,modify,userCancel,listForVerifier,history,show,create,listForOrganisation',
-    \SkillDisplay\Skills\Controller\SkillPathController::class => 'list,showApi,certificateDownload,syllabusForSetPdf,completeDownloadForSetPdf,progressForSet,getAwardsForSkillSet',
-    \SkillDisplay\Skills\Controller\SkillController::class => 'show,skillUpAjax',
-    \SkillDisplay\Skills\Controller\VerifierController::class => 'show,forSkill,listOfUser',
-    \SkillDisplay\Skills\Controller\UserController::class => 'starCertifierAjax,show,countries,baseData,updatePassword,patrons,updateNotifications,updateEmail,updateSocialPlatforms,updateProfile,publicProfile,downloadPublicProfilePdf,publicProfileVerifications,getOrganizationsForCurrentUser,getAllAwards,updateAwardSelection',
-    \SkillDisplay\Skills\Controller\OrganisationController::class => 'leave,joinOrganisation,removeMember,createInvitationCodesAjax,organisationStatistics,downloadCsvStatistics,show,setAccountOverdraw,managerList,getBillingInformation,verificationList',
-    \SkillDisplay\Skills\Controller\SearchController::class => 'search',
-    \SkillDisplay\Skills\Controller\CampaignController::class => 'getForUser',
-    \SkillDisplay\Skills\Controller\PortalController::class => 'links',
-    \SkillDisplay\Skills\Controller\VerificationCreditController::class => 'overview,list,add',
-    \SkillDisplay\Skills\Controller\PaymentController::class => 'getSubscription, getCustomerPortalUrl',
-    \SkillDisplay\Skills\Controller\NotificationController::class => 'show, deleteNotifications',
+    CertificationController::class => 'recent,recentRequests,modify,userCancel,listForVerifier,history,show,create,listForOrganisation',
+    SkillPathController::class => 'list,showApi,certificateDownload,syllabusForSetPdf,completeDownloadForSetPdf,progressForSet,getAwardsForSkillSet',
+    SkillController::class => 'show,skillUpAjax',
+    VerifierController::class => 'show,forSkill,listOfUser',
+    UserController::class => 'starCertifierAjax,show,countries,baseData,updatePassword,patrons,updateNotifications,updateEmail,updateSocialPlatforms,updateProfile,publicProfile,downloadPublicProfilePdf,publicProfileVerifications,getOrganizationsForCurrentUser,getAllAwards,updateAwardSelection',
+    OrganisationController::class => 'leave,joinOrganisation,removeMember,createInvitationCodesAjax,organisationStatistics,downloadCsvStatistics,show,setAccountOverdraw,managerList,getBillingInformation,verificationList',
+    SearchController::class => 'search',
+    CampaignController::class => 'getForUser',
+    PortalController::class => 'links',
+    VerificationCreditController::class => 'overview,list,add',
+    PaymentController::class => 'getSubscription, getCustomerPortalUrl',
+    NotificationController::class => 'show, deleteNotifications',
 ];
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'Api',
     $apiActions,
@@ -119,37 +156,37 @@ $apiActions = [
     $apiActions
 );
 
-\TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+ExtensionUtility::configurePlugin(
     'Skills',
     'Anonymous',
     [
-        \SkillDisplay\Skills\Controller\UserController::class => 'anonymousRequest, anonymousCreate',
+        UserController::class => 'anonymousRequest, anonymousCreate',
     ],
     // non-cacheable actions
     [
-        \SkillDisplay\Skills\Controller\UserController::class => 'anonymousRequest, anonymousCreate',
+        UserController::class => 'anonymousRequest, anonymousCreate',
     ]
 );
 
 $GLOBALS['TYPO3_CONF_VARS']['LOG']['SkillDisplay']['Skills']['writerConfiguration'] = [
-    \TYPO3\CMS\Core\Log\LogLevel::INFO => [
-        \TYPO3\CMS\Core\Log\Writer\FileWriter::class => [
-            'logFileInfix' => 'skills'
-        ]
-    ]
+    LogLevel::INFO => [
+        FileWriter::class => [
+            'logFileInfix' => 'skills',
+        ],
+    ],
 ];
 
 $caches = [
     'skill_progress',
-    'skillset_progress'
+    'skillset_progress',
 ];
 foreach ($caches as $cacheName) {
     $GLOBALS['TYPO3_CONF_VARS']['SYS']['caching']['cacheConfigurations'][$cacheName] = [
-        'frontend' => \TYPO3\CMS\Core\Cache\Frontend\VariableFrontend::class,
-        'backend' => \TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend::class,
+        'frontend' => VariableFrontend::class,
+        'backend' => Typo3DatabaseBackend::class,
         'options' => [
             'defaultLifetime' => 2592000,
         ],
-        'groups' => ['lowlevel']
+        'groups' => ['lowlevel'],
     ];
 }

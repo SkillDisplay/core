@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Command;
@@ -11,7 +12,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 class ImportController extends Command
 {
@@ -77,15 +77,15 @@ class ImportController extends Command
                 break;
             default:
                 $output->writeln('unknown resolve mode. allowed values are ignore, force, ask');
-                return 1;
+                return Command::INVALID;
         }
 
         if (!$validate && $pid <= 0) {
             $output->writeln('page uid must be greater than 0');
-            return 2;
+            return Command::INVALID;
         }
 
-        $importService = GeneralUtility::makeInstance(ObjectManager::class)->get(ImportService::class, new SymfonyStyle($input, $output));
+        $importService = GeneralUtility::makeInstance(ImportService::class, new SymfonyStyle($input, $output));
         if ($validate) {
             $result = $importService->validate($sourceFile);
             if ($result) {
@@ -93,10 +93,9 @@ class ImportController extends Command
             } else {
                 $output->writeln('Invalid source file!');
             }
-            return $result ? 0 : 300;
-        } else {
-            $importService->doImport($sourceFile, 1, $pid, $useMode);
-            return 0;
+            return $result ? Command::SUCCESS : 300;
         }
+        $importService->doImport($sourceFile, 1, $pid, $useMode);
+        return Command::SUCCESS;
     }
 }

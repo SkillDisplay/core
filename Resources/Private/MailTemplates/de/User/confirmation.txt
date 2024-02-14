@@ -10,7 +10,7 @@ klicke einfach auf den Link unten.
 
 Achtung: Dieser Link kann nur einmal verwendet werden.
 
-<f:uri.page pageUid="{settings.pids.registration}" absolute="1" additionalParams="{code:code, L:1}" noCacheHash="1"/>
+<f:uri.page pageUid="{settings.pids.registration}" absolute="1" additionalParams="{regcode:code, L:1}"/>
 
 
 Dein SkillDisplay Team

@@ -8,7 +8,7 @@ To activate your account and verify your email address, just click the link belo
 
 Note: This link can only be used once.
 
-<f:uri.page pageUid="{settings.pids.registration}" absolute="1" additionalParams="{code:code}" noCacheHash="1"/>
+<f:uri.page pageUid="{settings.pids.registration}" absolute="1" additionalParams="{regcode:code}"/>
 
 Your SkillDisplay Team
 

@@ -22,7 +22,7 @@ return [
                 'type' => 'input',
                 'size' => 5,
                 'max' => 5,
-                'eval' => 'required,int'
+                'eval' => 'required,int',
             ],
         ],
         'price' => [
@@ -45,7 +45,6 @@ return [
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditusage.credit_pack',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'foreign_table' => 'tx_skills_domain_model_verificationcreditpack',
                 'allowed' => 'tx_skills_domain_model_verificationcreditpack',
                 'size' => 1,
@@ -66,7 +65,6 @@ return [
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditusage.verification',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'foreign_table' => 'tx_skills_domain_model_certification',
                 'allowed' => 'tx_skills_domain_model_certification',
                 'size' => 1,

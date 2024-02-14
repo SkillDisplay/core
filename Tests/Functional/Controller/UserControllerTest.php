@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Controller;
 
-use Doctrine\DBAL\DBALException;
 use PHPUnit\Framework\MockObject\MockObject;
+use RuntimeException;
 use SJBR\StaticInfoTables\Domain\Repository\CountryRepository;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Controller\UserController;
@@ -12,41 +13,32 @@ use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Repository\AwardRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
+use SkillDisplay\Skills\Domain\Repository\GrantedRewardRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Service\ShortLinkService;
 use SkillDisplay\Skills\Service\UserService;
+use SkillDisplay\Skills\Tests\Functional\SimulateLoginTrait;
 use SkillDisplay\Skills\Validation\Validator\EditUserValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserGroupRepository;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\TestingFramework\Core\AccessibleObjectInterface;
 use TYPO3\TestingFramework\Core\Exception;
 
-/**
- * Test case.
- *
- * @author Markus Klein <markus.klein@reelworx.at>
- */
 class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
 {
-    /** @var UserController|MockObject|AccessibleObjectInterface */
-    protected $subject = null;
+    use SimulateLoginTrait;
 
-    /** @var UserService|MockObject */
-    protected $userManager;
+    protected UserController|MockObject|AccessibleObjectInterface $subject;
 
-    /**
-     * @throws DBALException
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
-     */
+    protected MockObject|UserService $userManager;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        // disable file processing for tests
-        unset($GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['processors']['DeferredBackendImageProcessor']);
-
         $this->userManager = $this->getMockBuilder(UserService::class)->setConstructorArgs([
-            $this->objectManager->get(FrontendUserGroupRepository::class),
+            GeneralUtility::makeInstance(FrontendUserGroupRepository::class),
             $this->userRepository,
         ])->getMock();
 
@@ -57,19 +49,22 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
         $validator->method('getErrorMessage')->willReturn('');
         GeneralUtility::addInstance(EditUserValidator::class, $validator);
 
-        $this->subject = $this->getAccessibleMock(UserController::class,
-            ['redirect', 'forward', 'addFlashMessage', 'getCurrentUser'], [
-                $this->objectManager->get(SkillRepository::class),
-                $this->userManager,
+        $this->subject = $this->getAccessibleMock(
+            UserController::class,
+            ['addFlashMessage', 'getCurrentUser'],
+            [
                 $this->userRepository,
-                $this->objectManager->get(ShortLinkService::class),
-                $this->objectManager->get(CertifierRepository::class),
-                $this->objectManager->get(CountryRepository::class),
-                $this->objectManager->get(AwardRepository::class),
-                $this->objectManager->get(CertificationRepository::class),
-            ]);
-        $this->subject->injectObjectManager($this->objectManager);
-        $this->subject->_set('view', $this->view);
+                GeneralUtility::makeInstance(SkillRepository::class),
+                $this->userManager,
+                GeneralUtility::makeInstance(ShortLinkService::class),
+                GeneralUtility::makeInstance(CertifierRepository::class),
+                GeneralUtility::makeInstance(CountryRepository::class),
+                GeneralUtility::makeInstance(AwardRepository::class),
+                GeneralUtility::makeInstance(CertificationRepository::class),
+                GeneralUtility::makeInstance(GrantedRewardRepository::class),
+            ]
+        );
+        $this->initController($this->subject);
     }
 
     /**
@@ -77,7 +72,8 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
      */
     protected function setUpDatabase(): void
     {
-        $this->setUpBackendUserFromFixture(1);
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/be_users.csv');
+        $this->setUpBackendUser(1);
         $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
     }
 
@@ -86,7 +82,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
      */
     public function updateProfileFailsForNoLoggedInUser()
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
 
         $this->subject->updateProfileAction('', '', '', '', '', '', '', '');
     }
@@ -102,7 +98,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
         $this->subject->updateProfileAction('', 'asdf', '', '', '', '', '', '');
 
         $success = $this->view->_get('variables')['success'];
-        self::assertEquals(false, $success['status']);
+        self::assertFalse($success['status']);
     }
 
     /**
@@ -116,7 +112,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
         $this->subject->updateProfileAction('first', '', '', '', '', '', '', '');
 
         $success = $this->view->_get('variables')['success'];
-        self::assertEquals(false, $success['status']);
+        self::assertFalse($success['status']);
     }
 
     /**
@@ -130,15 +126,16 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
         $this->subject->updateProfileAction('first', 'last', '', '', '', '', '', '');
 
         $success = $this->view->_get('variables')['success'];
-        self::assertEquals(true, $success['status']);
+        self::assertTrue($success['status']);
 
         $updatedUser = $this->userRepository->findByUsername('muster');
-        $this->assertEquals('first', $updatedUser->getFirstName());
-        $this->assertEquals('last', $updatedUser->getLastName());
+        self::assertSame('first', $updatedUser->getFirstName());
+        self::assertSame('last', $updatedUser->getLastName());
     }
 
     /**
      * @test
+     * @throws InvalidQueryException
      */
     public function publicProfileNotVisibleIfNotEnabled()
     {
@@ -146,8 +143,10 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
         $this->subject->publicProfileAction($this->currentUser);
         $profile = $this->view->_get('variables')['publicProfile'];
 
-        self::assertEquals('The requested user does not want his profile to be published publicly.',
-            $profile['message']);
+        self::assertSame(
+            'The requested user does not want his profile to be published publicly.',
+            $profile['message']
+        );
     }
 
     /**

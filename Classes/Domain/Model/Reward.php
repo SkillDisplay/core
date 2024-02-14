@@ -1,18 +1,22 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
+use DateTime;
+use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Reward extends AbstractEntity
 {
@@ -21,71 +25,44 @@ class Reward extends AbstractEntity
     public const TYPE_AFFILIATE = 'affiliate';
     public const TYPE_DOWNLOAD = 'download';
 
-    /** @var string */
-    protected $title = '';
+    protected string $title = '';
+    protected string $reward = '';
+    protected string $description = '';
+    protected string $detailLink = '';
+    protected ?Category $category = null;
+    protected ?DateTime $availabilityStart = null;
+    protected ?DateTime $availabilityEnd = null;
+    protected ?DateTime $validUntil = null;
+    protected ?Brand $validForOrganisation = null;
+    /** @var ObjectStorage<RewardPrerequisite> */
+    protected ObjectStorage $prerequisites;
+    protected ?Brand $brand = null;
+    protected string $type = '';
+    protected int $pdfLayoutFile = 0;
+    protected int $syllabusLayoutFile = 0;
+    protected ?SkillPath $skillpath = null;
+    protected int $level = 0;
+    protected int $active = 0;
+    protected bool $linkSkillpath = true;
 
-    /** @var string */
-    protected $reward = '';
-
-    /** @var string */
-    protected $description = '';
-
-    /** @var string */
-    protected $detailLink = '';
-
-    /** @var \TYPO3\CMS\Extbase\Domain\Model\Category|null */
-    protected $category = null;
-
-    /** @var \DateTime|null */
-    protected $availabilityStart;
-
-    /** @var \DateTime|null */
-    protected $availabilityEnd;
-
-    /** @var \DateTime */
-    protected $validUntil;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\Brand|null */
-    protected $validForOrganisation = null;
-
-    /** @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\RewardPrerequisite> */
-    protected $prerequisites = null;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\Brand */
-    protected $brand;
-
-    /** @var string */
-    protected $type = '';
-
-    /** @var int */
-    protected $pdfLayoutFile = 0;
-
-    /** @var int */
-    protected $syllabusLayoutFile = 0;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\SkillPath|null */
-    protected $skillpath;
-
-    /** @var int */
-    protected $level = 0;
-
-    /** @var int */
-    protected $active = 0;
-
-    const ApiJsonViewConfiguration = [
+    public const ApiJsonViewConfiguration = [
         '_only' => [
-            'uid', 'title', 'description', 'level', 'brand', 'skillpath'
+            'uid', 'title', 'description', 'level', 'brand', 'skillpath', 'linkSkillpath',
         ],
         '_descend' => [
             'brand' => Brand::JsonViewMinimalConfiguration,
             'skillpath' => [
                 '_only' => [
-                    'uid', 'name'
-                ]
-            ]
-        ]
+                    'uid', 'name',
+                ],
+            ],
+        ],
     ];
 
+    public function __construct()
+    {
+        $this->prerequisites = new ObjectStorage();
+    }
 
     public function getTitle(): string
     {
@@ -127,45 +104,45 @@ class Reward extends AbstractEntity
         $this->detailLink = $detailLink;
     }
 
-    public function getAvailabilityStart(): ?\DateTime
+    public function getAvailabilityStart(): ?DateTime
     {
         return $this->availabilityStart;
     }
 
-    public function setAvailabilityStart(\DateTime $availabilityStart = null): void
+    public function setAvailabilityStart(DateTime $availabilityStart = null): void
     {
         $this->availabilityStart = $availabilityStart;
     }
 
-    public function getAvailabilityEnd(): ?\DateTime
+    public function getAvailabilityEnd(): ?DateTime
     {
         return $this->availabilityEnd;
     }
 
-    public function setAvailabilityEnd(\DateTime $availabilityEnd = null): void
+    public function setAvailabilityEnd(DateTime $availabilityEnd = null): void
     {
         $this->availabilityEnd = $availabilityEnd;
     }
 
-    public function getValidUntil(): ?\DateTime
+    public function getValidUntil(): ?DateTime
     {
         return $this->validUntil;
     }
 
-    public function setValidUntil(\DateTime $validUntil = null): void
+    public function setValidUntil(DateTime $validUntil = null): void
     {
         $this->validUntil = $validUntil;
     }
 
     /**
-     * @return RewardPrerequisite[]|\TYPO3\CMS\Extbase\Persistence\ObjectStorage
+     * @return ObjectStorage<RewardPrerequisite>
      */
-    public function getPrerequisites(): \TYPO3\CMS\Extbase\Persistence\ObjectStorage
+    public function getPrerequisites(): ObjectStorage
     {
         return $this->prerequisites;
     }
 
-    public function setPrerequisites(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $prerequisites): void
+    public function setPrerequisites(ObjectStorage $prerequisites): void
     {
         $this->prerequisites = $prerequisites;
     }
@@ -235,23 +212,23 @@ class Reward extends AbstractEntity
         return $this->level;
     }
 
-    public function setLevel(int $level)
+    public function setLevel(int $level): void
     {
         $this->level = $level;
     }
 
     /**
-     * @return \TYPO3\CMS\Extbase\Domain\Model\Category|null
+     * @return Category|null
      */
-    public function getCategory(): ?\TYPO3\CMS\Extbase\Domain\Model\Category
+    public function getCategory(): ?Category
     {
         return $this->category;
     }
 
     /**
-     * @param \TYPO3\CMS\Extbase\Domain\Model\Category|null $category
+     * @param Category|null $category
      */
-    public function setCategory(?\TYPO3\CMS\Extbase\Domain\Model\Category $category): void
+    public function setCategory(?Category $category): void
     {
         $this->category = $category;
     }
@@ -272,6 +249,20 @@ class Reward extends AbstractEntity
         $this->active = $active;
     }
 
+    /**
+     * @return bool
+     */
+    public function isLinkSkillpath(): bool
+    {
+        return $this->linkSkillpath;
+    }
 
+    /**
+     * @param bool $linkSkillpath
+     */
+    public function setLinkSkillpath(bool $linkSkillpath): void
+    {
+        $this->linkSkillpath = $linkSkillpath;
+    }
 
 }

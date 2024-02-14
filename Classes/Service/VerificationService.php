@@ -1,14 +1,14 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -45,8 +45,8 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    const SKILL_ACTION_NONE = 0;
-    const SKILL_ACTION_DELETE = 1;
+    public const SKILL_ACTION_NONE = 0;
+    public const SKILL_ACTION_DELETE = 1;
 
     protected CertificationRepository $certificationRepository;
     protected CertifierRepository $certifierRepository;
@@ -84,7 +84,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
      *
      * @param SkillUpHookInterface $hook
      */
-    public function registerHook(SkillUpHookInterface $hook)
+    public function registerHook(SkillUpHookInterface $hook): void
     {
         $this->hooks[] = $hook;
     }
@@ -224,16 +224,16 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
                                 'reason' => 'A grouped skillUp is currently pending. Cannot request a skillUp twice.',
                             ];
                             break;
-                        } else {
-                            // we can cancel the conflicting single request
-                            $failedSkills[$subSkill->getUid()] = [
-                                'skill' => $subSkill,
-                                'conflictCert' => $cert,
-                                'skip' => true,
-                                'action' => self::SKILL_ACTION_DELETE,
-                                'reason' => 'The pending request will be cancelled.',
-                            ];
                         }
+                        // we can cancel the conflicting single request
+                        $failedSkills[$subSkill->getUid()] = [
+                            'skill' => $subSkill,
+                            'conflictCert' => $cert,
+                            'skip' => true,
+                            'action' => self::SKILL_ACTION_DELETE,
+                            'reason' => 'The pending request will be cancelled.',
+                        ];
+
                     }
                     if ($certifier && $cert->getCertifier()
                         && $cert->getLevelNumber() === $tier
@@ -279,8 +279,15 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
         $tags = [];
         $certifications = [];
         foreach ($skills as $skill) {
-            $certifications[] = $this->certificationRepository->addTier($skill, $user, $tier, $comment, $certifier,
-                $campaign, $groupId);
+            $certifications[] = $this->certificationRepository->addTier(
+                $skill,
+                $user,
+                $tier,
+                $comment,
+                $certifier,
+                $campaign,
+                $groupId
+            );
             $tags[] = $skill->getCacheTag($user->getUid());
         }
         foreach ($certifications as $verification) {
@@ -314,7 +321,6 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
      * @param string $reason
      * @throws IllegalObjectTypeException
      * @throws UnknownObjectException
-     * @throws InvalidQueryException
      */
     public function confirmSkillUp(
         Certification $verification,
@@ -322,7 +328,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
         bool $decline = false,
         bool $revoke = false,
         string $reason = ''
-    ) {
+    ): void {
         $certs = $verification->getRequestGroup()
             ? $this->certificationRepository->findByRequestGroup($verification->getRequestGroup())->toArray()
             : [$verification];
@@ -359,7 +365,8 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
                     if ($pointsToBook !== 0) {
                         throw new LogicException('This may not happen. Credit packs modified in between?');
                     }
-                    $this->logger->info('Credit usage',
+                    $this->logger->info(
+                        'Credit usage',
                         [
                             'verificationId' => $cert->getUid(),
                             'brandId' => $cert->getBrand()->getUid(),
@@ -466,18 +473,26 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
                 $certifiers = array_merge($newPersonCertifiers, $newTestCertifiers);
             }
         }
-        $index = null;
-        if (!empty($certifiers)) {
+        if ($user && !empty($certifiers)) {
+            $keysToRemove = [];
             foreach ($certifiers as $key => $certifier) {
+                // remove non-public verifiers where user is not member in the same organisation
+                if (!$certifier->isPublic() && !UserOrganisationsService::isUserMemberOfOrganisations([$certifier->getBrand()], $user)) {
+                    // todo re-enable when TD-590 is done
+                    // $keysToRemove[$key] = true;
+                }
                 // remove the user itself
-                if ($user && $certifier->getUser() && $certifier->getUser()->getUid() === $user->getUid()) {
-                    $index = $key;
-                    break;
+                if ($certifier->getUser() && $certifier->getUser()->getUid() === $user->getUid()) {
+                    $keysToRemove[$key] = true;
                 }
             }
-        }
-        if ($index !== null) {
-            unset($certifiers[$index]);
+            if ($keysToRemove) {
+                array_filter(
+                    $certifiers,
+                    function ($key) use ($keysToRemove) { return !isset($keysToRemove[$key]); },
+                    ARRAY_FILTER_USE_KEY
+                );
+            }
         }
         return $certifiers;
     }
@@ -490,7 +505,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
     {
         $total = 0;
         foreach ($verifications as $verification) {
-             $total += (int)$this->creditSettings[$verification->getLevel()];
+            $total += (int)$this->creditSettings[$verification->getLevel()];
         }
         return $total;
     }
@@ -509,8 +524,32 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
         }, 0.0);
         return [
             'points' => $this->creditPackRepository->getAvailableCredit($organisation->getUid()),
-            'balance' => $balance * -1
+            'balance' => $balance * -1,
         ];
+    }
+
+    /**
+     * Move all verifications on $source skill to the successor skills $targets
+     *
+     * @param Skill $source
+     * @param Skill[] $targets
+     * @throws IllegalObjectTypeException
+     */
+    public function moveVerifications(Skill $source, array $targets): void
+    {
+        $setGroup = count($targets) > 1;
+        $certs = $this->certificationRepository->findBySkill($source);
+        foreach ($certs as $cert) {
+            if (!$cert->getRequestGroup() && $setGroup) {
+                $cert->setRequestGroup('skillSplit-' . time());
+            }
+            $newCert = $cert;
+            foreach ($targets as $target) {
+                $newCert->setSkill($target);
+                $this->certificationRepository->add($newCert);
+                $newCert = $cert->copy();
+            }
+        }
     }
 
     /**

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'hideTable' => true,
@@ -9,7 +10,7 @@ return [
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
-        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_reward.svg'
+        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_reward.svg',
     ],
     'types' => [
         1 => ['showitem' => 'reward, skill, level, brand'],
@@ -17,8 +18,8 @@ return [
     'columns' => [
         'reward' => [
             'config' => [
-                'type' => 'passthrough'
-            ]
+                'type' => 'passthrough',
+            ],
         ],
         'skill' => [
             'exclude' => false,
@@ -53,7 +54,7 @@ return [
                 'foreign_table' => 'tx_skills_domain_model_brand',
                 'foreign_table_where' => 'AND tx_skills_domain_model_brand.sys_language_uid IN (0,-1) ORDER BY tx_skills_domain_model_brand.name',
                 'items' => [
-                    ['', 0]
+                    ['', 0],
                 ],
                 'default' => 0,
             ],

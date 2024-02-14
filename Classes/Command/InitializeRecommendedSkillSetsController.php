@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Command;
 
-use Doctrine\DBAL\Exception;
 use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Service\SkillSetRelationService;
@@ -28,7 +28,6 @@ class InitializeRecommendedSkillSetsController extends Command
      * @param OutputInterface $output
      * @return int
      * @throws InvalidQueryException
-     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -48,6 +47,6 @@ class InitializeRecommendedSkillSetsController extends Command
             }
             $service->calculateByUser($user);
         }
-        return 0;
+        return Command::SUCCESS;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Command;
@@ -44,15 +45,15 @@ class CleanupController extends Command
             'delete FROM `tx_skills_patron_mm` WHERE not exists (select uid from tx_skills_domain_model_brand where uid_foreign = uid);',
         ];
         foreach ($clean_mm_statements as $statement) {
-            $connection->exec($statement);
+            $connection->executeStatement($statement);
         }
 
         // remove all relations from skills to translated tags
-        $connection->exec('delete tx_skills_skill_tag_mm
+        $connection->executeStatement('delete tx_skills_skill_tag_mm
             FROM tx_skills_skill_tag_mm
                 join tx_skills_domain_model_skill s on s.uid = tx_skills_skill_tag_mm.uid_local
                 join tx_skills_domain_model_tag t on t.uid = tx_skills_skill_tag_mm.uid_foreign
             where s.sys_language_uid = 0 AND t.sys_language_uid > 0');
-        return 0;
+        return Command::SUCCESS;
     }
 }

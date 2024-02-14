@@ -1,15 +1,15 @@
 <?php
+
 declare(strict_types=1);
-/***
- *
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2021 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
@@ -23,7 +23,6 @@ use TYPO3\CMS\Extbase\Persistence\QueryInterface;
  */
 class NotificationRepository extends BaseRepository
 {
-
     public function findForUser(User $user): array
     {
         $q = $this->createQuery();
@@ -32,11 +31,11 @@ class NotificationRepository extends BaseRepository
         return $q->execute()->toArray();
     }
 
-    public function deleteNotification(User $user, int $notificationId)
+    public function deleteNotification(User $user, int $notificationId): void
     {
         $condition = [
             'user' => $user->getUid(),
-            'uid' => $notificationId
+            'uid' => $notificationId,
         ];
         $con = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable(
             'tx_skills_domain_model_notification'

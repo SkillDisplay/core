@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Command;
@@ -10,7 +11,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 class ExportController extends Command
 {
@@ -41,13 +41,14 @@ class ExportController extends Command
      *
      * @param InputInterface $input
      * @param OutputInterface $output
+     * @return int
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $skillSets = $input->getArgument('skillSets');
         $targetFileName = $input->getOption('output');
-        $exportService = GeneralUtility::makeInstance(ObjectManager::class)->get(ExportService::class);
+        $exportService = GeneralUtility::makeInstance(ExportService::class);
         $exportService->doExport($targetFileName, $skillSets);
-        return 0;
+        return Command::SUCCESS;
     }
 }

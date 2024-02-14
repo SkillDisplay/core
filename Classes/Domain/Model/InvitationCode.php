@@ -1,38 +1,31 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace SkillDisplay\Skills\Domain\Model;
 
-/***
- *
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
- ***/
+ **/
 
+use DateTime;
+use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class InvitationCode extends AbstractEntity
 {
     /**
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $code = '';
-
-    /** @var \SkillDisplay\Skills\Domain\Model\Brand */
-    protected $brand;
-
-    /** @var \DateTime */
-    protected $expires;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\User */
-    protected $createdBy;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\User */
-    protected $usedBy;
-
-    /** @var \DateTime */
-    protected $usedAt;
+    protected string $code = '';
+    protected ?Brand $brand = null;
+    protected ?DateTime $expires = null;
+    protected ?User $createdBy = null;
+    protected ?User $usedBy = null;
+    protected ?DateTime $usedAt;
 
     public function getCode(): string
     {
@@ -54,12 +47,12 @@ class InvitationCode extends AbstractEntity
         $this->brand = $brand;
     }
 
-    public function getExpires(): ?\DateTime
+    public function getExpires(): ?DateTime
     {
         return $this->expires;
     }
 
-    public function setExpires(\DateTime $expires): void
+    public function setExpires(?DateTime $expires): void
     {
         $this->expires = $expires;
     }
@@ -84,12 +77,12 @@ class InvitationCode extends AbstractEntity
         $this->usedBy = $usedBy;
     }
 
-    public function getUsedAt(): ?\DateTime
+    public function getUsedAt(): ?DateTime
     {
         return $this->usedAt;
     }
 
-    public function setUsedAt(\DateTime $usedAt): void
+    public function setUsedAt(DateTime $usedAt): void
     {
         $this->usedAt = $usedAt;
     }

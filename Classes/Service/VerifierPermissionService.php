@@ -1,25 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SkillDisplay\Skills\Service;
 
-use PDO;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\Exception;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 class VerifierPermissionService
 {
     private const PERMISSIONS_TABLE = 'tx_skills_domain_model_certifierpermission';
-
-    protected ObjectManager $objectManager;
-
-    public function __construct(ObjectManager $objectManager)
-    {
-        $this->objectManager = $objectManager;
-    }
 
     /**
      * @param int[] $verifiers
@@ -88,9 +83,7 @@ class VerifierPermissionService
      */
     private static function loadSkills(array $skillSets): array
     {
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        /** @var SkillPathRepository $skillPathRepository */
-        $skillPathRepository = $objectManager->get(SkillPathRepository::class);
+        $skillPathRepository = GeneralUtility::makeInstance(SkillPathRepository::class);
         $skills = [];
         foreach ($skillSets as $skillSetId) {
             $skillSet = $skillPathRepository->findByUid((int)$skillSetId);
@@ -119,33 +112,35 @@ class VerifierPermissionService
         $qb
             ->delete(self::PERMISSIONS_TABLE)
             ->where(
-                $qb->expr()->eq('uid', $qb->createNamedParameter($uid, PDO::PARAM_INT))
+                $qb->expr()->eq('uid', $qb->createNamedParameter($uid, Connection::PARAM_INT))
             )
-            ->execute();
+            ->executeStatement();
     }
 
     private static function updatePermission(int $uid, array $permissions): void
     {
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
         /** @var QueryBuilder $qb */
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable(self::PERMISSIONS_TABLE);
 
         $qb = $qb
             ->update(self::PERMISSIONS_TABLE)
+            ->set('tstamp', $now)
             ->where(
-                $qb->expr()->eq('uid', $qb->createNamedParameter($uid, PDO::PARAM_INT))
-            )
-            ->set('tstamp', $GLOBALS['SIM_EXEC_TIME']);
+                $qb->expr()->eq('uid', $qb->createNamedParameter($uid, Connection::PARAM_INT))
+            );
 
         foreach ($permissions as $key => $value) {
             $qb = $qb->set($key, $value);
         }
 
-        $qb->execute();
+        $qb->executeStatement();
     }
 
     private static function createPermission(int $verifierId, int $skillId, array $permissions): void
     {
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
         /** @var QueryBuilder $qb */
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable(self::PERMISSIONS_TABLE);
@@ -154,13 +149,13 @@ class VerifierPermissionService
         $data['skill'] = $skillId;
         $data['certifier'] = $verifierId;
         $data['pid'] = self::fetchPidFromVerifier($verifierId);
-        $data['tstamp'] = $GLOBALS['SIM_EXEC_TIME'];
-        $data['crdate'] = $GLOBALS['SIM_EXEC_TIME'];
+        $data['tstamp'] = $now;
+        $data['crdate'] = $now;
         $data['cruser_id'] = 1;
         $qb
             ->insert(self::PERMISSIONS_TABLE)
             ->values($data)
-            ->execute();
+            ->executeStatement();
     }
 
     private static function fetchPermission(int $verifierId, int $skillId): array
@@ -173,12 +168,11 @@ class VerifierPermissionService
             ->select('*')
             ->from(self::PERMISSIONS_TABLE)
             ->where(
-                $qb->expr()->eq('certifier', $qb->createNamedParameter($verifierId, PDO::PARAM_INT)),
-                $qb->expr()->eq('skill', $qb->createNamedParameter($skillId, PDO::PARAM_INT))
+                $qb->expr()->eq('certifier', $qb->createNamedParameter($verifierId, Connection::PARAM_INT)),
+                $qb->expr()->eq('skill', $qb->createNamedParameter($skillId, Connection::PARAM_INT))
             )
-            ->execute()
-            ->fetchAll();
-
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         if (count($permissionList) > 0) {
             $currentPermission = array_shift($permissionList);
@@ -220,7 +214,7 @@ class VerifierPermissionService
 
     private static function permissionEmpty(array $permission): bool
     {
-        return (int)$permission['tier1'] === 0 && (int)$permission['tier2'] === 0 && (int)$permission['tier4'] === 0 ;
+        return (int)$permission['tier1'] === 0 && (int)$permission['tier2'] === 0 && (int)$permission['tier4'] === 0;
     }
 
     private static function fetchPidFromVerifier(int $verifierId): int
@@ -233,10 +227,10 @@ class VerifierPermissionService
             ->select('pid')
             ->from('tx_skills_domain_model_certifier')
             ->where(
-                $qb->expr()->eq('uid', $qb->createNamedParameter($verifierId, PDO::PARAM_INT))
+                $qb->expr()->eq('uid', $qb->createNamedParameter($verifierId, Connection::PARAM_INT))
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         if (count($result) === 1) {
             return (int)$result[0]['pid'];

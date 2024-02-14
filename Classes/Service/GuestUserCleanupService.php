@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
- *
  * This file is part of the "Skills" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -14,7 +15,9 @@
 namespace SkillDisplay\Skills\Service;
 
 use DateTime;
+use DateTimeImmutable;
 use Exception;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
@@ -24,16 +27,13 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class GuestUserCleanupService
 {
-    const TIME_LIMIT = '-14 days';
+    public const TIME_LIMIT = '-14 days';
 
-    /** @var SessionBackendInterface */
-    protected $sessionBackend;
+    protected SessionBackendInterface $sessionBackend;
 
-    /** @var DateTime */
-    private $limit;
+    private DateTimeImmutable $limit;
 
-    /** @var array */
-    private $toDelete = [];
+    private array $toDelete = [];
 
     /**
      * GuestUserCleanupService constructor.
@@ -44,14 +44,14 @@ class GuestUserCleanupService
         $manager = GeneralUtility::makeInstance(SessionManager::class);
         $this->sessionBackend = $manager->getSessionBackend('FE');
 
-        $now = new DateTime('@' . $GLOBALS['SIM_EXEC_TIME']);
+        $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'full');
         $this->limit = $now->modify(self::TIME_LIMIT);
     }
 
     /**
      * @throws Exception
      */
-    public function run()
+    public function run(): void
     {
         $allSessions = $this->sessionBackend->getAll();
         $allAnonymousUsers = $this->getAllAnonymousUsers();
@@ -82,7 +82,7 @@ class GuestUserCleanupService
      * @param string $sessionId
      * @throws Exception
      */
-    private function checkAndDelete(int $userId, int $timestamp, string $sessionId = '')
+    private function checkAndDelete(int $userId, int $timestamp, string $sessionId = ''): void
     {
         $sessionTime = new DateTime('@' . $timestamp);
         if ($sessionTime < $this->limit && $this->checkUserIsAnonymous($userId)) {
@@ -121,10 +121,10 @@ class GuestUserCleanupService
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($userId, Connection::PARAM_INT))
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
 
-        return (count($result) === 1 && $result[0]['anonymous']);
+        return count($result) === 1 && $result[0]['anonymous'];
     }
 
     /**
@@ -145,8 +145,8 @@ class GuestUserCleanupService
                     $queryBuilder->createNamedParameter(1, Connection::PARAM_INT)
                 )
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         $userAsKey = [];
         foreach ($result as $user) {

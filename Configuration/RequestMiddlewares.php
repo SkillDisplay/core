@@ -1,20 +1,24 @@
 <?php
+
+use SkillDisplay\Skills\Middleware\ApiRouter;
+use SkillDisplay\Skills\Middleware\OptionMethod;
+
 return [
     'frontend' => [
         'api' => [
-            'target' => \SkillDisplay\Skills\Middleware\ApiRouter::class,
+            'target' => ApiRouter::class,
             'after' => [
                 'typo3/cms-core/normalized-params-attribute',
             ],
             'before' => [
-                'typo3/cms-frontend/eid'
-            ]
+                'typo3/cms-frontend/eid',
+            ],
         ],
         'http-options' => [
-            'target' => \SkillDisplay\Skills\Middleware\OptionMethod::class,
+            'target' => OptionMethod::class,
             'before' => [
                 'typo3/cms-core/normalized-params-attribute',
-            ]
+            ],
         ],
     ],
 ];

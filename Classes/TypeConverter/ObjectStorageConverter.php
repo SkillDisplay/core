@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /***************************************************************
  *  Copyright notice
  *
@@ -27,16 +30,12 @@
 
 namespace SkillDisplay\Skills\TypeConverter;
 
-/**
- * Class ObjectStorageConverter
- */
 class ObjectStorageConverter extends \TYPO3\CMS\Extbase\Property\TypeConverter\ObjectStorageConverter
 {
-
     /**
      * Take precedence over the available ObjectStorageConverter
      *
-     * @var integer
+     * @var int
      */
     protected $priority = 2;
 
@@ -71,7 +70,7 @@ class ObjectStorageConverter extends \TYPO3\CMS\Extbase\Property\TypeConverter\O
      * @param mixed $propertyValue
      * @return bool
      */
-    protected function isUploadType($propertyValue)
+    protected function isUploadType(mixed $propertyValue): bool
     {
         return is_array($propertyValue) && isset($propertyValue['tmp_name']) && isset($propertyValue['error']);
     }

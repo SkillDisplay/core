@@ -1,16 +1,18 @@
 "use strict";
 
 let gulp = require('gulp');
-let plugins = require('gulp-load-plugins');
-let rimraf = require('rimraf');
+let typescript = require('gulp-typescript');
+let inlineCss = require('gulp-inline-css');
+let uncss = require('gulp-uncss');
+let replace = require('gulp-replace');
+
+let {rimraf} = require('rimraf');
 let panini = require('panini');
 let lazypipe = require('lazypipe');
 let inky = require('inky');
 let fs = require('fs');
 let siphon = require('siphon-media-query');
 let sass = require('gulp-sass')(require('sass'));
-
-const $ = plugins();
 
 let Tasks = {
   devContext: true,
@@ -29,13 +31,13 @@ let Tasks = {
       .pipe(gulp.dest('Resources/Public/Fonts/'));
   },
   jsbe: function () {
-    let tsProject = $.typescript.createProject("tsconfig.json", {
+    let tsProject = typescript.createProject("tsconfig.json", {
       module: 'amd',
       moduleResolution: "node",
     });
     let src = gulp
       .src('Resources/Private/TypeScript/BE/*.ts')
-      .pipe(tsProject($.typescript.reporter.longReporter())).js;
+      .pipe(tsProject(typescript.reporter.longReporter())).js;
     return src.pipe(gulp.dest('Resources/Public/JavaScript/'));
   },
   watch: function (done) {
@@ -43,20 +45,25 @@ let Tasks = {
     return done();
   },
   sass: function () {
-    let scss_paths = [
+    const sass = require('gulp-sass')(require('sass-embedded'));
+    const cssPath = 'Resources/Public/Css/';
+    const scssPaths = [
       'node_modules/'
     ];
 
-    return gulp
+    let res = gulp
       .src(Tasks.sources.css)
       .pipe(sass({
-        outputStyle: Tasks.devContext ? '' : 'compressed',
-        includePaths: scss_paths
-      }).on('error', sass.logError))
-      .pipe($.autoprefixer({
-        cascade: false
-      }))
-      .pipe(gulp.dest('Resources/Public/Css/'));
+        includePaths: scssPaths
+      }).on('error', sass.logError));
+
+    if (!Tasks.devContext) {
+      res = res.pipe(require('gulp-postcss')([
+        require('autoprefixer')(),
+        require('cssnano')()
+      ]));
+    }
+    return res.pipe(gulp.dest(cssPath));
   },
   mail: {
     dest: 'Resources/Private/MailTemplates',
@@ -66,7 +73,7 @@ let Tasks = {
         .pipe(sass({
           includePaths: ['node_modules/foundation-emails/scss']
         }).on('error', sass.logError))
-        .pipe($.uncss({
+        .pipe(uncss({
             html: [Tasks.mail.dest + '/**/*.html']
           }
         ))
@@ -75,7 +82,7 @@ let Tasks = {
     // Delete the "dist" folder
     // This happens every time a build starts
     clean: function (done) {
-      rimraf(Tasks.mail.dest, done);
+      rimraf(Tasks.mail.dest).then(() => done());
     },
     // Compile layouts, pages, and partials into flat HTML files
     // Then parse using Inky templates
@@ -114,35 +121,22 @@ function inliner(css) {
   let mqCss = siphon(css);
 
   let pipe = lazypipe()
-    .pipe($.inlineCss, {
+    .pipe(inlineCss, {
       applyStyleTags: false,
       preserveMediaQueries: true,
       removeLinkTags: false,
       lowerCaseTags: false,
     })
-    .pipe($.replace, '<!-- <style> -->', `<style>${mqCss}</style>`)
-    .pipe($.replace, '<link rel="stylesheet" type="text/css" href="../../app.css">', '');
+    .pipe(replace, '<!-- <style> -->', `<style>${mqCss}</style>`)
+    .pipe(replace, '<link rel="stylesheet" type="text/css" href="../../app.css">', '');
 
   return pipe();
 }
 
-gulp.task('sass', Tasks.sass);
-gulp.task('copy', Tasks.copy);
-gulp.task('jsbe', Tasks.jsbe);
-gulp.task('watch', Tasks.watch);
+const dev = gulp.parallel(Tasks.sass, Tasks.jsbe);
 
-gulp.task('setProduction', Tasks.setProduction);
-
-gulp.task('release', gulp.series('setProduction', 'copy', gulp.parallel('sass', 'jsbe')));
-gulp.task('dev', gulp.series(gulp.parallel('sass', 'jsbe')));
-gulp.task('mail', gulp.series(Tasks.mail.clean, Tasks.mail.pages, Tasks.mail.sass, Tasks.mail.inline));
-
-gulp.task('default', function (done) {
-  process.stdout.write('\n'
-    + '===========================================\n'
-    + 'Tasks: dev, release, copy, watch, mail\n'
-    + '===========================================\n'
-    + '\n'
-  );
-  return done();
-});
+exports.default = Tasks.watch;
+exports.dev = dev;
+exports.copy = Tasks.copy;
+exports.release = gulp.series(Tasks.setProduction, Tasks.copy, dev);
+exports.mail = gulp.series(Tasks.mail.clean, Tasks.mail.pages, Tasks.mail.sass, Tasks.mail.inline);

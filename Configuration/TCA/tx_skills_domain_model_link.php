@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'hideTable' => true,
@@ -9,7 +10,6 @@ return [
         'cruser_id' => 'cruser_id',
         'searchFields' => 'title,url,uuid',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_link.png',
-        'setToDefaultOnCopy' => 'uuid'
     ],
     'types' => [
         1 => ['showitem' => 'skill, --palette--;;title, --div--;Import, uuid, imported'],
@@ -18,26 +18,26 @@ return [
         'title' => ['showitem' => 'title, url'],
     ],
     'columns' => [
-	    'title' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_link.title',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 30,
+        'title' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_link.title',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
-	    'url' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_link.url',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 255,
+                'eval' => 'trim,required',
+            ],
+        ],
+        'url' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_link.url',
+            'config' => [
+                'type' => 'input',
+                'size' => 255,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
+                'eval' => 'trim,required',
+            ],
+        ],
         'color' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_link.color',

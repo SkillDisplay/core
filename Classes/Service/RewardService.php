@@ -1,14 +1,14 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+/**
  * This file is part of the "Skills" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2018 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -20,26 +20,30 @@ use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Domain\Repository\GrantedRewardRepository;
 use SkillDisplay\Skills\Domain\Repository\RewardRepository;
 use SkillDisplay\Skills\Event\VerificationUpdatedEvent;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\Exception;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
-class RewardService
+readonly class RewardService
 {
+    public function __construct(
+        protected RewardRepository $rewardRepository,
+        protected GrantedRewardRepository $grantedRewardRepository,
+    ) {}
+
     /**
      * Slot implementation for "certificationUpdated"
      *
      * @param VerificationUpdatedEvent $event
-     * @throws Exception
+     * @throws AspectNotFoundException
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      */
     public function checkRewardsReachedForCertifications(VerificationUpdatedEvent $event): void
     {
-        /** @var RewardRepository $rewardRepository */
-        $rewardRepository = GeneralUtility::makeInstance(RewardRepository::class);
         $verifications = $event->getVerifications();
         foreach ($verifications as $cert) {
             if ((!$cert->getGrantDate() || !$cert->isValid()) && !$cert->getRevokeDate()) {
@@ -47,33 +51,37 @@ class RewardService
             }
             $user = $cert->getUser();
             $skill = $cert->getSkill();
-            $skillSet = $cert->getRequestGroupParent();
-            $skillRewards = $rewardRepository->findByCertification($cert);
-            $skillSetRewards = $rewardRepository->findForSkillSets($user, strval($cert->getLevelNumber()));
+            $skillRewards = $this->rewardRepository->findByCertification($cert);
+            $skillSetRewards = $this->rewardRepository->findForSkillSets($user, (string)($cert->getLevelNumber()));
             foreach ($skillRewards as $reward) {
                 $this->checkRewardReached($user, $reward, $skill);
             }
 
+            /** @var Reward $reward */
             foreach ($skillSetRewards as $reward) {
-                $this->checkRewardReached($user, $reward, $skill, $skillSet);
+                $this->checkRewardReached($user, $reward, $skill, $cert->getRequestGroupParent());
             }
         }
     }
 
     /**
+     * @param User $user
+     * @param Reward $reward
+     * @param Skill|null $skill
+     * @param SkillPath|null $requestGroupSkillSet
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
+     * @throws AspectNotFoundException
      */
-    public function checkRewardReached(User $user, Reward $reward, Skill $skill = null, SkillPath $skillSet = null): void
+    public function checkRewardReached(User $user, Reward $reward, ?Skill $skill = null, ?SkillPath $requestGroupSkillSet = null): void
     {
-        $grantedRepo = GeneralUtility::makeInstance(GrantedRewardRepository::class);
-        $existingReward = $grantedRepo->findByRewardAndUser($reward, $user);
+        $existingReward = $this->grantedRewardRepository->findByRewardAndUser($reward, $user);
         if ($existingReward->count()) {
             return;
         }
         $isReached = false;
         if ($reward->getSkillpath()) {
-            if ($skillSet && $skillSet->getUid() === $reward->getSkillpath()->getUid()) {
+            if ($requestGroupSkillSet && $requestGroupSkillSet->getUid() === $reward->getSkillpath()->getUid()) {
                 $isReached = true;
             } else {
                 $skillSetsOfSkill = $skill->getContainingPaths();
@@ -103,12 +111,15 @@ class RewardService
             }
         }
         if ($isReached) {
-            $grant = GeneralUtility::makeInstance(GrantedReward::class);
+            $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
+
+            $grant = new GrantedReward();
             $grant->setReward($reward);
             $grant->setUser($user);
-            $grant->setCrdate($GLOBALS['EXEC_TIME']);
+            $grant->setCrdate($now);
             $grant->setValidUntil($reward->getValidUntil());
-            $grantedRepo->add($grant);
+            $this->grantedRewardRepository->add($grant);
+
             GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
         }
     }

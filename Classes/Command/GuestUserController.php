@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
- *
  * This file is part of the "Skills" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -28,15 +29,9 @@ class GuestUserController extends Command
         $this->setDescription('Cleanup old guest users');
     }
 
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int|void
-     * @throws \Exception
-     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         (new GuestUserCleanupService())->run();
-        return 0;
+        return Command::SUCCESS;
     }
 }

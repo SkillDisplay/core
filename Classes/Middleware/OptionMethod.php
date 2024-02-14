@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Middleware;
 
@@ -21,8 +23,7 @@ class OptionMethod implements MiddlewareInterface
     public function process(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
-    ): ResponseInterface
-    {
+    ): ResponseInterface {
         if (strtolower($request->getMethod()) === 'options') {
             // CORS request, answer as needed
             $response = GeneralUtility::makeInstance(Response::class);

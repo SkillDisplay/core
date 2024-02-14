@@ -1,7 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
@@ -9,17 +10,18 @@
  *
  *  (c) 2016 Markus Klein
  *           Georg Ringer
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
+
+use RuntimeException;
 
 class CertificationStatistics
 {
     /**
      * @var Certification[][][]
      */
-    private $verifications = [
+    private array $verifications = [
         'revoked' => [],
         'expired' => [],
         'granted' => [],
@@ -30,14 +32,14 @@ class CertificationStatistics
     /**
      * @var int[][][]
      */
-    private $statistics = [];
+    private array $statistics = [];
 
     private array $brandIds = [];
 
     public function addCertification(Certification $certification): void
     {
         if (!empty($this->statistics)) {
-            throw new \RuntimeException('Invalid access, must NOT be seal()d yet.');
+            throw new RuntimeException('Invalid access, must NOT be seal()d yet.');
         }
         if ($certification->getRevokeDate()) {
             $this->verifications['revoked'][$certification->getLevel()][] = $certification;
@@ -110,7 +112,7 @@ class CertificationStatistics
         return $this->brandIds;
     }
 
-    public function isCompleted() : bool
+    public function isCompleted(): bool
     {
         return !empty($this->statistics['granted']);
     }

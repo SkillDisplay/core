@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /*
  *
@@ -14,12 +16,13 @@
 namespace SkillDisplay\Skills\Hook;
 
 use SkillDisplay\Skills\Service\BackendPageAccessCheckService;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SkillsProcFunc
 {
-    public function checkForReadableSkills(array &$configuration)
+    public function checkForReadableSkills(array &$configuration): void
     {
         $accessCheck = GeneralUtility::makeInstance(BackendPageAccessCheckService::class);
         $table = 'tx_skills_domain_model_skill';
@@ -29,7 +32,7 @@ class SkillsProcFunc
             ->select('pid')
             ->from($table)
             ->where(
-                $qb->expr()->eq('uid', $qb->createPositionalParameter(1, \PDO::PARAM_INT))
+                $qb->expr()->eq('uid', $qb->createPositionalParameter(1, Connection::PARAM_INT))
             )
             ->execute();
 
@@ -37,12 +40,23 @@ class SkillsProcFunc
 
             $statementSkill->bindValue(1, $item[1]);
             $statementSkill->execute();
-            $skill = $statementSkill->fetchAll();
-            $statementSkill->closeCursor();
+            $skill = $statementSkill->fetchAllAssociative();
+            $statementSkill->free();
 
             if (count($skill) !== 1 || !$accessCheck->readAccess($skill[0]['pid'])) {
                 unset($configuration['items'][$key]);
             }
         }
+    }
+
+    public function filterBrandsForUser(array &$configuration): void
+    {
+        $brandIds = DataHandlerHook::getDefaultBrandIdsOfBackendUser();
+        if (!$brandIds) {
+            return;
+        }
+        $configuration['items'] = array_filter($configuration['items'], function (array $item) use ($brandIds) {
+            return in_array($item[1], $brandIds, true);
+        });
     }
 }

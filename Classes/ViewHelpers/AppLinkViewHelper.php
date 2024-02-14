@@ -1,15 +1,15 @@
 <?php
 
-/*
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
- * Copyright (c) Reelworx GmbH
- *
- */
+ * (c) Reelworx GmbH
+ **/
 
 namespace SkillDisplay\Skills\ViewHelpers;
 
@@ -29,9 +29,9 @@ class AppLinkViewHelper extends AbstractTagBasedViewHelper
     {
         $this->registerArgument('url', 'string', 'The URL of the App', true);
         $this->registerArgument('appRoute', 'string', 'Route in App', true);
-        $this->registerArgument('class', 'string', 'Additional css classes', false);
-        $this->registerArgument('languageUid', 'int', 'Language UID', false);
-        $this->registerArgument('onlyUri', 'bool', 'When true just return the uri', false);
+        $this->registerArgument('class', 'string', 'Additional css classes');
+        $this->registerArgument('languageUid', 'int', 'Language UID');
+        $this->registerArgument('onlyUri', 'bool', 'When true just return the uri');
     }
 
     /**
@@ -39,7 +39,7 @@ class AppLinkViewHelper extends AbstractTagBasedViewHelper
      */
     public function render()
     {
-        # todo reimplement when App is multilanguage
+        // todo reimplement when App is multilanguage
         if (isset($this->arguments['languageUid'])) {
             $language = (int)$this->arguments['languageUid'];
             if ($language > 0) {

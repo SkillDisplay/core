@@ -1,16 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
-/***
- *
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2021 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -31,23 +30,12 @@ class SkillSetRelationService
     public const REGISTRY_SKILL_SETS = 'recommendationSetsToUpdate';
     public const REGISTRY_USERS = 'recommendationUsersToUpdate';
 
-    private SkillPathRepository $skillSetRepository;
-    private CertificationRepository $certificationRepository;
-    private RecommendedSkillSetRepository $recommendedSkillSetRepository;
-
     public function __construct(
-        SkillPathRepository $skillSetRepository,
-        CertificationRepository $certificationRepository,
-        RecommendedSkillSetRepository $recommendedSkillSetRepository
-    ) {
-        $this->skillSetRepository = $skillSetRepository;
-        $this->certificationRepository = $certificationRepository;
-        $this->recommendedSkillSetRepository = $recommendedSkillSetRepository;
-    }
+        protected readonly SkillPathRepository $skillSetRepository,
+        protected readonly CertificationRepository $certificationRepository,
+        protected readonly RecommendedSkillSetRepository $recommendedSkillSetRepository
+    ) {}
 
-    /**
-     * @throws \Doctrine\DBAL\Exception
-     */
     public function calculatePopularityForSets(): void
     {
         /** @var SkillPath $skillSet */
@@ -100,7 +88,7 @@ class SkillSetRelationService
         $this->recommendedSkillSetRepository->deleteRecommendations($user->getUid(), 0, 0);
 
         $organisationsOfUser = UserOrganisationsService::getOrganisationsOrEmpty($user);
-        $skillSets = GeneralUtility::makeInstance(SkillPathRepository::class)->findAllVisible($organisationsOfUser);
+        $skillSets = $this->skillSetRepository->findAllVisible($organisationsOfUser);
         foreach ($skillSets as $skillSet) {
             $this->calculateScoresBySourceSet($user, $skillSet);
         }

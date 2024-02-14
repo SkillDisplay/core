@@ -1,65 +1,93 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
+use InvalidArgumentException;
+use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
+use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
+use SkillDisplay\Skills\Domain\Repository\RequirementRepository;
+use SkillDisplay\Skills\Domain\Repository\RewardRepository;
+use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
+use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Hook\DataHandlerHook;
 use SkillDisplay\Skills\Service\BackendPageAccessCheckService;
-use SkillDisplay\Skills\Service\VerifierPermissionService;
 use SkillDisplay\Skills\Service\TestSystemProviderService;
+use SkillDisplay\Skills\Service\VerificationService;
+use SkillDisplay\Skills\Service\VerifierPermissionService;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
+use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
+use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
-use TYPO3\CMS\Extbase\Mvc\Exception\StopActionException;
-use TYPO3\CMS\Extbase\Mvc\View\ViewInterface;
 use TYPO3\CMS\Extbase\Object\Exception;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class BackendVerifierController extends BackendController
 {
-    protected function initializeView(ViewInterface $view): void
-    {
+    public function __construct(
+        SkillPathRepository $skillPathRepository,
+        SkillRepository $skillRepo,
+        BrandRepository $brandRepository,
+        CertificationRepository $certificationRepository,
+        CertifierRepository $certifierRepository,
+        RewardRepository $rewardRepository,
+        RequirementRepository $requirementRepository,
+        PageRenderer $pageRenderer,
+        ModuleTemplateFactory $moduleTemplateFactory,
+        VerificationService $verificationService,
+        protected readonly UserRepository $userRepository,
+    ) {
+        $this->menuItems = [];
+        parent::__construct(
+            $skillPathRepository,
+            $skillRepo,
+            $brandRepository,
+            $certificationRepository,
+            $certifierRepository,
+            $rewardRepository,
+            $requirementRepository,
+            $pageRenderer,
+            $moduleTemplateFactory,
+            $verificationService
+        );
     }
 
-    protected function generateMenu(): void
-    {
-    }
-
-    protected function generateButtons(): void
-    {
-    }
-
-    public function verifierPermissionsAction(): ?string
+    /**
+     * @throws InvalidQueryException
+     */
+    public function verifierPermissionsAction(): ResponseInterface
     {
         $mainBrandId = DataHandlerHook::getDefaultBrandIdsOfBackendUser()[0] ?? 0;
         if (!$mainBrandId && !$GLOBALS['BE_USER']->isAdmin()) {
-            return 'Configuration error. No organisation assigned.';
+            return $this->htmlResponse('Configuration error. No organisation assigned.');
         }
 
-        $certifierRepository = $this->objectManager->get(CertifierRepository::class);
         $verifierList = [];
 
         /** @var Certifier[] $verifiersOfBrand */
         if ($mainBrandId) {
-            $verifiersOfBrand = $certifierRepository->findByBrandId($mainBrandId)->toArray();
+            $verifiersOfBrand = $this->certifierRepository->findByBrandId($mainBrandId)->toArray();
         } else {
-            $verifiersOfBrand = $certifierRepository->findAll()->toArray();
+            $verifiersOfBrand = $this->certifierRepository->findAll()->toArray();
         }
         $brand = null;
         $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
@@ -67,12 +95,12 @@ class BackendVerifierController extends BackendController
             $brand = $verifier->getBrand();
             if ($verifier->getUser()) {
                 $verifierList[$verifier->getUid()] = $verifier->getBrand()->getName() .
-                                                      ' / ' .
-                                                      $verifier->getUser()->getUsername();
+                    ' / ' .
+                    $verifier->getUser()->getUsername();
             } else {
                 $verifierList[$verifier->getUid()] = $verifier->getBrand()->getName() .
-                                                      ' / ' .
-                                                      $providerService->getProviderById($verifier->getTestSystem())->getLabel();
+                    ' / ' .
+                    $providerService->getProviderById($verifier->getTestSystem())->getLabel();
             }
         }
         asort($verifierList);
@@ -81,17 +109,15 @@ class BackendVerifierController extends BackendController
         $users = [];
         if ($mainBrandId) {
             // load users of organisations not yet being a verifier for the organisation
-            /** @var UserRepository $userRepo */
-            $userRepo = $this->objectManager->get(UserRepository::class);
             $verifierUserIds = array_map(function (Certifier $certifier) {
                 return $certifier->getUser() ? $certifier->getUser()->getUid() : 0;
             }, $verifiersOfBrand);
 
-            $users = [];
             /** @var User $user */
-            foreach ($userRepo->findByOrganisation($mainBrandId) as $user) {
+            foreach ($this->userRepository->findByOrganisation($mainBrandId) as $user) {
                 if (!in_array($user->getUid(), $verifierUserIds)) {
-                    $users[$user->getUid()] = $user->getLastName() . ' ' . $user->getFirstName() . ' (' . $user->getUsername() . ')';
+                    $users[$user->getUid()] = $user->getLastName() . ' ' . $user->getFirstName(
+                    ) . ' (' . $user->getUsername() . ')';
                 }
             }
             asort($users);
@@ -121,17 +147,17 @@ class BackendVerifierController extends BackendController
         }
         $this->view->assign('allowedTiers', $allowedTiers);
 
-        return null;
+        return $this->generateOutput();
     }
 
     /**
-     * @param array $verifiers
-     * @param array $skillSets
+     * @param int[] $verifiers
+     * @param int[] $skillSets
      * @param string $submitType
      * @param string $tier1
      * @param string $tier2
      * @param string $tier4
-     * @throws StopActionException
+     * @return ResponseInterface
      * @throws Exception
      */
     public function modifyPermissionsAction(
@@ -141,18 +167,17 @@ class BackendVerifierController extends BackendController
         string $tier1 = '',
         string $tier2 = '',
         string $tier4 = ''
-    ) {
+    ): ResponseInterface {
         $allowedTiers = [];
         $mainBrandId = DataHandlerHook::getDefaultBrandIdsOfBackendUser()[0] ?? 0;
         if ($mainBrandId) {
             $brand = null;
-            $certifierRepository = $this->objectManager->get(CertifierRepository::class);
             foreach ($verifiers as $verifierId) {
                 /** @var Certifier $verifier */
-                $verifier = $certifierRepository->findByUid($verifierId);
+                $verifier = $this->certifierRepository->findByUid($verifierId);
                 $brand = $verifier->getBrand();
                 if ($verifier->getBrand()->getUid() !== $mainBrandId) {
-                    throw new \InvalidArgumentException('The passed verifier is not part of the organisation');
+                    throw new InvalidArgumentException('The passed verifier is not part of the organisation');
                 }
             }
             $allowedTiers = $brand ? $this->getAllowedTiers($brand) : [];
@@ -173,43 +198,37 @@ class BackendVerifierController extends BackendController
 
         if (count($verifiers) === 0 || count($skillSets) === 0 || $permissions === []) {
             $this->addFlashMessage('Invalid selection', 'Error', AbstractMessage::ERROR);
-        } else {
-            if ($submitType === 'grant') {
-                $count = VerifierPermissionService::grantPermissions($verifiers, $skillSets, $permissions);
-                $this->addFlashMessage('Granted permissions to ' . $count . ' skill/verifier combinations.');
-            } elseif ($submitType === 'revoke') {
-                $count = VerifierPermissionService::revokePermissions($verifiers, $skillSets, $permissions);
-                $this->addFlashMessage('Revoked permissions from ' . $count . '  skill/verifier combinations.');
-            }
+        } elseif ($submitType === 'grant') {
+            $count = VerifierPermissionService::grantPermissions(array_map('intval', $verifiers), array_map('intval', $skillSets), $permissions);
+            $this->addFlashMessage('Granted permissions to ' . $count . ' skill/verifier combinations.');
+        } elseif ($submitType === 'revoke') {
+            $count = VerifierPermissionService::revokePermissions(array_map('intval', $verifiers), array_map('intval', $skillSets), $permissions);
+            $this->addFlashMessage('Revoked permissions from ' . $count . '  skill/verifier combinations.');
         }
 
-        $this->redirect('verifierPermissions');
+        $uri = $this->uriBuilder->uriFor('verifierPermissions', null, 'BackendVerifier');
+        return new RedirectResponse($this->addBaseUriIfNecessary($uri), 303);
     }
 
-    /**
-     * @param User $user
-     * @throws StopActionException
-     */
-    public function addVerifierAction(User $user)
+    public function addVerifierAction(User $user): ResponseInterface
     {
         $mainBrandId = DataHandlerHook::getDefaultBrandIdsOfBackendUser()[0] ?? 0;
         if ($mainBrandId) {
             foreach ($user->getOrganisations() as $organisation) {
                 if ($organisation->getUid() === $mainBrandId) {
-                    $brandRepo = $this->objectManager->get(BrandRepository::class);
-                    $brand = $brandRepo->findByUid($mainBrandId);
+                    $brand = $this->brandRepository->findByUid($mainBrandId);
 
                     $verifier = new Certifier();
                     $verifier->setPid($organisation->getPid());
                     $verifier->setUser($user);
                     $verifier->setBrand($brand);
 
-                    $certifierRepository = $this->objectManager->get(CertifierRepository::class);
-                    $certifierRepository->add($verifier);
+                    $this->certifierRepository->add($verifier);
                 }
             }
         }
-        $this->redirect('verifierPermissions');
+        $uri = $this->uriBuilder->uriFor('verifierPermissions', null, 'BackendVerifier');
+        return new RedirectResponse($this->addBaseUriIfNecessary($uri), 303);
     }
 
     /**

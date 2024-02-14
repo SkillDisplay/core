@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Validator;
 
@@ -12,8 +14,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PasswordValidator extends AbstractUserValidator
 {
-
-    public function isValid($password) {
+    public function isValid($password)
+    {
         if (!$password instanceof Password) {
             $this->addError('The given Object is not a Password.', 98145168);
             return;
@@ -27,12 +29,12 @@ class PasswordValidator extends AbstractUserValidator
         }
 
         $saltFactory = GeneralUtility::makeInstance(PasswordHashFactory::class);
-        $salt = $saltFactory->get($user->getPassword(), 'FE');
         try {
+            $salt = $saltFactory->get($user->getPassword(), 'FE');
             if (!$salt->checkPassword($password->getOldPassword(), $user->getPassword())) {
                 $this->addError($this->getErrorMessage('passwordOld'), 1471702624);
             }
-        } catch (InvalidPasswordHashException $e) {
+        } catch (InvalidPasswordHashException) {
             $this->addError('Existing password has invalid hash.', 1471702628);
         }
         $user->setPassword($password->getPassword());

@@ -1,22 +1,24 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2019 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
+use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
 
 class PortalController extends AbstractController
 {
-    public function linksAction()
+    public function linksAction(): ResponseInterface
     {
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -40,5 +42,6 @@ class PortalController extends AbstractController
             ->buildFrontendUri();
 
         $this->view->assign('links', $links);
+        return $this->createResponse();
     }
 }

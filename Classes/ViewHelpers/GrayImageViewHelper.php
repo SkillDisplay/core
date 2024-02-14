@@ -1,23 +1,26 @@
-<?php declare(strict_types=1);
-/*
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
- * Copyright (c) Reelworx GmbH
- *
- */
+ * (c) Reelworx GmbH
+ **/
 
 namespace SkillDisplay\Skills\ViewHelpers;
 
+use InvalidArgumentException;
+use RuntimeException;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
-use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
 use TYPO3\CMS\Fluid\ViewHelpers\ImageViewHelper;
 use TYPO3\CMS\Frontend\Imaging\GifBuilder;
+use TYPO3Fluid\Fluid\Core\ViewHelper\Exception;
+use UnexpectedValueException;
 
 class GrayImageViewHelper extends ImageViewHelper
 {
@@ -28,7 +31,7 @@ class GrayImageViewHelper extends ImageViewHelper
      *
      *
      * @throws Exception
-     * @throws \UnexpectedValueException
+     * @throws UnexpectedValueException
      * @return string Rendered tag
      */
     public function render()
@@ -61,12 +64,12 @@ class GrayImageViewHelper extends ImageViewHelper
             $conf = [
                 1 => 'IMAGE',
                 '1.' => [
-                    'file' => $processedImage->getForLocalProcessing(false)
+                    'file' => $processedImage->getForLocalProcessing(false),
                 ],
                 20 => 'EFFECT',
                 '20.' => [
-                    'value' => 'gray'
-                ]
+                    'value' => 'gray',
+                ],
             ];
             $conf['XY'] = '[1.w],[1.h]';
             $conf['transparentBackground'] = true;
@@ -90,13 +93,11 @@ class GrayImageViewHelper extends ImageViewHelper
             if (empty($this->arguments['title']) && $title) {
                 $this->tag->addAttribute('title', $title);
             }
-        } catch (ResourceDoesNotExistException $e) {
-            // thrown if file does not exist
-        } catch (\UnexpectedValueException $e) {
+        } catch (UnexpectedValueException) {
             // thrown if a file has been replaced with a folder
-        } catch (\RuntimeException $e) {
-            // RuntimeException thrown if a file is outside of a storage
-        } catch (\InvalidArgumentException $e) {
+        } catch (RuntimeException) {
+            // RuntimeException thrown if a file is outside a storage
+        } catch (InvalidArgumentException) {
             // thrown if file storage does not exist
         }
 

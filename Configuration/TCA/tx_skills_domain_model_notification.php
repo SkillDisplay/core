@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'groupName' => 'skills_notification',
@@ -16,7 +17,7 @@ return [
             'label' => 'crdate',
             'config' => [
                 'type' => 'passthrough',
-            ]
+            ],
         ],
         'user' => [
             'exclude' => false,
@@ -35,7 +36,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 50,
-                'eval' => 'trim,required'
+                'eval' => 'trim,required',
             ],
         ],
         'reference' => [
@@ -45,7 +46,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim'
+                'eval' => 'trim',
             ],
         ],
         'message' => [
@@ -55,7 +56,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim'
+                'eval' => 'trim',
             ],
         ],
     ],

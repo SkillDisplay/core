@@ -1,15 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein <markus.klein@reelworx.at>, Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
@@ -17,17 +17,10 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class CertifierPermission extends AbstractEntity
 {
-    /** @var bool */
-    protected $tier1 = false;
-
-    /** @var bool */
-    protected $tier2 = false;
-
-    /** @var bool */
-    protected $tier4 = false;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\Skill */
-    protected $skill = null;
+    protected bool $tier1 = false;
+    protected bool $tier2 = false;
+    protected bool $tier4 = false;
+    protected ?Skill $skill = null;
 
     public function getTier1(): bool
     {
@@ -74,7 +67,7 @@ class CertifierPermission extends AbstractEntity
         return $this->tier4;
     }
 
-    public function getSkill():?Skill
+    public function getSkill(): ?Skill
     {
         return $this->skill;
     }

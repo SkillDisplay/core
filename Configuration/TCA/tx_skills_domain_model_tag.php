@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_tag',
@@ -12,7 +13,6 @@ return [
         'transOrigDiffSourceField' => 'l10n_diffsource',
         'searchFields' => 'title,uuid',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_tag.png',
-        'setToDefaultOnCopy' => 'uuid'
     ],
     'types' => [
         1 => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, title, description, domain_tag, domain_tagged_skills, tagged_skills, --div--;Import, uuid, imported'],
@@ -21,11 +21,7 @@ return [
         'sys_language_uid' => [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language',
-            'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'special' => 'languages'
-            ],
+            'config' => ['type' => 'language'],
         ],
         'l10n_parent' => [
             'displayCond' => 'FIELD:sys_language_uid:>:0',
@@ -38,7 +34,7 @@ return [
                 ],
                 'foreign_table' => 'tx_skills_domain_model_tag',
                 'foreign_table_where' => 'AND tx_skills_domain_model_tag.pid=###CURRENT_PID### AND tx_skills_domain_model_tag.sys_language_uid IN (-1,0)',
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'l10n_diffsource' => [
@@ -46,16 +42,16 @@ return [
                 'type' => 'passthrough',
             ],
         ],
-	    'title' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_tag.title',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 30,
+        'title' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_tag.title',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
+                'eval' => 'trim,required',
+            ],
+        ],
         'description' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_tag.description',
@@ -63,8 +59,8 @@ return [
                 'type' => 'text',
                 'cols' => 40,
                 'rows' => 15,
-                'eval' => 'trim'
-            ]
+                'eval' => 'trim',
+            ],
         ],
         'uuid' => [
             'exclude' => true,
@@ -86,7 +82,7 @@ return [
                 'default' => '0',
                 'readOnly' => true,
             ],
-        ],/*
+        ], /*
         'tagged_skills' => [
             'exclude' => false,
             'l10n_mode' => 'exclude',
@@ -146,8 +142,8 @@ return [
                 'type' => 'check',
                 'items' => [
                     1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-                    ]
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
                 ],
             ],
         ],

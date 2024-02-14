@@ -1,14 +1,15 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
@@ -18,27 +19,19 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 class GrantedReward extends AbstractEntity
 {
     protected int $crdate = 0;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\Reward */
-    protected $reward;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\User */
-    protected $user;
-
-    /** @var DateTime */
-    protected $validUntil;
-
+    protected ?Reward $reward = null;
+    protected ?User $user = null;
+    protected ?DateTime $validUntil = null;
     protected bool $selectedByUser = false;
-
     protected int $positionIndex = 0;
 
     public const ApiJsonViewConfiguration = [
         '_only' => [
-            'uid', 'positionIndex', 'reward'
+            'uid', 'positionIndex', 'reward',
         ],
         '_descend' => [
-            'reward' => Reward::ApiJsonViewConfiguration
-        ]
+            'reward' => Reward::ApiJsonViewConfiguration,
+        ],
     ];
 
     public function getSelectedByUser(): bool

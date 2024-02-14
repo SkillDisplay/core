@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Command;
 
-use Doctrine\DBAL\Exception;
 use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
@@ -14,6 +14,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Generic\Exception\NotImplementedException;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class RecommendedSkillSetsController extends Command
 {
@@ -26,14 +28,19 @@ class RecommendedSkillSetsController extends Command
     }
 
     /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
      * @throws InvalidQueryException
-     * @throws Exception
+     * @throws NotImplementedException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $registry = GeneralUtility::makeInstance(Registry::class);
         $service = GeneralUtility::makeInstance(SkillSetRelationService::class);
         $userRepository = GeneralUtility::makeInstance(UserRepository::class);
+        $skillSetRepo = GeneralUtility::makeInstance(SkillPathRepository::class);
+        $pm = GeneralUtility::makeInstance(PersistenceManager::class);
 
         $service->calculatePopularityForSets();
 
@@ -47,13 +54,16 @@ class RecommendedSkillSetsController extends Command
                     continue;
                 }
                 foreach ($setUids as $skillSetUid) {
-                    $skillSet = GeneralUtility::makeInstance(SkillPathRepository::class)->findByUid($skillSetUid);
+                    $skillSet = $skillSetRepo->findByUid($skillSetUid);
                     if ($skillSet) {
                         $service->updateScoreWithSet($user, $skillSet);
                     } else {
                         $output->writeln('SkillSet does not exist: ' . $skillSetUid);
                     }
                 }
+                $pm->persistAll();
+                $pm->clearState();
+                gc_collect_cycles();
             }
         }
         $registry->remove('skills', SkillSetRelationService::REGISTRY_SKILL_SETS);
@@ -61,10 +71,12 @@ class RecommendedSkillSetsController extends Command
         $userIds = $registry->get('skills', SkillSetRelationService::REGISTRY_USERS, []);
         foreach ($userIds as $skillSetUid) {
             $user = $userRepository->findByUid($skillSetUid);
-            $service->calculateByUser($user);
+            if ($user) {
+                $service->calculateByUser($user);
+            }
         }
         $registry->remove('skills', SkillSetRelationService::REGISTRY_USERS);
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

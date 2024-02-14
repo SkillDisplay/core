@@ -1,13 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Domain\Model;
 
@@ -17,29 +17,18 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class SkillGroup extends AbstractEntity
 {
-    /** @var string */
-    protected $name = '';
+    protected string $name = '';
+    protected string $description = '';
 
-    /** @var string */
-    protected $description = '';
+    /** @var ObjectStorage<Skill> */
+    protected ObjectStorage $skills;
 
-    /** @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Skill> */
-    protected $skills = null;
-
-    /** @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Link> */
-    protected $links = null;
-
-    /** @var CertificationRepository */
-    protected $certificationRepository = null;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\User */
-    protected $user = null;
-
-    /** @var string */
-    protected $skillupCommentPlaceholder = '';
-
-    /** @var string */
-    protected $skillupCommentPreset = '';
+    /** @var ObjectStorage<Link> */
+    protected ObjectStorage $links;
+    protected ?CertificationRepository $certificationRepository = null;
+    protected ?User $user = null;
+    protected string $skillupCommentPlaceholder = '';
+    protected string $skillupCommentPreset = '';
 
     public function __construct()
     {
@@ -47,7 +36,7 @@ class SkillGroup extends AbstractEntity
         $this->links = new ObjectStorage();
     }
 
-    public function injectCertificationRepository(CertificationRepository $certificationRepository)
+    public function injectCertificationRepository(CertificationRepository $certificationRepository): void
     {
         $this->certificationRepository = $certificationRepository;
     }
@@ -110,13 +99,12 @@ class SkillGroup extends AbstractEntity
             ];
         }
 
-        $stats = [
+        return [
             'tier3' => $stats['tier3'] / $skillCount,
             'tier2' => $stats['tier2'] / $skillCount,
             'tier1' => $stats['tier1'] / $skillCount,
             'tier4' => $stats['tier4'] / $skillCount,
         ];
-        return $stats;
     }
 
     public function getName(): string

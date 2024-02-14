@@ -37,6 +37,9 @@ services:
   SkillDisplay\Skills\Service\SkillSetRelationService:
     public: true
 
+  SkillDisplay\Skills\Service\StatisticsService:
+    public: true
+
   SkillDisplay\Skills\Service\RewardService:
     tags:
       - name: event.listener
@@ -61,12 +64,6 @@ services:
       - name: 'console.command'
         command: 'skills:stats'
         schedulable: true
-
-  SkillDisplay\Skills\Command\DomainTagController:
-    tags:
-      - name: 'console.command'
-        command: 'skills:domain_tag:migrate'
-        schedulable: false
 
   SkillDisplay\Skills\Command\GuestUserController:
     tags:

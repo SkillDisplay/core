@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Routing;
 
@@ -12,9 +13,9 @@ use TYPO3\CMS\Extbase\Routing\ExtbasePluginEnhancer;
 
 class RestApiEnhancer extends ExtbasePluginEnhancer
 {
-    protected $queryMapping = [];
+    protected array $queryMapping = [];
 
-    protected $routePrefix = '';
+    protected string $routePrefix;
 
     public function __construct(array $configuration)
     {
@@ -67,7 +68,9 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
             $variables = array_flip($compiledRoute->getPathVariables());
             $mergedParams = array_replace($variant->getDefaults(), $deflatedParameters);
             // all params must be given, otherwise we exclude this variant
-            if (array_diff_key($variables, $mergedParams) !== []) {
+            // (it is allowed that $variables is empty - in this case variables are
+            // "given" implicitly through controller-action pair in `_controller`)
+            if (array_diff_key($variables, $mergedParams)) {
                 continue;
             }
             $variant->addOptions(['deflatedParameters' => $deflatedParameters]);
@@ -114,7 +117,7 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
     public function inflateParameters(array $parameters, array $internals = []): array
     {
         // remove expected query parameters
-        $parameters = array_filter($parameters, function(string $queryParamName) { return !isset($this->queryMapping[$queryParamName]); }, ARRAY_FILTER_USE_KEY);
+        $parameters = array_filter($parameters, function (string $queryParamName) { return !isset($this->queryMapping[$queryParamName]); }, ARRAY_FILTER_USE_KEY);
         return parent::inflateParameters($parameters, $internals);
     }
 
@@ -141,8 +144,8 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
         // dynamic arguments, that don't have a static mapper
         $dynamicArguments = $variableProcessor
             ->inflateNamespaceParameters($dynamicCandidates, $this->namespace);
-        // static arguments, that don't appear in dynamic arguments
-        $staticArguments = ArrayUtility::arrayDiffAssocRecursive($routeArguments, $dynamicArguments);
+        // route arguments, that don't appear in dynamic arguments
+        $staticArguments = ArrayUtility::arrayDiffKeyRecursive($routeArguments, $dynamicArguments);
 
         foreach ($remainingQueryParameters as $name => $value) {
             if (isset($route->getOptions()['_queryMapping'][$name])) {
@@ -151,7 +154,8 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
         }
 
         $page = $route->getOption('_page');
-        $pageId = (int)($page['l10n_parent'] > 0 ? $page['l10n_parent'] : $page['uid']);
+        $pageId = (int)(isset($page['t3ver_oid']) && $page['t3ver_oid'] > 0 ? $page['t3ver_oid'] : $page['uid']);
+        $pageId = (int)($page['l10n_parent'] > 0 ? $page['l10n_parent'] : $pageId);
         // See PageSlugCandidateProvider where this is added.
         if ($page['MPvar'] ?? '') {
             $routeArguments['MP'] = $page['MPvar'];

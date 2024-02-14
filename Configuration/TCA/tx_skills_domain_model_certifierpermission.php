@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'hideTable' => true,
@@ -9,60 +10,59 @@ return [
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
-        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_certifierpermission.gif'
+        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_certifierpermission.gif',
     ],
     'types' => [
         1 => ['showitem' => 'certifier, skill, --palette--;;tiers'],
     ],
     'palettes' => [
-        'tiers' => ['showitem' => 'tier2, tier1, tier4']
+        'tiers' => ['showitem' => 'tier2, tier1, tier4'],
     ],
     'columns' => [
-	    'tier1' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier1',
-	        'config' => [
-			    'type' => 'check',
-			    'items' => [
-			        1 => [
-			            0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-			        ]
-			    ],
-			    'default' => 0
-			]
-	    ],
-	    'tier2' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier2',
-	        'config' => [
-			    'type' => 'check',
-			    'items' => [
-			        1 => [
-			            0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-			        ]
-			    ],
-			    'default' => 0
-			]
-	    ],
-	    'tier4' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier4',
-	        'config' => [
-			    'type' => 'check',
-			    'items' => [
-			        1 => [
-			            0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-			        ]
-			    ],
-			    'default' => 0
-			]
-	    ],
-	    'skill' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.skill',
+        'tier1' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier1',
+            'config' => [
+                'type' => 'check',
+                'items' => [
+                    1 => [
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
+                ],
+                'default' => 0,
+            ],
+        ],
+        'tier2' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier2',
+            'config' => [
+                'type' => 'check',
+                'items' => [
+                    1 => [
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
+                ],
+                'default' => 0,
+            ],
+        ],
+        'tier4' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.tier4',
+            'config' => [
+                'type' => 'check',
+                'items' => [
+                    1 => [
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
+                ],
+                'default' => 0,
+            ],
+        ],
+        'skill' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifierpermission.skill',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'foreign_table' => 'tx_skills_domain_model_skill',
                 'allowed' => 'tx_skills_domain_model_skill',
                 'size' => 1,
@@ -77,7 +77,7 @@ return [
                     ],
                 ],
             ],
-	    ],
+        ],
         'certifier' => [
             'label' => 'Certifier',
             'config' => [

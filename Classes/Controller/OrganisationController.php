@@ -1,24 +1,24 @@
-<?php declare(strict_types=1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2017 Markus Klein
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
 use DateTime;
 use InvalidArgumentException;
+use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certification;
-use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\InvitationCode;
 use SkillDisplay\Skills\Domain\Model\OrganisationStatistics;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -37,8 +37,7 @@ use SkillDisplay\Skills\Service\SkillSetRelationService;
 use SkillDisplay\Skills\Service\UserOrganisationsService;
 use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Http\ImmediateResponseException;
-use TYPO3\CMS\Core\Log\LogManager;
+use TYPO3\CMS\Core\Http\PropagateResponseException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
@@ -47,20 +46,33 @@ use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
 class OrganisationController extends AbstractController
 {
-    public function listAction()
+    public function __construct(
+        UserRepository $userRepository,
+        protected readonly BrandRepository $brandRepository,
+        protected readonly SkillPathRepository $skillSetRepository,
+        protected readonly OrganisationStatisticsRepository $organisationStatisticsRepository,
+        protected readonly CertificationRepository $certificationRepository,
+        protected readonly CertifierRepository $verifierRepository,
+        protected readonly InvitationCodeRepository $invitationCodeRepository,
+    ) {
+        parent::__construct($userRepository);
+    }
+
+    public function listAction(): ResponseInterface
     {
         $categoryId = (int)$this->settings['category'];
-        $brandRepository = $this->objectManager->get(BrandRepository::class);
-        $organisations = $brandRepository->findAllByCategory($categoryId)->toArray();
+        $organisations = $this->brandRepository->findAllByCategory($categoryId)->toArray();
         $this->view->assign('organisations', $organisations);
+        return $this->createResponse();
     }
 
     /**
      * @param Brand|null $organisation
-     * @throws ImmediateResponseException
+     * @return ResponseInterface
      * @throws PageNotFoundException
+     * @throws PropagateResponseException
      */
-    public function showAction(Brand $organisation = null)
+    public function showAction(?Brand $organisation = null): ResponseInterface
     {
         $this->assertEntityAvailable($organisation);
 
@@ -92,8 +104,6 @@ class OrganisationController extends AbstractController
                 ],
             ];
 
-            /** @var SkillPathRepository $skillPathRepository */
-            $skillPathRepository = $this->objectManager->get(SkillPathRepository::class);
             $skillSets = [];
 
             $currentUser = $this->getCurrentUser(false);
@@ -101,19 +111,18 @@ class OrganisationController extends AbstractController
                 UserOrganisationsService::isUserMemberOfOrganisations([$organisation], $currentUser);
 
             /** @var SkillPath $skillSet */
-            foreach ($skillPathRepository->findSkillPathsOfBrand($organisation->getUid()) as $skillSet) {
+            foreach ($this->skillSetRepository->findSkillPathsOfBrand($organisation->getUid()) as $skillSet) {
                 if ($skillSet->getVisibility() === SkillPath::VISIBILITY_PUBLIC ||
                     ($skillSet->getVisibility() === SkillPath::VISIBILITY_ORGANISATION && $inOrganisation)) {
-                    $skillSet->setUserForCompletedChecks($this->getCurrentUser(false));
+                    if ($currentUser) {
+                        $skillSet->setUserForCompletedChecks($currentUser);
+                    }
                     $skillSets[] = $skillSet;
                 }
             }
 
             if ($organisation->getShowNumOfCertificates()) {
-                /** @var OrganisationStatisticsRepository $statisticsRepo */
-                $statisticsRepo = $this->objectManager->get(OrganisationStatisticsRepository::class);
-                /** @var OrganisationStatistics $stats */
-                $stats = $statisticsRepo->getOrganisationStatisticsForBrand($organisation->getUid());
+                $stats = $this->organisationStatisticsRepository->getOrganisationStatisticsForBrand($organisation->getUid());
             } else {
                 $stats = [];
             }
@@ -125,7 +134,6 @@ class OrganisationController extends AbstractController
         } else {
             // set this global variable for news filtering
             $GLOBALS['currentBrandId'] = $organisation->getUid();
-            $certificationRepository = $this->objectManager->get(CertificationRepository::class);
 
             $verifications = $this->getVerifications($organisation);
 
@@ -133,15 +141,15 @@ class OrganisationController extends AbstractController
             $this->view->assign('levelRange', range(1, $organisation->getPartnerLevel()));
             $this->view->assign('verificationsCount', $verifications[0]);
             $this->view->assign('verificationsPercentage', $verifications[1]);
-            $this->view->assign('verificationTotal', $certificationRepository->countByBrand($organisation));
+            $this->view->assign('verificationTotal', $this->certificationRepository->countByBrand($organisation));
         }
 
         $this->view->assign('organisation', $organisation);
+        return $this->createResponse();
     }
 
     protected function getVerifications(Brand $organisation): array
     {
-        $certificationRepository = $this->objectManager->get(CertificationRepository::class);
         $users = $organisation->getMembers();
         $verificationsCount = [
             3 => 0,
@@ -151,8 +159,7 @@ class OrganisationController extends AbstractController
         ];
         /** @var User $user */
         foreach ($users as $user) {
-            $certifications = $certificationRepository->findAcceptedForUser($user);
-            /** @var Certification $certification */
+            $certifications = $this->certificationRepository->findAcceptedForUser($user);
             foreach ($certifications as $certification) {
                 $verificationsCount[$certification->getLevelNumber()]++;
             }
@@ -168,17 +175,17 @@ class OrganisationController extends AbstractController
         return [$verificationsCount, $verifications];
     }
 
-    public function leaveAction(Brand $organisation)
+    public function leaveAction(Brand $organisation): ResponseInterface
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
             throw new AuthenticationException('');
         }
         if (!$this->view instanceof JsonView) {
-            return '';
+            return $this->htmlResponse('');
         }
         $user->getOrganisations()->detach($organisation);
-        $this->objectManager->get(UserRepository::class)->update($user);
+        $this->userRepository->update($user);
         SkillSetRelationService::registerForUpdate(SkillSetRelationService::REGISTRY_USERS, $user->getUid());
 
         $this->createMailMessage($mailService, $mailView, $msg);
@@ -189,27 +196,26 @@ class OrganisationController extends AbstractController
         $msg->setContent($mailService->renderMail($mailView, 'organisationMemberLeft'));
         $msg->setTo($user->getEmail());
 
-        $managers = $this->objectManager->get(UserRepository::class)->findManagers($organisation);
-        /** @var User $manager */
+        $managers = $this->userRepository->findManagers($organisation);
         foreach ($managers as $manager) {
             $msg->addBcc($manager->getEmail());
         }
         $msg->send();
 
-        return null;
+        return $this->createResponse();
     }
 
-    public function removeMemberAction(Brand $organisation, User $user)
+    public function removeMemberAction(Brand $organisation, User $user): ResponseInterface
     {
         $loggedInUser = $this->getCurrentUser();
         if (!$loggedInUser) {
             throw new AuthenticationException('');
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
-            return '{"error": "User not allowed to remove member of brand"}';
+            return $this->jsonResponse('{"error": "User not allowed to remove member of brand"}');
         }
         $user->getOrganisations()->detach($organisation);
-        $this->objectManager->get(UserRepository::class)->update($user);
+        $this->userRepository->update($user);
         SkillSetRelationService::registerForUpdate(SkillSetRelationService::REGISTRY_USERS, $user->getUid());
 
         $this->createMailMessage($mailService, $mailView, $msg);
@@ -220,21 +226,16 @@ class OrganisationController extends AbstractController
         $msg->setContent($mailService->renderMail($mailView, 'organisationMemberRemoved'));
         $msg->setTo($user->getEmail());
 
-        $managers = $this->objectManager->get(UserRepository::class)->findManagers($organisation);
-        /** @var User $manager */
+        $managers = $this->userRepository->findManagers($organisation);
         foreach ($managers as $manager) {
             $msg->addBcc($manager->getEmail());
         }
         $msg->send();
 
-        return '{"error": ""}';
+        return $this->jsonResponse('{"error": ""}');
     }
 
-    /**
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
-     * @throws IllegalObjectTypeException
-     */
-    public function joinOrganisationAction(string $code)
+    public function joinOrganisationAction(string $code): ResponseInterface
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
@@ -244,21 +245,25 @@ class OrganisationController extends AbstractController
             throw new InvalidArgumentException('User may not be anonymous', 347856234);
         }
 
-        $invitationRepo = $this->objectManager->get(InvitationCodeRepository::class);
-        /** @var InvitationCode $invitation */
-        $invitation = $invitationRepo->findByCode($code)->getFirst();
+        $invitation = $this->invitationCodeRepository->findOneByCode($code);
         if (!$invitation) {
             $this->view->assign('success', false);
-            $this->view->assign('error',
-                LocalizationUtility::translate('organisation.listmy.join.error.invalidCode.text', 'skills'));
+            $this->view->assign(
+                'error',
+                LocalizationUtility::translate('organisation.listmy.join.error.invalidCode.text', 'skills')
+            );
         } elseif ($invitation->getExpires() && $invitation->getExpires()->getTimestamp() < time()) {
             $this->view->assign('success', false);
-            $this->view->assign('error',
-                LocalizationUtility::translate('organisation.listmy.join.error.expiredCode.text', 'skills'));
+            $this->view->assign(
+                'error',
+                LocalizationUtility::translate('organisation.listmy.join.error.expiredCode.text', 'skills')
+            );
         } elseif ($invitation->getUsedBy() !== null) {
             $this->view->assign('success', false);
-            $this->view->assign('error',
-                LocalizationUtility::translate('organisation.listmy.join.error.usedCode.text', 'skills'));
+            $this->view->assign(
+                'error',
+                LocalizationUtility::translate('organisation.listmy.join.error.usedCode.text', 'skills')
+            );
         } else {
             /** @var Brand $orga */
             $brand = $invitation->getBrand();
@@ -271,8 +276,10 @@ class OrganisationController extends AbstractController
             }
             if ($alreadyMember) {
                 $this->view->assign('success', false);
-                $this->view->assign('error',
-                    LocalizationUtility::translate('organisation.listmy.join.error.alreadyMember.text', 'skills'));
+                $this->view->assign(
+                    'error',
+                    LocalizationUtility::translate('organisation.listmy.join.error.alreadyMember.text', 'skills')
+                );
             } else {
                 $this->view->assign('success', true);
                 $this->view->assign('error', '');
@@ -282,7 +289,7 @@ class OrganisationController extends AbstractController
 
                 $invitation->setUsedBy($user);
                 $invitation->setUsedAt(new DateTime());
-                $invitationRepo->update($invitation);
+                $this->invitationCodeRepository->update($invitation);
 
                 $this->createMailMessage($mailService, $mailView, $msg);
 
@@ -292,14 +299,15 @@ class OrganisationController extends AbstractController
                 $msg->setContent($mailService->renderMail($mailView, 'organisationMemberJoined'));
                 $msg->setTo($user->getEmail());
 
-                $managers = $this->objectManager->get(UserRepository::class)->findManagers($brand);
-                /** @var User $manager */
+                $managers = $this->userRepository->findManagers($brand);
                 foreach ($managers as $manager) {
-                    $msg->addBcc($manager->getEmail());
+                    if (GeneralUtility::validEmail($manager->getEmail())) {
+                        $msg->addBcc($manager->getEmail());
+                    }
                 }
                 $msg->send();
 
-                $this->objectManager->get(PersistenceManager::class)->persistAll();
+                GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
                 /** @var EventDispatcher $eventDispatcher */
                 $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
                 $eventDispatcher->dispatch(new OrganisationJoinedEvent($brand, $user));
@@ -308,17 +316,18 @@ class OrganisationController extends AbstractController
 
         if ($this->view instanceof JsonView) {
             $this->view->setVariablesToRender(['success', 'error']);
-            return null;
+            return $this->createResponse();
         }
-        return '';
+        return $this->htmlResponse('');
     }
 
     /**
      * @param int $amount
      * @param Brand $brand
+     * @return ResponseInterface
      * @throws IllegalObjectTypeException
      */
-    public function createInvitationCodesAjaxAction(int $amount, Brand $brand)
+    public function createInvitationCodesAjaxAction(int $amount, Brand $brand): ResponseInterface
     {
         $loggedInUser = $this->getCurrentUser(false);
         if (!$loggedInUser) {
@@ -327,15 +336,14 @@ class OrganisationController extends AbstractController
         if (!$loggedInUser->getManagedBrands()->contains($brand)) {
             throw new AuthenticationException('Not a manager of this organisation');
         }
-        $invitationRepo = $this->objectManager->get(InvitationCodeRepository::class);
         $codes = [];
         for ($i = 0; $i < $amount; $i++) {
             $code = md5('something' . time() . $i);
-            $invitation = $this->objectManager->get(InvitationCode::class);
+            $invitation = new InvitationCode();
             $invitation->setCode($code);
             $invitation->setBrand($brand);
             $invitation->setCreatedBy($this->getCurrentUser());
-            $invitationRepo->add($invitation);
+            $this->invitationCodeRepository->add($invitation);
             $codes[] = $code;
         }
         /** @var JsonView $view */
@@ -344,16 +352,10 @@ class OrganisationController extends AbstractController
         $view->setConfiguration(['codes' => ['_descendAll' => []]]);
         $view->assign('success', true);
         $view->assign('codes', $codes);
+        return $this->createResponse();
     }
 
-    /**
-     * @param Brand $organisation
-     * @param int $enabled
-     * @param string $billingAddress
-     * @param string $country
-     * @param string $vatId
-     */
-    public function setAccountOverdrawAction(Brand $organisation, int $enabled, string $billingAddress, string $country, string $vatId)
+    public function setAccountOverdrawAction(Brand $organisation, int $enabled, string $billingAddress, string $country, string $vatId): ResponseInterface
     {
         $success = true;
         $errorMessage = '';
@@ -377,10 +379,13 @@ class OrganisationController extends AbstractController
                 $organisation->setCountry($country);
                 $organisation->setVatId($vatId);
             }
-            GeneralUtility::makeInstance(LogManager::class)
-                ->getLogger(__CLASS__)
-                ->info("Credit overdraw changed to $enabled for Brand ID " . $organisation->getUid() . ' by FE user ID ' . $user->getUid());
-            $this->objectManager->get(BrandRepository::class)->update($organisation);
+            $this->logger->info(sprintf(
+                'Credit overdraw changed to %d for Brand ID %d by FE user ID %d',
+                $enabled,
+                $organisation->getUid(),
+                $user->getUid()
+            ));
+            $this->brandRepository->update($organisation);
         }
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -392,12 +397,10 @@ class OrganisationController extends AbstractController
         }
         $this->view->assign('success', $success);
         $this->view->assign('errorMessage', $errorMessage);
+        return $this->createResponse();
     }
 
-    /***
-     * @param Brand $organisation
-     */
-    public function getBillingInformationAction(Brand $organisation)
+    public function getBillingInformationAction(Brand $organisation): ResponseInterface
     {
         $loggedInUser = $this->getCurrentUser(false);
         if (!$loggedInUser) {
@@ -418,17 +421,17 @@ class OrganisationController extends AbstractController
             $this->view->setVariablesToRender(array_keys($configuration));
         }
         $this->view->assign('billingInformation', $data);
+        return $this->createResponse();
     }
 
-    public function managerListAction(Brand $organisation)
+    public function managerListAction(Brand $organisation): ResponseInterface
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
             throw new AuthenticationException('');
         }
         $validAccess = false;
-        $verifiers = $this->objectManager->get(CertifierRepository::class)->findByBrandId($organisation->getUid());
-        /** @var Certifier $verifier */
+        $verifiers = $this->verifierRepository->findByBrandId($organisation->getUid());
         foreach ($verifiers as $verifier) {
             if ($verifier->getUser()->getUid() === $user->getUid()) {
                 $validAccess = true;
@@ -453,29 +456,26 @@ class OrganisationController extends AbstractController
             $this->view->setConfiguration($configuration);
             $this->view->setVariablesToRender(array_keys($configuration));
         }
-        $managers = $this->objectManager->get(UserRepository::class)->findManagers($organisation);
+        $managers = $this->userRepository->findManagers($organisation);
         $this->view->assign('managers', $managers);
+        return $this->createResponse();
     }
 
-    public function organisationStatisticsAction(Brand $organisation)
+    public function organisationStatisticsAction(Brand $organisation, string $apiKey = ''): ResponseInterface
     {
-        $loggedInUser = $this->getCurrentUser(false);
+        $loggedInUser = $this->getCurrentUser(false, $apiKey);
         if (!$loggedInUser) {
             throw new AuthenticationException('');
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
             throw new AuthenticationException('Not a manager of this organisation');
         }
-        $statisticsRepo = $this->objectManager->get(OrganisationStatisticsRepository::class);
-        /** @var OrganisationStatistics $stats */
-        $stats = $statisticsRepo->getOrganisationStatisticsForBrand($organisation->getUid());
+        $stats = $this->organisationStatisticsRepository->getOrganisationStatisticsForBrand($organisation->getUid());
         if ($stats) {
-            /** @var SkillPathRepository $skillSetRepository */
-            $skillSetRepository = $this->objectManager->get(SkillPathRepository::class);
-            $stats->setLimitInterestToSkillSets($skillSetRepository->findAllVisible([$organisation]));
+            $stats->setLimitInterestToSkillSets($this->skillSetRepository->findAllVisible([$organisation]));
         } else {
             // there are no statistics for this brand yet, send empty one
-            $stats = $this->objectManager->get(OrganisationStatistics::class);
+            $stats = new OrganisationStatistics();
             $stats->setBrand($organisation);
         }
         $this->view->assign('organisationStatistics', $stats);
@@ -486,32 +486,33 @@ class OrganisationController extends AbstractController
             $this->view->setConfiguration($configuration);
             $this->view->setVariablesToRender(array_keys($configuration));
         }
+        return $this->createResponse();
     }
 
-    public function downloadCsvStatisticsAction(Brand $organisation)
+    public function downloadCsvStatisticsAction(Brand $organisation): ResponseInterface
     {
         $this->verificationListAction($organisation, 'csv');
+        return $this->createResponse();
     }
 
-    public function verificationListAction(Brand $organisation, string $type = 'csv') {
-        $loggedInUser = $this->getCurrentUser(false);
+    public function verificationListAction(Brand $organisation, string $type = 'json', string $apiKey = ''): ResponseInterface
+    {
+        $loggedInUser = $this->getCurrentUser(false, $apiKey);
         if (!$loggedInUser) {
             throw new AuthenticationException('');
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
             throw new AuthenticationException('Not a manager of this organisation');
         }
-        $certificationRepository = $this->objectManager->get(CertificationRepository::class);
-        $certifierRepository = $this->objectManager->get(CertifierRepository::class);
         $lines = [];
         /** @var User $member */
         foreach ($organisation->getMembers() as $member) {
-            foreach ($certificationRepository->findAcceptedOrDeniedByUser($member, null) as $certification) {
+            foreach ($this->certificationRepository->findAcceptedOrDeniedByUser($member, null) as $certification) {
                 $lines = $this->addVerificationEntryToArray($lines, $certification);
             }
         }
-        foreach ($certifierRepository->findByBrandId($organisation->getUid()) as $certifier) {
-            foreach ($certificationRepository->findAcceptedOrDeniedByUser(null, $certifier) as $certification) {
+        foreach ($this->verifierRepository->findByBrandId($organisation->getUid()) as $certifier) {
+            foreach ($this->certificationRepository->findAcceptedOrDeniedByUser(null, $certifier) as $certification) {
                 $lines = $this->addVerificationEntryToArray($lines, $certification);
             }
         }
@@ -519,7 +520,7 @@ class OrganisationController extends AbstractController
         $lines = $this->removeDuplicates($lines);
 
         usort($lines, function ($a, $b) {
-            return $a[0] - $b[0];
+            return $a['uid'] - $b['uid'];
         });
 
         if ($type === 'csv') {
@@ -528,7 +529,6 @@ class OrganisationController extends AbstractController
                 'Uid',
                 'Created',
                 'Granted',
-                'Denied',
                 'Skill UID',
                 'Skill UUID',
                 'Skill',
@@ -540,20 +540,23 @@ class OrganisationController extends AbstractController
                 'Certifier',
                 'Organisation',
                 'Campaign',
+                'SkillSet UID',
+                'SkillSet Name',
             ]);
 
             $filename = 'Verifications_' . date('YmdHi') . '.csv';
             CsvService::sendCSVFile($lines, $filename);
-        } else if ($type === 'json' && $this->view instanceof JsonView) {
+        } elseif ($type === 'json' && $this->view instanceof JsonView) {
             $this->view->assign('verifications', $lines);
             $configuration = [
                 'verifications' => [
-                    '_descendAll' => []
+                    '_descendAll' => [],
                 ],
             ];
             $this->view->setConfiguration($configuration);
             $this->view->setVariablesToRender(array_keys($configuration));
         }
+        return $this->createResponse();
 
     }
 
@@ -573,11 +576,11 @@ class OrganisationController extends AbstractController
     private function addVerificationEntryToArray(array $lines, Certification $certification): array
     {
         $skill = $certification->getSkill();
+        $skillSet = $certification->getRequestGroupParent();
         $lines[] = [
             'uid' => $certification->getUid(),
             'created' => date('Y-m-d H:i', $certification->getCrdate()),
             'granted' => $certification->getGrantDate() ? $certification->getGrantDate()->format('Y-m-d H:i') : '',
-            'denied' => $certification->getDenyDate() ? $certification->getDenyDate()->format('Y-m-d H:i') : '',
             'skillUid' => $skill ? $skill->getUid() : 0,
             'skillUUid' => $skill ? $skill->getUUId() : '',
             'skill' => $skill ? $skill->getTitle() : $certification->getSkillTitle(),
@@ -588,12 +591,15 @@ class OrganisationController extends AbstractController
             'lastName' => $certification->getUser() ? $certification->getUser()->getLastName() : 'deleted user',
             'certifier' => $certification->getCertifier()
                 ? (
-            $certification->getCertifier()->getUser()
-                ? $certification->getCertifier()->getUser()->getUsername()
-                : ($certification->getCertifier()->getTestSystem() ? $certification->getCertifier()->getTestSystem() : 'deleted user'))
+                    $certification->getCertifier()->getUser()
+                    ? $certification->getCertifier()->getUser()->getUsername()
+                    : ($certification->getCertifier()->getTestSystem() ?: 'deleted user')
+                )
                 : 'CertoBot',
             'organisation' => $certification->getBrand() ? $certification->getBrand()->getName() : '',
             'campaign' => $certification->getCampaign() ? $certification->getCampaign()->getTitle() : '',
+            'skillSetUid' => $skillSet ? $skillSet->getUid() : 0,
+            'skillSetName' => $skillSet ? $skillSet->getName() : '',
         ];
         return $lines;
     }

@@ -1,15 +1,15 @@
-<?php declare(strict_types = 1);
+<?php
 
-/***
- *
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -19,15 +19,9 @@ use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-class SkillCleanupService
+readonly class SkillCleanupService
 {
-    /** @var int */
-    private $skillId;
-
-    public function __construct(int $skillId)
-    {
-        $this->skillId = $skillId;
-    }
+    public function __construct(private int $skillId) {}
 
     /**
      * delete all nested rows that are connected to the skill
@@ -59,11 +53,11 @@ class SkillCleanupService
                 )
             );
 
-        $qb->execute();
+        $qb->executeStatement();
     }
 
     /**
-     * fetches all requirements of the skill to cleanup the nested data
+     * fetches all requirements of the skill to clean up the nested data
      */
     private function deleteRequirements(): void
     {
@@ -76,7 +70,7 @@ class SkillCleanupService
     }
 
     /**
-     * fetches all sets of the requirement to cleanup the nested data
+     * fetches all sets of the requirement to clean up the nested data
      *
      * @param int $requirementId
      */
@@ -91,7 +85,7 @@ class SkillCleanupService
     }
 
     /**
-     * fetches all skill sets of the set to cleanup the nested data
+     * fetches all skill sets of the set to clean up the nested data
      *
      * @param int $setId
      */
@@ -124,8 +118,9 @@ class SkillCleanupService
      */
     private function deleteWithDataHandler(string $table, array $uidList): void
     {
-        if ($uidList === [])
+        if ($uidList === []) {
             return;
+        }
 
         $cmd = [];
 
@@ -151,7 +146,7 @@ class SkillCleanupService
      * @param string $table
      * @param string $column
      * @param int $key
-     * @param null|callable $handleChildren
+     * @param callable|null $handleChildren
      */
     private function fetchAndDeleteNestedData(string $table, string $column, int $key, callable $handleChildren = null): void
     {
@@ -174,8 +169,8 @@ class SkillCleanupService
                     $qb->createNamedParameter($key, Connection::PARAM_INT)
                 )
             )
-            ->execute()
-            ->fetchAll();
+            ->executeQuery()
+            ->fetchAllAssociative();
 
         $result = array_column($result, 'uid');
 

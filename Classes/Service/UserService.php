@@ -1,14 +1,14 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Markus Klein
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -22,28 +22,17 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Model\FrontendUserGroup;
 use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserGroupRepository;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class UserService
 {
-    /** @var UserRepository */
-    protected $userRepository;
+    protected int $acceptedGroupId = 0;
+    protected int $storagePid = 0;
 
-    /** @var FrontendUserGroupRepository */
-    protected $userGroupRepository;
-
-    /** @var int */
-    protected $acceptedGroupId = 0;
-
-    /** @var int */
-    protected $storagePid = 0;
-
-    public function __construct(FrontendUserGroupRepository $userGroupRepository, UserRepository $userRepository)
-    {
-        $this->userGroupRepository = $userGroupRepository;
-        $this->userRepository = $userRepository;
-    }
+    public function __construct(
+        protected readonly FrontendUserGroupRepository $userGroupRepository,
+        protected readonly UserRepository $userRepository
+    ) {}
 
     public static function cleanupUser(int $userId): void
     {
@@ -56,11 +45,11 @@ class UserService
             ->where(
                 $queryBuilder->expr()->eq('user', $queryBuilder->createNamedParameter($userId, Connection::PARAM_INT))
             )
-            ->execute();
+            ->executeStatement();
 
         $queryBuilder
             ->delete('tx_skills_domain_model_recommendedskillset')
-            ->execute();
+            ->executeStatement();
     }
 
     public function setAcceptedUserGroup($id): void
@@ -80,12 +69,11 @@ class UserService
         $user->setPassword($this->encryptPassword($user->getPassword()));
         $this->userRepository->add($user);
 
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $persistenceManager = $objectManager->get(PersistenceManager::class);
+        $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
         $persistenceManager->persistAll();
     }
 
-    public function activate(User $user)
+    public function activate(User $user): void
     {
         /** @var FrontendUserGroup $usergroup */
         $usergroup = $this->userGroupRepository->findByUid($this->acceptedGroupId);
@@ -110,7 +98,7 @@ class UserService
         $this->userRepository->update($user);
     }
 
-    protected function encryptPassword(string $password) : string
+    protected function encryptPassword(string $password): string
     {
         $saltFactory = GeneralUtility::makeInstance(PasswordHashFactory::class);
         $salt = $saltFactory->getDefaultHashInstance('FE');
@@ -135,9 +123,11 @@ class UserService
         $user->setPasswordRepeat($password->getPasswordRepeat());
         if (empty($user->getPassword()) || empty($user->getPasswordRepeat())) {
             return 'The new password cannot be empty!';
-        } elseif ($user->getPassword() !== $user->getPasswordRepeat()) {
+        }
+        if ($user->getPassword() !== $user->getPasswordRepeat()) {
             return 'The repeated password does not match!';
-        } elseif (!preg_match('/\\A(?=\\D*\\d).{8,}/', $user->getPassword())) {
+        }
+        if (!preg_match('/\\A(?=\\D*\\d).{8,}/', $user->getPassword())) {
             // min 8 chars and a digit
             return 'The password does not match the criteria!';
         }

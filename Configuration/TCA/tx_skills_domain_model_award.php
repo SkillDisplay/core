@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award',
@@ -41,9 +42,9 @@ return [
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.type.verified', 0],
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.type.member', 1],
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.type.coach', 2],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.type.mentor', 3]
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.type.mentor', 3],
                 ],
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'level' => [
@@ -58,9 +59,9 @@ return [
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.level.certificate', 1],
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.level.educational', 2],
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.level.self', 3],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.level.business', 4]
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.level.business', 4],
                 ],
-                'default' => 1
+                'default' => 1,
             ],
         ],
         'rank' => [
@@ -74,9 +75,9 @@ return [
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.rank.bronze', 0],
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.rank.silver', 1],
                     ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.rank.gold', 2],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.rank.platinum', 3]
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_award.rank.platinum', 3],
                 ],
-                'default' => 0
+                'default' => 0,
             ],
         ],
     ],

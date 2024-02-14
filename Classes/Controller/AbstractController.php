@@ -1,32 +1,36 @@
-<?php declare(strict_types=1);
-/*
- *
+<?php
+
+declare(strict_types=1);
+
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2016 Reelworx GmbH <office@reelworx.at>
- *
- */
+ **/
 
 namespace SkillDisplay\Skills\Controller;
 
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Reelworx\TYPO3\MailService\ExtbaseMailTrait;
 use SkillDisplay\Skills\AuthenticationException;
-use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\User;
-use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Mvc\View\JsonView;
+use SkillDisplay\Skills\TermsException;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Context\UserAspect;
 use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
-use TYPO3\CMS\Core\Http\ImmediateResponseException;
+use TYPO3\CMS\Core\Http\PropagateResponseException;
+use TYPO3\CMS\Core\Http\RedirectResponse;
+use TYPO3\CMS\Core\Http\Response;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
+use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Frontend\Controller\ErrorController;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 
@@ -36,6 +40,10 @@ abstract class AbstractController extends ActionController implements LoggerAwar
     use ExtbaseMailTrait;
 
     protected bool $isAjax = false;
+
+    public function __construct(
+        protected readonly UserRepository $userRepository
+    ) {}
 
     /**
      * {inherit}
@@ -50,21 +58,22 @@ abstract class AbstractController extends ActionController implements LoggerAwar
         return parent::resolveView();
     }
 
-    /**
-     * {inherit}
-     */
-    protected function callActionMethod()
+    protected function callActionMethod(RequestInterface $request): ResponseInterface
     {
         try {
-            parent::callActionMethod();
+            $response = parent::callActionMethod($request);
         } catch (AuthenticationException $e) {
-            $this->response->setStatus(403);
+            $response = new Response($e->getMessage(), 403);
+        } catch (TermsException $e) {
+            $response = new RedirectResponse($this->addBaseUriIfNecessary($e->getUrl()), 303);
         }
-        if ($this->isAjax) {
-            $this->response->setHeader('Access-Control-Allow-Origin', $_SERVER['HTTP_ORIGIN']);
-            $this->response->setHeader('Access-Control-Allow-Credentials', 'true');
-            $this->response->setHeader('Content-Type', 'application/json');
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if ($this->isAjax && $origin) {
+            $response = $response
+                ->withHeader('Access-Control-Allow-Origin', $origin)
+                ->withHeader('Access-Control-Allow-Credentials', 'true');
         }
+        return $response;
     }
 
     /**
@@ -82,50 +91,49 @@ abstract class AbstractController extends ActionController implements LoggerAwar
         $user = null;
         if ($apiKey) {
             /** @var User $user */
-            $user = $this->objectManager->get(UserRepository::class)->findByApiKey($apiKey);
+            $user = $this->userRepository->findByApiKey($apiKey);
         } else {
             /** @var UserAspect $userAspect */
             $userAspect = GeneralUtility::makeInstance(Context::class)->getAspect('frontend.user');
             if ($userAspect->isUserOrGroupSet()) {
                 /** @var User $user */
-                $user = $this->objectManager
-                    ->get(UserRepository::class)
-                    ->findByIdentifier($userAspect->get('id'));
+                $user = $this->userRepository->findByIdentifier($userAspect->get('id'));
             }
         }
         if ($user) {
             if (!$this->isAjax && $validateTerms && !$user->isTermsAccepted() && !$user->isAnonymous()) {
-                $this->redirect('terms', 'User', null,
+                $this->uriBuilder->reset()->setCreateAbsoluteUri(true)
+                    ->setTargetPageUid((int)$this->settings['pids']['registration']);
+                $uri = $this->uriBuilder->uriFor(
+                    'terms',
                     ['redirect' => GeneralUtility::getIndpEnv('TYPO3_REQUEST_URL')],
-                    $this->settings['pids']['registration']);
+                    'User'
+                );
+                throw new TermsException($uri);
             }
-            $user->setAdminGroupId((int)$this->settings['adminUserGroup']);
         }
         return $user;
     }
 
-    protected function getCurrentBrand(string $apiKey): ?Brand
-    {
-        if (!$apiKey) {
-            return null;
-        }
-        return $this->objectManager->get(BrandRepository::class)->findByApiKey($apiKey);
-    }
-
     /**
-     * @param $object
-     * @throws ImmediateResponseException
+     * @param object|null $object
      * @throws PageNotFoundException
+     * @throws PropagateResponseException
      */
-    protected function assertEntityAvailable($object): void
+    protected function assertEntityAvailable(?Object $object): void
     {
         if ($object === null) {
             $response = GeneralUtility::makeInstance(ErrorController::class)->pageNotFoundAction(
-                $GLOBALS['TYPO3_REQUEST'],
+                $this->request,
                 'Resource not found',
             );
-            throw new ImmediateResponseException($response);
+            throw new PropagateResponseException($response);
         }
+    }
+
+    protected function createResponse(): ResponseInterface
+    {
+        return $this->view instanceof JsonView ? $this->jsonResponse() : $this->htmlResponse();
     }
 
     protected function getTSFE(): TypoScriptFrontendController

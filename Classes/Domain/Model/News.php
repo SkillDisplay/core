@@ -2,10 +2,9 @@
 
 namespace SkillDisplay\Skills\Domain\Model;
 
-class News extends \GeorgRinger\News\Domain\Model\News {
-
-    /** @var int */
-    protected $brand = 0;
+class News extends \GeorgRinger\News\Domain\Model\News
+{
+    protected int $brand = 0;
 
     public function getBrand(): int
     {

@@ -1,32 +1,30 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 /**
- *
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2021 Reelworx GmbH, Johannes Kasberger
- *
  **/
 
 namespace SkillDisplay\Skills\Controller;
 
 use Doctrine\DBAL\Driver\Exception;
-use PDO;
+use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Domain\Model\Brand;
+use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
 
 class PaymentController extends AbstractController
 {
-    /**
-     * @throws Exception
-     */
-    public function getSubscriptionAction(Brand $organisation)
+    public function getSubscriptionAction(Brand $organisation): ResponseInterface
     {
         $loggedInUser = $this->getCurrentUser();
         if (!$loggedInUser) {
@@ -71,12 +69,13 @@ class PaymentController extends AbstractController
         }
 
         $this->view->assignMultiple($data);
+        return $this->createResponse();
     }
 
     /**
      * @throws Exception
      */
-    public function getCustomerPortalUrlAction(string $returnUrl)
+    public function getCustomerPortalUrlAction(string $returnUrl): ResponseInterface
     {
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -108,7 +107,7 @@ class PaymentController extends AbstractController
                 $session = $client->billingPortal->sessions->create(
                     [
                         'customer' => $rawUser['stripe_user'],
-                        'return_url' => $returnUrl
+                        'return_url' => $returnUrl,
                     ]
                 );
                 $portalUrl = $session->url;
@@ -123,11 +122,9 @@ class PaymentController extends AbstractController
         ];
 
         $this->view->assignMultiple($data);
+        return $this->createResponse();
     }
 
-    /**
-     * @throws Exception
-     */
     private function getSubscriptionId(Brand $organisation): string
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -135,9 +132,9 @@ class PaymentController extends AbstractController
         $brandData = $queryBuilder->select('stripe_subscription')
             ->from('tx_skills_domain_model_brand')
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($organisation->getUid(), PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($organisation->getUid(), Connection::PARAM_INT))
             )
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         if (count($brandData) === 1) {
@@ -146,9 +143,6 @@ class PaymentController extends AbstractController
         return '';
     }
 
-    /**
-     * @throws Exception
-     */
     private function getUserByStripeId(string $stripeId): array
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -158,7 +152,7 @@ class PaymentController extends AbstractController
             ->where(
                 $queryBuilder->expr()->eq('stripe_user', $queryBuilder->createNamedParameter($stripeId))
             )
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         if (count($userData) === 1) {
@@ -167,9 +161,6 @@ class PaymentController extends AbstractController
         return [];
     }
 
-    /**
-     * @throws Exception
-     */
     private function getUserByUid(int $uid): array
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -177,9 +168,9 @@ class PaymentController extends AbstractController
         $userData = $queryBuilder->select('*')
             ->from('fe_users')
             ->where(
-                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, PDO::PARAM_INT))
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($uid, Connection::PARAM_INT))
             )
-            ->execute()
+            ->executeQuery()
             ->fetchAllAssociative();
 
         if (count($userData) === 1) {

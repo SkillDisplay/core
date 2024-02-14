@@ -1,4 +1,7 @@
 <?php
+
+use SkillDisplay\Skills\Service\TestSystemProviderService;
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier',
@@ -6,17 +9,17 @@ return [
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
-		'delete' => 'deleted',
+        'delete' => 'deleted',
         'enablecolumns' => [
-			'disabled' => 'hidden',
+            'disabled' => 'hidden',
         ],
-        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_certifier.gif'
+        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_certifier.gif',
     ],
     'types' => [
-        1 => ['showitem' => 'hidden, --palette--;;properties, shared_api_secret, permissions'],
+        1 => ['showitem' => 'hidden, public, --palette--;;properties, shared_api_secret, permissions'],
     ],
     'palettes' => [
-        'properties' => ['showitem' => 'user, brand, link, test_system']
+        'properties' => ['showitem' => 'user, brand, link, test_system'],
     ],
     'columns' => [
         'hidden' => [
@@ -26,29 +29,28 @@ return [
                 'type' => 'check',
                 'items' => [
                     1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-                    ]
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
                 ],
             ],
         ],
-	    'user' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.user',
-	        'config' => [
-			    'type' => 'select',
-			    'renderType' => 'selectSingle',
-			    'foreign_table' => 'fe_users',
+        'user' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.user',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'foreign_table' => 'fe_users',
                 'foreign_table_where' => 'ORDER BY fe_users.username',
-                'items' => [['','']],
-                'default' => ''
-			],
-	    ],
-	    'brand' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.brand',
+                'items' => [['', '']],
+                'default' => '',
+            ],
+        ],
+        'brand' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.brand',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'foreign_table' => 'tx_skills_domain_model_brand',
                 'allowed' => 'tx_skills_domain_model_brand',
                 'size' => 1,
@@ -63,7 +65,7 @@ return [
                     ],
                 ],
             ],
-	    ],
+        ],
         'link' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.link',
@@ -77,26 +79,26 @@ return [
                 'fieldControl' => [
                     'linkPopup' => [],
                 ],
-            ]
+            ],
         ],
-	    'permissions' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.permissions',
-	        'config' => [
-			    'type' => 'inline',
-			    'foreign_table' => 'tx_skills_domain_model_certifierpermission',
-			    'foreign_field' => 'certifier',
+        'permissions' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.permissions',
+            'config' => [
+                'type' => 'inline',
+                'foreign_table' => 'tx_skills_domain_model_certifierpermission',
+                'foreign_field' => 'certifier',
                 'minitems' => 0,
-			    'maxitems' => 9999,
-			    'appearance' => [
-			        'collapseAll' => true,
-			        'levelLinksPosition' => 'top',
-			        'showSynchronizationLink' => true,
-			        'showPossibleLocalizationRecords' => true,
-			        'showAllLocalizationLink' => true
-			    ],
-			],
-	    ],
+                'maxitems' => 9999,
+                'appearance' => [
+                    'collapseAll' => true,
+                    'levelLinksPosition' => 'top',
+                    'showSynchronizationLink' => true,
+                    'showPossibleLocalizationRecords' => true,
+                    'showAllLocalizationLink' => true,
+                ],
+            ],
+        ],
         'shared_api_secret' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.shared_api_secret',
@@ -104,7 +106,7 @@ return [
                 'type' => 'input',
                 'size' => 50,
                 'max' => 100,
-                'eval' => 'trim'
+                'eval' => 'trim',
             ],
         ],
         'test_system' => [
@@ -112,9 +114,22 @@ return [
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'itemsProcFunc' => \SkillDisplay\Skills\Service\TestSystemProviderService::class . '->' . 'getProviderListForTCA',
-                'items' => []
-            ]
+                'itemsProcFunc' => TestSystemProviderService::class . '->getProviderListForTCA',
+                'items' => [],
+            ],
+        ],
+        'public' => [
+            'exclude' => true,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certifier.public',
+            'config' => [
+                'type' => 'check',
+                'items' => [
+                    1 => [
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
+                ],
+                'default' => 0,
+            ],
         ],
     ],
 ];

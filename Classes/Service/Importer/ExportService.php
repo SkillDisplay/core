@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service\Importer;
 
@@ -47,8 +49,7 @@ class ExportService extends AbstractImportExportService
         SkillPathRepository $skillSetRepository,
         TagRepository $tagRepository,
         SkillRepository $skillRepository
-    )
-    {
+    ) {
         $this->brandRepository = $brandRepository;
         $this->linkRepository = $linkRepository;
         $this->skillSetRepository = $skillSetRepository;
@@ -66,7 +67,7 @@ class ExportService extends AbstractImportExportService
                 $data['file-' . $fieldName . '-name'] = $file->getOriginalFile()->getName();
                 return true;
             }
-        } catch (RuntimeException $exception) {
+        } catch (RuntimeException) {
         }
 
         return false;
@@ -80,11 +81,11 @@ class ExportService extends AbstractImportExportService
             ->from($table)
             ->where($qb->expr()->eq('l10n_parent', $qb->createNamedParameter($parentUid, Connection::PARAM_INT)))
             ->andWhere($qb->expr()->gt('sys_language_uid', $qb->createNamedParameter(0, Connection::PARAM_INT)))
-            ->execute();
+            ->executeQuery();
 
         $languageMapping = ExportService::getLanguageMapping();
         $translations = [];
-        while ($row = $results->fetch()) {
+        while ($row = $results->fetchAssociative()) {
             if (!isset($languageMapping[$row['sys_language_uid']])) {
                 continue;
             }
@@ -98,7 +99,7 @@ class ExportService extends AbstractImportExportService
 
             $translations[$languageMapping[$row['sys_language_uid']]] = $entry;
         }
-        $results->closeCursor();
+        $results->free();
 
         return $translations;
     }
@@ -231,7 +232,7 @@ class ExportService extends AbstractImportExportService
 
     private function writeResult(string $targetFileName): void
     {
-        $file = fopen($targetFileName, "w+");
+        $file = fopen($targetFileName, 'w+');
         if ($file === false) {
             throw new RuntimeException($targetFileName . ' cannot be opened for export');
         }

@@ -1,0 +1,15 @@
+fe_users,
+,uid,pid,tx_extbase_type,username,password,first_name,last_name,email
+,10,4,Tx_Skills_User,splitter1,Something,S,Splitter 1,splitter1@example.com
+,11,4,Tx_Skills_User,splitter2,Something,S,Splitter 2,splitter2@example.com
+
+tx_skills_domain_model_skill,
+,uid,pid,title
+,6,3,TestSkill for splitting
+,7,3,TestSkill for splitting to
+,8,3,TestSkill for splitting to
+
+tx_skills_domain_model_certification
+,uid,pid,tier1,tier2,tier3,tier4,grant_date,skill,user,certifier,brand,price
+,26,3,0,0,1,0,2024-02-14 03:48:35,6,10,0,0,0
+,27,3,0,0,1,0,2024-02-14 03:48:35,6,11,0,0,0

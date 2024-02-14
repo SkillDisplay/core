@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service\Importer;
 
@@ -15,6 +17,7 @@ use SkillDisplay\Skills\Domain\Model\Tag;
 use SkillDisplay\Skills\Hook\ImportDataHandler;
 use SkillDisplay\Skills\Service\TranslatedUuidService;
 use Symfony\Component\Console\Style\StyleInterface;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
@@ -82,7 +85,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
 
         try {
             $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName('Default');
-        } catch(DBALException $exception) {
+        } catch (DBALException $exception) {
             $this->log($exception->getMessage());
             $connection = null;
         }
@@ -92,19 +95,15 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         }
 
         $this->pid = $targetPid;
-        $this->importTimeStamp = $GLOBALS['EXEC_TIME'];
+        $this->importTimeStamp = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
         $this->resolveMode = $resolveMode;
 
         $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
         $this->storage = $resourceFactory->getStorageObject($targetStorageId);
-        if (!$this->storage) {
-            $this->log('Specified FAL storage ' . $targetStorageId . ' not found.');
-            return;
-        }
 
         $stdin = $this->openStdIn();
         if (!$stdin) {
-            $this->log("Failed to open STDIN for reading!");
+            $this->log('Failed to open STDIN for reading!');
             return;
         }
         $sourceFile = $this->openSourceFile($sourceFileName);
@@ -114,7 +113,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         }
 
         if (!$this->validateFileIntegrity($sourceFile)) {
-            $this->log("Source file is invalid. Hash validation failed.");
+            $this->log('Source file is invalid. Hash validation failed.');
             return;
         }
         $this->log('Importing from ' . $sourceFileName);
@@ -134,7 +133,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
             if ($connection) {
                 $connection->commit();
             }
-        } catch(ConnectionException $connectionException) {
+        } catch (ConnectionException $connectionException) {
             $this->log($connectionException->getMessage());
         }
 
@@ -217,7 +216,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                       ->where(
                           $qb->expr()->eq('uuid', $qb->createNamedParameter($uuid))
                       )
-                      ->execute()->fetchAll();
+                      ->executeQuery()->fetchAllAssociative();
         $count = count($rows);
         if ($count === 1) {
             return $rows[0];
@@ -269,11 +268,10 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                     $doUpdate = true;
                     break;
                 case ImportService::RESOLVE_IGNORE:
-                    $doUpdate = false;
                     break;
                 case ImportService::RESOLVE_ASK:
                     $changes = [
-                        ['tstamp', date('Y-m-d H:i:s', $modifiedLocal), date('Y-m-d H:i:s', $modifiedExport)]
+                        ['tstamp', date('Y-m-d H:i:s', $modifiedLocal), date('Y-m-d H:i:s', $modifiedExport)],
                     ];
                     foreach ($changedFieldNames as $key) {
                         $changes[] = [$key, $row[$key], $entry[$key]];
@@ -368,7 +366,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                       ->where(
                           $qb->expr()->eq('sha1', $qb->createNamedParameter($hash))
                       )
-                      ->execute()->fetch();
+                      ->executeQuery()->fetchAssociative();
 
         return $result['uid'] ?? 0;
     }
@@ -386,7 +384,6 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                     $folder,
                     $data[$field . '-name'],
                     DuplicationBehavior::REPLACE,
-                    true
                 );
             } catch (InvalidArgumentException|ExistingTargetFileNameException $ex) {
                 $this->log('File ' . $tmpFile . ' exception: ' . $ex->getMessage());
@@ -437,7 +434,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
            ->andWhere(
                $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($uid, Connection::PARAM_INT))
            )
-           ->execute();
+           ->executeStatement();
     }
 
     private function fileReferenceExists(int $fileUid, string $table, int $uid, string $field): bool
@@ -447,13 +444,13 @@ class ImportService extends AbstractImportExportService implements SQLLogger
             ->count('*')
             ->from('sys_file_reference')
             ->where(
-              $qb->expr()->eq('tablenames', $qb->createNamedParameter($table)),
-              $qb->expr()->eq('fieldname', $qb->createNamedParameter($field)),
-              $qb->expr()->eq('uid_local', $qb->createNamedParameter($fileUid, Connection::PARAM_INT)),
-              $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($uid, Connection::PARAM_INT))
+                $qb->expr()->eq('tablenames', $qb->createNamedParameter($table)),
+                $qb->expr()->eq('fieldname', $qb->createNamedParameter($field)),
+                $qb->expr()->eq('uid_local', $qb->createNamedParameter($fileUid, Connection::PARAM_INT)),
+                $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($uid, Connection::PARAM_INT))
             )
-            ->execute()
-            ->fetchColumn();
+            ->executeQuery()
+            ->fetchOne();
 
         return $numberOfReferences === 1;
     }
@@ -497,7 +494,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
             ->andWhere(
                 $qb->expr()->eq('uid_foreign', $qb->createNamedParameter($uidForeign, Connection::PARAM_INT))
             )
-            ->execute()->fetchAll();
+            ->executeQuery()->fetchAllAssociative();
 
         if (!empty($result)) {
             return;
@@ -509,12 +506,12 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                 'uid_local' => $uidLocal,
                 'uid_foreign' => $uidForeign,
             ])
-            ->execute();
+            ->executeStatement();
     }
 
     private function setLinkForSkill(int $uid, string $uuidLink): void
     {
-        $this->setLinkRelation($uid, "tx_skills_domain_model_skill", $uuidLink);
+        $this->setLinkRelation($uid, 'tx_skills_domain_model_skill', $uuidLink);
     }
 
     private function setLinkRelation(int $id, string $tablename, string $uuidLink): void
@@ -527,7 +524,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
            )
            ->set('tablename', $tablename)
            ->set('skill', $id)
-           ->execute();
+           ->executeStatement();
     }
 
     private function insertSkillTagRelation(int $uid, string $uuidTag): void
@@ -562,7 +559,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
 
     private function setLinkForSkillSet(int $uid, string $uuidLink): void
     {
-        $this->setLinkRelation($uid, "tx_skills_domain_model_skillpath", $uuidLink);
+        $this->setLinkRelation($uid, 'tx_skills_domain_model_skillpath', $uuidLink);
     }
 
     private function insertSkillSetSkillRelation(int $uid, string $uuidSkill): void
@@ -595,7 +592,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
             ->where(
                 $qb->expr()->eq('skill', $uid)
             )
-            ->execute();
+            ->executeStatement();
     }
 
     private function createNewRequirement(int $skill): int
@@ -707,7 +704,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         if ($this->currentLineNumber) {
             $message = 'Line ' . $this->currentLineNumber . ': ' . $message;
         }
-        fputs($this->logFile, $message . PHP_EOL);
+        fwrite($this->logFile, $message . PHP_EOL);
         $this->output->text($message);
     }
 
@@ -715,15 +712,16 @@ class ImportService extends AbstractImportExportService implements SQLLogger
     {
         $this->output->table($headers, $rows);
         foreach (array_merge($headers, $rows) as $row) {
-            fputs($this->logFile, $row . ', ');
+            fwrite($this->logFile, $row . ', ');
         }
-        fputs($this->logFile, PHP_EOL);
+        fwrite($this->logFile, PHP_EOL);
     }
 
-    public function startQuery($sql, array $params = null, array $types = null)
+    public function startQuery($sql, array $params = null, array $types = null): void
     {
-        if (!self::logSqlActive)
+        if (!self::logSqlActive) {
             return;
+        }
 
         $paramsText = '';
         if ($params) {
@@ -732,10 +730,8 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                 $paramsText .= $key . '=' . $value . LF;
             }
         }
-        $this->log($sql. $paramsText);
+        $this->log($sql . $paramsText);
     }
 
-    public function stopQuery()
-    {
-    }
+    public function stopQuery() {}
 }

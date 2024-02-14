@@ -1,6 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
+/**
+ * This file is part of the "Skill Display" Extension for TYPO3 CMS.
+ *
+ * For the full copyright and license information, please read the
+ * LICENSE.txt file that was distributed with this source code.
+ *
+ *  (c) 2016 Markus Klein
+ *           Georg Ringer
+ **/
+
 namespace SkillDisplay\Skills\Domain\Model;
 
+use DateTime;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
@@ -9,32 +23,22 @@ use SkillDisplay\Skills\Service\Importer\ExportService;
 use SkillDisplay\Skills\Service\VerificationService;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
+use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
+use TYPO3\CMS\Extbase\Annotation\Validate;
+use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyLoadingProxy;
+use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
-/***
- *
- * This file is part of the "Skill Display" Extension for TYPO3 CMS.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- *  (c) 2016 Markus Klein
- *           Georg Ringer
- *
- ***/
-
-/**
- * Skill
- */
 class Skill extends AbstractEntity
 {
-    const VISIBILITY_PUBLIC = 0;
-    const VISIBILITY_ORGANISATION = 1;
+    public const VISIBILITY_PUBLIC = 0;
+    public const VISIBILITY_ORGANISATION = 1;
 
-    const JsonViewConfiguration = [
+    public const JsonViewConfiguration = [
         '_only' => [
             'uid',
             'title',
@@ -47,13 +51,13 @@ class Skill extends AbstractEntity
             'domainTag',
             'tags',
             'dormant',
-            'owner'
+            'owner',
         ],
         '_descend' => [
             'dormant' => [],
             'links' => [
                 '_descendAll' => [
-                    '_only' => ['title', 'url', 'icon']
+                    '_only' => ['title', 'url', 'icon'],
                 ],
             ],
             'prerequisites' => [
@@ -62,12 +66,12 @@ class Skill extends AbstractEntity
                         'uid',
                         'title',
                         'progress',
-                        'dormant'
+                        'dormant',
                     ],
                     '_descend' => [
-                        'progress' => []
-                    ]
-                ]
+                        'progress' => [],
+                    ],
+                ],
             ],
             'progress' => [],
             'brands' => [
@@ -78,32 +82,33 @@ class Skill extends AbstractEntity
                         'description',
                         'logoPublicUrl',
                     ],
-                ]
+                ],
             ],
             'domainTag' => [
                 '_only' => [
-                    'title'
-                ]
+                    'uid',
+                    'title',
+                ],
             ],
             'tags' => [
                 '_descendAll' => [
                     '_only' => [
-                        'title'
-                    ]
-                ]
+                        'title',
+                    ],
+                ],
             ],
             'owner' => [
                 '_only' => [
                     'uid',
                     'firstName',
                     'lastName',
-                    'userAvatar'
-                ]
-            ]
+                    'userAvatar',
+                ],
+            ],
         ],
     ];
 
-    const TRANSLATE_FIELDS = [
+    public const TRANSLATE_FIELDS = [
         'title',
         'description',
         'icon',
@@ -111,7 +116,7 @@ class Skill extends AbstractEntity
         'goals',
     ];
 
-    const LevelTierMap = [
+    public const LevelTierMap = [
         'undefined' => 0,
         'self' => 3,
         'education' => 2,
@@ -124,114 +129,64 @@ class Skill extends AbstractEntity
         'tier4' => 4,
     ];
 
-    /** @var SkillRepository */
-    protected $skillRepository = null;
+    protected SkillRepository $skillRepository;
+    protected CertificationRepository $certificationRepository;
+    protected SkillPathRepository $skillPathRepository;
 
-    /** @var CertificationRepository */
-    protected $certificationRepository = null;
-
-    /** @var SkillPathRepository */
-    protected $skillPathRepository = null;
-
-    /** @var User */
-    private $user = null;
+    private ?User $user = null;
 
     /**
-     * title
-     *
-     * @var string
-     * @TYPO3\CMS\Extbase\Annotation\Validate("NotEmpty")
+     * @Validate("NotEmpty")
      */
-    protected $title = '';
-
-    /** @var string */
-    protected $description = '';
-
-    /** @var string */
-    protected $goals = '';
-
-    /** @var string */
-    protected $icon = '';
+    protected string $title = '';
+    protected string $description = '';
+    protected string $goals = '';
+    protected string $icon = '';
 
     /**
-     * image
-     *
-     * @var \TYPO3\CMS\Extbase\Domain\Model\FileReference
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Cascade("remove")
+     * @Lazy
+     * @Cascade("remove")
      */
-    protected $image = null;
+    protected FileReference|LazyLoadingProxy|null $image;
 
     /**
-     * brands
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Brand>
+     * @Lazy
      */
-    protected $brands = null;
+    protected ObjectStorage|LazyObjectStorage $brands;
 
     /**
-     * tags
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Tag>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Tag>
+     * @Lazy
      */
-    protected $tags = null;
+    protected ObjectStorage|LazyObjectStorage $tags;
+
+    protected ?Tag $domainTag = null;
 
     /**
-     * domain_tag
-     *
-     * @var \SkillDisplay\Skills\Domain\Model\Tag|null
+     * @var ObjectStorage<Link>
+     * @Lazy
      */
-    protected $domainTag = null;
+    protected ObjectStorage|LazyObjectStorage $links;
 
     /**
-     * links
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Link>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
+     * @var ObjectStorage<Requirement>
+     * @Lazy
+     * @Cascade("remove")
      */
-    protected $links = null;
+    protected ObjectStorage|LazyObjectStorage $requirements;
 
-    /**
-     * requirements
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Requirement>
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Lazy
-     * @TYPO3\CMS\Extbase\Annotation\ORM\Cascade("remove")
-     */
-    protected $requirements = null;
-
-    /** @var bool */
-    protected $placeholder = false;
-
-    /** @var \DateTime|null */
-    protected $dormant;
-
-    /** @var \SkillDisplay\Skills\Domain\Model\User|null */
-    protected $owner = null;
-
-    /** @var int */
-    protected $tstamp = 0;
-
-    /** @var string */
-    protected $uuid = '';
-
-    /** @var int */
-    protected $imported = 0;
-
-    /** @var array */
-    private $progressCache = null;
-
-    /** @var CertificationStatistics */
-    private $statsCache = null;
-
-    /** @var int */
-    protected $visibility = 0;
+    protected bool $placeholder = false;
+    protected ?DateTime $dormant = null;
+    protected ?User $owner = null;
+    protected int $tstamp = 0;
+    protected string $uuid = '';
+    protected int $imported = 0;
+    private ?array $progressCache = null;
+    protected int $visibility = 0;
 
     /**
      * non-persisted property
-     * @var array
      */
     protected array $recommendedSkillSets = [];
 
@@ -244,11 +199,6 @@ class Skill extends AbstractEntity
         $this->uuid = CertoBot::uuid();
     }
 
-    /**
-     * Return the progress statistics for a single skill
-     *
-     * @return array
-     */
     public function getSingleProgressPercentage(): array
     {
         $stats = [
@@ -304,13 +254,10 @@ class Skill extends AbstractEntity
     /**
      * Returns the requirements
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Requirement>
+     * @return ObjectStorage<Requirement>
      */
-    public function getRequirements()
+    public function getRequirements(): ObjectStorage
     {
-        if ($this->requirements instanceof LazyLoadingProxy) {
-            $this->requirements = $this->requirements->_loadRealInstance();
-        }
         return $this->requirements;
     }
 
@@ -344,14 +291,14 @@ class Skill extends AbstractEntity
     /**
      * Sets the requirements
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Requirement> $requirements
+     * @param ObjectStorage<Requirement> $requirements
      */
-    public function setRequirements(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $requirements)
+    public function setRequirements(ObjectStorage $requirements): void
     {
         $this->requirements = $requirements;
     }
 
-    public function getCompletedInformation() : CertificationStatistics
+    public function getCompletedInformation(): CertificationStatistics
     {
         $stats = new CertificationStatistics();
         if (!$this->user) {
@@ -373,7 +320,7 @@ class Skill extends AbstractEntity
         return $stats;
     }
 
-    public function isSkillable() : bool
+    public function isSkillable(): bool
     {
         return !$this->dormant;
     }
@@ -435,7 +382,7 @@ class Skill extends AbstractEntity
      * @param bool $recursive
      * @return Skill[]
      */
-    public function getPrerequisites(bool $recursive = false) : array
+    public function getPrerequisites(bool $recursive = false): array
     {
         $skills = [];
         foreach ($this->requirements as $req) {
@@ -462,7 +409,7 @@ class Skill extends AbstractEntity
             return $this->progressCache;
         }
 
-        $verificationService = GeneralUtility::makeInstance(ObjectManager::class)->get(VerificationService::class);
+        $verificationService = GeneralUtility::makeInstance(VerificationService::class);
         $completedInformation = $this->getCompletedInformation();
         $stats = $completedInformation->getStatistics();
         $brandIds = $completedInformation->getBrandIds();
@@ -472,15 +419,15 @@ class Skill extends AbstractEntity
             'business' => !empty($stats['pending']['tier4']) ? 1 : (!empty($stats['granted']['tier4']) ? 0 : 2),
             'certificate' => !empty($stats['pending']['tier1']) ? 1 : (!empty($stats['granted']['tier1']) ? 0 : 2),
             'selfDisabled' => false,
-            'educationDisabled' => $GLOBALS['reducedProgress'] ?? ($this->user ? empty($verificationService->getVerifiersForSkills([$this], $this->user, 2)) : true),
-            'businessDisabled' => $GLOBALS['reducedProgress'] ?? ($this->user ? empty($verificationService->getVerifiersForSkills([$this], $this->user, 4)) : true),
-            'certificateDisabled' => $GLOBALS['reducedProgress'] ?? ($this->user ? empty($verificationService->getVerifiersForSkills([$this], $this->user, 1)) : true),
+            'educationDisabled' => $GLOBALS['reducedProgress'] ?? (!$this->user || empty($verificationService->getVerifiersForSkills([$this], $this->user, 2))),
+            'businessDisabled' => $GLOBALS['reducedProgress'] ?? (!$this->user || empty($verificationService->getVerifiersForSkills([$this], $this->user, 4))),
+            'certificateDisabled' => $GLOBALS['reducedProgress'] ?? (!$this->user || empty($verificationService->getVerifiersForSkills([$this], $this->user, 1))),
             'educationPendingId' => !empty($stats['pending']['tier2']) ? $stats['pending']['tier2'][0] : 0,
             'businessPendingId' => !empty($stats['pending']['tier4']) ? $stats['pending']['tier4'][0] : 0,
             'certificatePendingId' => !empty($stats['pending']['tier1']) ? $stats['pending']['tier1'][0] : 0,
-            'educationBrandIds' => $brandIds['tier2'],
-            'businessBrandIds' => $brandIds['tier4'],
-            'certificateBrandIds' => $brandIds['tier1'],
+            'educationBrandIds' => $brandIds['tier2'] ?? [],
+            'businessBrandIds' => $brandIds['tier4'] ?? [],
+            'certificateBrandIds' => $brandIds['tier1'] ?? [],
         ];
         return $this->progressCache;
     }
@@ -528,17 +475,14 @@ class Skill extends AbstractEntity
     /**
      * Returns the brands
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Brand>
+     * @return ObjectStorage<Brand>
      */
-    public function getBrands()
+    public function getBrands(): ObjectStorage
     {
-        if ($this->brands instanceof LazyLoadingProxy) {
-            $this->brands = $this->brands->_loadRealInstance();
-        }
         return $this->brands;
     }
 
-    public function setBrands(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $brands): void
+    public function setBrands(ObjectStorage $brands): void
     {
         $this->brands = $brands;
     }
@@ -556,17 +500,14 @@ class Skill extends AbstractEntity
     /**
      * Returns the tags
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Tag>
+     * @return ObjectStorage<Tag>
      */
-    public function getTags()
+    public function getTags(): ObjectStorage
     {
-        if ($this->tags instanceof LazyLoadingProxy) {
-            $this->tags = $this->tags->_loadRealInstance();
-        }
         return $this->tags;
     }
 
-    public function setTags(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $tags): void
+    public function setTags(ObjectStorage $tags): void
     {
         $this->tags = $tags;
     }
@@ -591,7 +532,7 @@ class Skill extends AbstractEntity
         $this->requirements->detach($requirementToRemove);
     }
 
-    public function getImage(): ?\TYPO3\CMS\Extbase\Domain\Model\FileReference
+    public function getImage(): ?FileReference
     {
         if ($this->image instanceof LazyLoadingProxy) {
             $this->image = $this->image->_loadRealInstance();
@@ -599,7 +540,7 @@ class Skill extends AbstractEntity
         return $this->image;
     }
 
-    public function setImage(\TYPO3\CMS\Extbase\Domain\Model\FileReference $image): void
+    public function setImage(FileReference $image): void
     {
         $this->image = $image;
     }
@@ -617,23 +558,19 @@ class Skill extends AbstractEntity
     /**
      * Returns the links
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Link>
+     * @return ObjectStorage<Link>
      */
-    public function getLinks()
+    public function getLinks(): ObjectStorage
     {
-        if ($this->links instanceof LazyLoadingProxy) {
-            $this->links = $this->links->_loadRealInstance();
-        }
         return $this->links;
     }
 
     /**
      * Sets the links
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Link> $links
-     * @return void
+     * @param ObjectStorage<Link> $links
      */
-    public function setLinks(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $links): void
+    public function setLinks(ObjectStorage $links): void
     {
         $this->links = $links;
     }
@@ -658,14 +595,14 @@ class Skill extends AbstractEntity
      *
      * @return Skill[]
      */
-    public function getSuccessorSkills() : array
+    public function getSuccessorSkills(): array
     {
         return $this->skillRepository->findParents($this);
     }
 
     /**
      * @return SkillPath[]
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws InvalidQueryException
      */
     public function getContainingPaths(): array
     {
@@ -682,12 +619,12 @@ class Skill extends AbstractEntity
         $this->goals = $goals;
     }
 
-    public function getDormant(): ?\DateTime
+    public function getDormant(): ?DateTime
     {
         return $this->dormant;
     }
 
-    public function setDormant(?\DateTime $dormant): void
+    public function setDormant(?DateTime $dormant): void
     {
         $this->dormant = $dormant;
     }
@@ -702,17 +639,17 @@ class Skill extends AbstractEntity
         $this->owner = $owner;
     }
 
-    public function injectCertificationRepository(CertificationRepository $certificationRepository)
+    public function injectCertificationRepository(CertificationRepository $certificationRepository): void
     {
         $this->certificationRepository = $certificationRepository;
     }
 
-    public function injectSkillPathRepository(SkillPathRepository $skillPathRepository)
+    public function injectSkillPathRepository(SkillPathRepository $skillPathRepository): void
     {
         $this->skillPathRepository = $skillPathRepository;
     }
 
-    public function injectSkillRepository(SkillRepository $skillRepository)
+    public function injectSkillRepository(SkillRepository $skillRepository): void
     {
         $this->skillRepository = $skillRepository;
     }
@@ -720,32 +657,32 @@ class Skill extends AbstractEntity
     public function getExportJson(): string
     {
         $data = [
-            "tstamp" => $this->tstamp,
-            "title" => $this->getTitle(),
-            "description" => $this->getDescription(),
-            "icon" => $this->getIcon(),
-            "placeholder" => (int)$this->getPlaceholder(),
-            "goals" => $this->getGoals(),
-            "dormant" => $this->getDormant() ? $this->getDormant()->getTimestamp() : 0,
+            'tstamp' => $this->tstamp,
+            'title' => $this->getTitle(),
+            'description' => $this->getDescription(),
+            'icon' => $this->getIcon(),
+            'placeholder' => (int)$this->getPlaceholder(),
+            'goals' => $this->getGoals(),
+            'dormant' => $this->getDormant() ? $this->getDormant()->getTimestamp() : 0,
         ];
 
         $links = [];
-        foreach($this->getLinks() as $link) {
+        foreach ($this->getLinks() as $link) {
             $links[] = $link->getUUId();
         }
 
         $brands = [];
-        foreach($this->getBrands() as $brand) {
+        foreach ($this->getBrands() as $brand) {
             $brands[] = $brand->getUUId();
         }
 
         $tags = [];
-        foreach($this->getTags() as $tag) {
+        foreach ($this->getTags() as $tag) {
             $tags[] = $tag->getUUId();
         }
 
         $requirements = [];
-        foreach($this->getRequirements() as $requirement) {
+        foreach ($this->getRequirements() as $requirement) {
             $sets = [];
             foreach ($requirement->getSets() as $set) {
                 $setGroup = [];

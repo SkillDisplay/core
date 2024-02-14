@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace SkillDisplay\Skills\Mvc\View;
 
 use TYPO3\CMS\Extbase\Mvc\View\JsonView as ExtbaseJsonView;
@@ -11,14 +14,15 @@ class JsonView extends ExtbaseJsonView
      *
      * @param mixed $value
      * @param array $configuration
+     * @param false $firstLevel
      * @return array
      */
-    protected function transformValue($value, array $configuration)
+    protected function transformValue($value, array $configuration, $firstLevel = false)
     {
         if ($value instanceof ObjectStorage) {
             $value = $value->toArray();
         }
         $configuration['_exclude'][] = 'exportJson';
-        return parent::transformValue($value, $configuration);
+        return parent::transformValue($value, $configuration, $firstLevel);
     }
 }

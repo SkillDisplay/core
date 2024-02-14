@@ -1,4 +1,7 @@
 <?php
+
+use SkillDisplay\Skills\Domain\Model\Reward;
+
 return [
     'ctrl' => [
         'groupName' => 'skills_rewards',
@@ -7,17 +10,17 @@ return [
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
-        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_reward.svg'
+        'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_reward.svg',
     ],
     'types' => [
-        1 => ['showitem' => 'type, title, category, reward, pdf_layout_file, description, brand, detail_link, availability_start, availability_end, valid_until, active, valid_for_organisation, --palette--;;linkeditems, prerequisites, syllabus_layout_file'],
+        0 => ['showitem' => 'type, title, category, reward, pdf_layout_file, description, brand, detail_link, availability_start, availability_end, valid_until, active, valid_for_organisation, --palette--;;linkeditems, prerequisites, syllabus_layout_file'],
     ],
     'palettes' => [
         'linkeditems' => [
             'label' => 'Required SkillSet (overrides prerequisites if selected)',
             'description' => 'Selecting a SkillSet makes the selection of single requirements below ineffective. Only this configuration is respected then.',
             'showitem' => 'skillpath, level',
-        ]
+        ],
     ],
     'columns' => [
         'type' => [
@@ -27,11 +30,11 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.badge', \SkillDisplay\Skills\Domain\Model\Reward::TYPE_BADGE],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.certificate', \SkillDisplay\Skills\Domain\Model\Reward::TYPE_CERTIFICATE],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.affiliate', \SkillDisplay\Skills\Domain\Model\Reward::TYPE_AFFILIATE],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.download', \SkillDisplay\Skills\Domain\Model\Reward::TYPE_DOWNLOAD],
-                ]
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.badge', Reward::TYPE_BADGE],
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.certificate', Reward::TYPE_CERTIFICATE],
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.affiliate', Reward::TYPE_AFFILIATE],
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.type.download', Reward::TYPE_DOWNLOAD],
+                ],
             ],
         ],
         'title' => [
@@ -41,7 +44,7 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 50,
-                'eval' => 'trim,required'
+                'eval' => 'trim,required',
             ],
         ],
         'reward' => [
@@ -64,37 +67,35 @@ return [
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.pdf_layout_file',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'allowed' => 'sys_file',
                 'foreign_table' => 'sys_file',
                 'appearance' => [
                     'elementBrowserAllowed' => 'html',
-                    'elementBrowserType' => 'file'
+                    'elementBrowserType' => 'file',
                 ],
                 'fieldWizard' => ['recordsOverview' => ['disabled' => true]],
                 'size' => 1,
                 'maxitems' => 1,
                 'minitems' => 0,
                 'default' => 0,
-            ]
+            ],
         ],
         'syllabus_layout_file' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.syllabus_layout_file',
             'config' => [
                 'type' => 'group',
-                'internal_type' => 'db',
                 'allowed' => 'sys_file',
                 'foreign_table' => 'sys_file',
                 'appearance' => [
                     'elementBrowserAllowed' => 'pdf',
-                    'elementBrowserType' => 'file'
+                    'elementBrowserType' => 'file',
                 ],
                 'size' => 1,
                 'maxitems' => 1,
                 'minitems' => 0,
                 'default' => 0,
-            ]
+            ],
         ],
         'description' => [
             'exclude' => false,
@@ -104,7 +105,7 @@ return [
                 'cols' => 50,
                 'rows' => 3,
                 'max' => 80,
-                'eval' => 'trim,required'
+                'eval' => 'trim,required',
             ],
         ],
         'detail_link' => [
@@ -129,8 +130,8 @@ return [
                 'type' => 'input',
                 'renderType' => 'inputDateTime',
                 'default' => 0,
-                'eval' => 'datetime'
-            ]
+                'eval' => 'datetime',
+            ],
         ],
         'availability_end' => [
             'exclude' => false,
@@ -139,8 +140,8 @@ return [
                 'type' => 'input',
                 'renderType' => 'inputDateTime',
                 'default' => 0,
-                'eval' => 'datetime'
-            ]
+                'eval' => 'datetime',
+            ],
         ],
         'valid_until' => [
             'exclude' => false,
@@ -150,7 +151,7 @@ return [
                 'renderType' => 'inputDateTime',
                 'default' => 0,
                 'eval' => 'datetime',
-            ]
+            ],
         ],
         'valid_for_organisation' => [
             'exclude' => false,
@@ -161,30 +162,30 @@ return [
                 'foreign_table' => 'tx_skills_domain_model_brand',
                 'foreign_table_where' => 'AND tx_skills_domain_model_brand.sys_language_uid IN (0,-1) ORDER BY tx_skills_domain_model_brand.name',
                 'items' => [
-                    ['', 0]
+                    ['', 0],
                 ],
-                'default' => 0
+                'default' => 0,
             ],
         ],
-	    'prerequisites' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.prerequisites',
-	        'config' => [
-			    'type' => 'inline',
-			    'foreign_table' => 'tx_skills_domain_model_rewardprerequisite',
-			    'foreign_field' => 'reward',
+        'prerequisites' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.prerequisites',
+            'config' => [
+                'type' => 'inline',
+                'foreign_table' => 'tx_skills_domain_model_rewardprerequisite',
+                'foreign_field' => 'reward',
                 'minitems' => 0,
-			    'maxitems' => 9999,
-			    'appearance' => [
-			        'collapseAll' => 1,
-			        'levelLinksPosition' => 'top',
-			        'showSynchronizationLink' => 1,
-			        'showPossibleLocalizationRecords' => 1,
-			        'useSortable' => 0,
-			        'showAllLocalizationLink' => 1
-			    ],
-			],
-	    ],
+                'maxitems' => 9999,
+                'appearance' => [
+                    'collapseAll' => 1,
+                    'levelLinksPosition' => 'top',
+                    'showSynchronizationLink' => 1,
+                    'showPossibleLocalizationRecords' => 1,
+                    'useSortable' => 0,
+                    'showAllLocalizationLink' => 1,
+                ],
+            ],
+        ],
         'brand' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_rewardprerequisite.brand',
@@ -204,8 +205,8 @@ return [
                 'items' => [
                     [
                         '',
-                        0
-                    ]
+                        0,
+                    ],
                 ],
                 'default' => 0,
                 'foreign_table' => 'tx_skills_domain_model_skillpath',
@@ -232,8 +233,17 @@ return [
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.active',
             'config' => [
                 'type' => 'check',
-                'default' => 0
-            ]
+                'default' => 0,
+            ],
+        ],
+        'category' => [
+            'exclude' => true,
+            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_category.categories',
+            'config' => [
+                'type' => 'category',
+                'relationship' => 'oneToOne',
+                'size' => 5,
+            ],
         ],
     ],
 ];

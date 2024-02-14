@@ -18,17 +18,23 @@ For some PDF generation the executable `weasyprint` (https://weasyprint.readthed
 
 ### Using yarn and gulp
 
-Use yarn inside the docker container. For convenience we provide `./yarn.sh`
+Use yarn inside the docker container.
+
+For convenience we provide `./Scripts/node.sh yarn`
 
 #### Gulp tasks can be run with:
 
-`./yarn.sh gulp <task>`
+`./Scripts/node.sh yarn gulp <task>`
 
 #### Building mails:
 
 The mail templates use the Foundation Emails framework. So the source files (`Resources/Private/MailTemplatesSrc/`) need to be compiled.
 
-`./yarn.sh gulp mail`
+`./Scripts/node.sh yarn gulp mail`
+
+### Local testing and composer dependencies
+
+`./Scripts/composer.sh upgrade -W` is your friend
 
 #### SkillDisplay App (aka Frontend)
 The SkillDisplay App will be released separately in the near future.
@@ -37,5 +43,3 @@ The SkillDisplay App will be released separately in the near future.
 
 ### Methodology and Manuals
 You can find articles on how to use the Visual Skill Editor for creating and managing your own SkillSets at the `SkillDisplay service desk` (https://skilldisplay.atlassian.net/servicedesk/customer/portal/2)
-
-

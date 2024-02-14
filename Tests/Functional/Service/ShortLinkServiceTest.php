@@ -1,11 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Service;
 
 use Doctrine\DBAL\DBALException;
+use InvalidArgumentException;
 use SkillDisplay\Skills\Service\ShortLinkService;
 use SkillDisplay\Skills\Tests\Functional\AbstractFunctionalTestCaseBase;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\Exception;
 
 class ShortLinkServiceTest extends AbstractFunctionalTestCaseBase
@@ -25,9 +28,9 @@ class ShortLinkServiceTest extends AbstractFunctionalTestCaseBase
      */
     public function handleShortlinkReturnsExpectedAction()
     {
-        self::expectException(\InvalidArgumentException::class);
+        self::expectException(InvalidArgumentException::class);
         self::expectExceptionCode(1474505954);
-        $shortLinkService = $this->objectManager->get(ShortLinkService::class);
+        $shortLinkService = GeneralUtility::makeInstance(ShortLinkService::class);
         $shortLinkService->handleShortlink('AEF');
     }
 }

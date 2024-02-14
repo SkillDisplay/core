@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Event;
@@ -8,17 +9,10 @@ use SkillDisplay\Skills\Domain\Model\User;
 
 class OrganisationJoinedEvent
 {
-    /** @var Brand */
-    private $organisation;
-
-    /** @var User */
-    private $user;
-
-    public function __construct(Brand $organisation, User $user)
-    {
-        $this->organisation = $organisation;
-        $this->user = $user;
-    }
+    public function __construct(
+        private readonly Brand $organisation,
+        private readonly User $user
+    ) {}
 
     public function getOrganisation(): Brand
     {

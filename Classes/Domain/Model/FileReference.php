@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /***************************************************************
  *  Copyright notice
  *
@@ -25,6 +27,8 @@
 
 namespace SkillDisplay\Skills\Domain\Model;
 
+use TYPO3\CMS\Core\Resource\ResourceInterface;
+
 /**
  * Class FileReference
  */
@@ -35,11 +39,13 @@ class FileReference extends \TYPO3\CMS\Extbase\Domain\Model\FileReference
      *
      * @var int
      */
-    protected $originalFileIdentifier;
+    protected int $originalFileIdentifier;
 
-    public function setOriginalResource(\TYPO3\CMS\Core\Resource\ResourceInterface $originalResource)
+    public function setOriginalResource(ResourceInterface $originalResource): void
     {
         $this->originalResource = $originalResource;
-        $this->originalFileIdentifier = (int)$originalResource->getOriginalFile()->getUid();
+        if ($originalResource instanceof \TYPO3\CMS\Core\Resource\FileReference) {
+            $this->originalFileIdentifier = (int)$originalResource->getOriginalFile()->getUid();
+        }
     }
 }

@@ -1,16 +1,29 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
+
+use SkillDisplay\Skills\Domain\Model\Brand;
+use SkillDisplay\Skills\Domain\Model\Certification;
+use SkillDisplay\Skills\Domain\Model\FileReference;
+use SkillDisplay\Skills\Domain\Model\GrantedReward;
+use SkillDisplay\Skills\Domain\Model\Link;
+use SkillDisplay\Skills\Domain\Model\Skill;
+use SkillDisplay\Skills\Domain\Model\SkillPath;
+use SkillDisplay\Skills\Domain\Model\Tag;
+use SkillDisplay\Skills\Domain\Model\User;
+use TYPO3\CMS\Extbase\Domain\Model\FrontendUser;
 
 return [
-    \TYPO3\CMS\Extbase\Domain\Model\FrontendUser::class => [
+    FrontendUser::class => [
         'subclasses' => [
-            'Tx_Skills_User' => \SkillDisplay\Skills\Domain\Model\User::class
-        ]
+            'Tx_Skills_User' => User::class,
+        ],
     ],
-    \SkillDisplay\Skills\Domain\Model\User::class => [
+    User::class => [
         'tableName' => 'fe_users',
         'recordType' => 'Tx_Skills_User',
     ],
-    \SkillDisplay\Skills\Domain\Model\FileReference::class => [
+    FileReference::class => [
         'tableName' => 'sys_file_reference',
         'properties' => [
             'originalFileIdentifier' => [
@@ -18,49 +31,49 @@ return [
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\GrantedReward::class => [
+    GrantedReward::class => [
         'properties' => [
             'crdate' => [
                 'fieldName' => 'crdate',
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\Certification::class => [
+    Certification::class => [
         'properties' => [
             'crdate' => [
                 'fieldName' => 'crdate',
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\Brand::class => [
+    Brand::class => [
         'properties' => [
             'tstamp' => [
                 'fieldName' => 'tstamp',
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\Link::class => [
+    Link::class => [
         'properties' => [
             'tstamp' => [
                 'fieldName' => 'tstamp',
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\Skill::class => [
+    Skill::class => [
         'properties' => [
             'tstamp' => [
                 'fieldName' => 'tstamp',
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\SkillPath::class => [
+    SkillPath::class => [
         'properties' => [
             'tstamp' => [
                 'fieldName' => 'tstamp',
             ],
         ],
     ],
-    \SkillDisplay\Skills\Domain\Model\Tag::class => [
+    Tag::class => [
         'properties' => [
             'tstamp' => [
                 'fieldName' => 'tstamp',

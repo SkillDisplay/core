@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-	<file source-language="en" target-language="de" original="messages" product-name="skills" date="2020-12-10T08:54:46+01:00">
+<xliff version="1.2" xmlns:t3="http://typo3.org/schemas/xliff" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file source-language="en" target-language="de" original="messages" datatype="plaintext" product-name="skills" date="2023-05-09T16:34:19+02:00">
 		<header></header>
 		<body>
 			<trans-unit id="achievement.created" resname="achievement.created">
@@ -22,6 +22,10 @@
 			<trans-unit id="anonymousLogin.description" resname="anonymousLogin.description">
 				<source>You want to test SkillDisplay but don’t have an account yet? You can login anonymously, track your progress and convert your account to a regular account at a later time.</source>
 				<target>Du möchstes SkillDisplay testen aber hast noch keine Konto? Logge Dich anonym ein, speichere Deinen Fortschritt und wandle Dein Konto zu einem späteren Zeitpunkt um.</target>
+			</trans-unit>
+			<trans-unit id="backend.creditOverview" resname="backend.creditOverview">
+				<source>Credit Overview</source>
+				<target>Credit Übersicht</target>
 			</trans-unit>
 			<trans-unit id="backend.date.date_format-datepicker" resname="backend.date.date_format-datepicker">
 				<source>YYYY-MM-DD</source>
@@ -54,10 +58,6 @@
 			<trans-unit id="backend.verificationManager" resname="backend.verificationManager">
 				<source>Verification History CSV</source>
 				<target>Verifizierungsverlauf CSV</target>
-			</trans-unit>
-			<trans-unit id="backend.creditOverview" resname="backend.creditOverview">
-				<source>Credit Overview</source>
-				<target>Credit Übersicht</target>
 			</trans-unit>
 			<trans-unit id="brand.show.back" resname="brand.show.back">
 				<source>Back to partner listing</source>
@@ -410,6 +410,30 @@
 			<trans-unit id="skillPaths.list.title" resname="skillPaths.list.title">
 				<source>SkillSets</source>
 				<target>SkillSets</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.award" resname="skillSetAwards.award">
+				<source>Award</source>
+				<target>Auszeichnung</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.awards" resname="skillSetAwards.awards">
+				<source>Awards</source>
+				<target>Auszeichnungen</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.createAward" resname="skillSetAwards.createAward">
+				<source>Create Award</source>
+				<target>Auszeichnung erstellen</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.description" resname="skillSetAwards.description">
+				<source>Description</source>
+				<target>Beschreibung</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.payMessage" resname="skillSetAwards.payMessage">
+				<source>Keep in mind that the activation of awards for SkillSets is a paid feature</source>
+				<target>Beachten Sie, dass die Aktivierung von Auszeichnungen für SkillSets eine kostenpflichtige Funktion ist</target>
+			</trans-unit>
+			<trans-unit id="skillSetAwards.title" resname="skillSetAwards.title">
+				<source>Title</source>
+				<target>Titel</target>
 			</trans-unit>
 			<trans-unit id="skillUp.certifier.markFav" resname="skillUp.certifier.markFav">
 				<source>Mark as favourite</source>
@@ -1090,34 +1114,6 @@
 			<trans-unit id="your" resname="your">
 				<source>Your</source>
 				<target>Deine</target>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.skillSetAwards" resname="skillSetAwards.skillSetAwards">
-				<source>Awards for </source>
-				<source>Auszeichnungen für </source>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.awards" resname="skillSetAwards.awards">
-				<source>Awards</source>
-				<target>Auszeichnungen</target>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.award" resname="skillSetAwards.award">
-				<source>Award</source>
-				<target>Auszeichnung</target>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.payMessage" resname="skillSetAwards.payMessage">
-				<source>Keep in mind that the activation of awards for SkillSets is a paid feature</source>
-				<target>Beachten Sie, dass die Aktivierung von Auszeichnungen für SkillSets eine kostenpflichtige Funktion ist</target>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.title" resname="skillSetAwards.title">
-				<source>Title</source>
-				<target>Titel</target>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.description" resname="skillSetAwards.description">
-				<source>Description</source>
-				<target>Beschreibung</target>
-			</trans-unit>
-			<trans-unit id="skillSetAwards.createAward" resname="skillSetAwards.createAward">
-				<source>Create Award</source>
-				<target>Auszeichnung erstellen</target>
 			</trans-unit>
 		</body>
 	</file>

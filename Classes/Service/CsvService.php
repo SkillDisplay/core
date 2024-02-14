@@ -1,14 +1,14 @@
-<?php declare(strict_types=1);
-/***
- *
+<?php
+
+declare(strict_types=1);
+/**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
  * LICENSE.txt file that was distributed with this source code.
  *
  *  (c) 2020 Reelworx GmbH
- *
- ***/
+ **/
 
 namespace SkillDisplay\Skills\Service;
 
@@ -24,9 +24,9 @@ class CsvService
      * @param array $lines Lines to write to CSV file
      * @param string $filename Filename for the browser
      */
-    public static function sendCSVFile(array $lines, string $filename)
+    public static function sendCSVFile(array $lines, string $filename): never
     {
-        $lines = array_map(function($line) {
+        $lines = array_map(function ($line) {
             //  disabled because of SKILL-1127
             // return mb_convert_encoding(CsvUtility::csvValues($line, ';'), 'iso-8859-1', 'utf-8');
             return CsvUtility::csvValues($line, ';');
@@ -42,7 +42,7 @@ class CsvService
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename,
             'Content-Transfer-Encoding' => 'binary',
-            'Content-Length' => strlen($content)
+            'Content-Length' => strlen($content),
         ];
 
         // send headers

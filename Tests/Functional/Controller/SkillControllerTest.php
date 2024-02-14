@@ -1,57 +1,45 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Controller;
 
-use Doctrine\DBAL\DBALException;
 use PHPUnit\Framework\MockObject\MockObject;
 use SkillDisplay\Skills\Controller\SkillController;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Repository\RecommendedSkillSetRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
-use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
-use TYPO3\CMS\Core\Http\ImmediateResponseException;
-use TYPO3\CMS\Extbase\Mvc\Response;
+use SkillDisplay\Skills\Service\VerificationService;
+use SkillDisplay\Skills\Tests\Functional\SimulateLoginTrait;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\TestingFramework\Core\AccessibleObjectInterface;
-use TYPO3\TestingFramework\Core\Exception;
 
 class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
 {
-    /** @var SkillController|MockObject|AccessibleObjectInterface */
-    protected $subject = null;
+    use SimulateLoginTrait;
 
-    /** @var Response */
-    protected $response = null;
+    protected SkillController|MockObject|AccessibleObjectInterface $subject;
 
-    /** @var SkillRepository */
-    protected $skillRepository;
+    protected SkillRepository $skillRepository;
 
-    /**
-     * @throws DBALException
-     * @throws \TYPO3\CMS\Extbase\Object\Exception
-     */
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->skillRepository = $this->objectManager->get(SkillRepository::class);
-        $this->response = $this->getMockBuilder(Response::class)->getMock();
+        $this->skillRepository = GeneralUtility::makeInstance(SkillRepository::class);
         $this->subject = $this->getAccessibleMock(
             SkillController::class,
-            ['redirect', 'forward', 'addFlashMessage', 'getCurrentUser'],
+            ['addFlashMessage', 'getCurrentUser'],
             [
+                $this->userRepository,
                 $this->skillRepository,
-                $this->objectManager->get(RecommendedSkillSetRepository::class),
+                GeneralUtility::makeInstance(RecommendedSkillSetRepository::class),
+                GeneralUtility::makeInstance(VerificationService::class),
             ]
         );
-        $this->subject->injectObjectManager($this->objectManager);
-        $this->subject->_set('view', $this->view);
-        $this->subject->_set('response', $this->response);
+        $this->initController($this->subject);
     }
 
-    /**
-     * @throws Exception
-     */
     protected function setUpDatabase(): void
     {
         $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
@@ -59,8 +47,6 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
 
     /**
      * @test
-     * @throws ImmediateResponseException
-     * @throws PageNotFoundException
      */
     public function showsPublicSkill()
     {
@@ -70,13 +56,11 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
         /** @var Skill $assignedSkill */
         $assignedSkill = $this->view->_get('variables')['skill'];
 
-        self::assertEquals($skill->getUid(), $assignedSkill->getUid());
+        self::assertSame($skill->getUid(), $assignedSkill->getUid());
     }
 
     /**
      * @test
-     * @throws ImmediateResponseException
-     * @throws PageNotFoundException
      */
     public function hidesInternalSkill()
     {
@@ -84,14 +68,11 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
         $skill = $this->skillRepository->findByUid(1);
         $this->subject->showAction($skill);
 
-        /** @var Skill $assignedSkill */
-        self::assertEquals(null, $this->view->_get('variables')['skill']);
+        self::assertArrayNotHasKey('skill', $this->view->_get('variables'));
     }
 
     /**
      * @test
-     * @throws ImmediateResponseException
-     * @throws PageNotFoundException
      */
     public function showsInternalSkillForMember()
     {
@@ -102,6 +83,6 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
         /** @var Skill $assignedSkill */
         $assignedSkill = $this->view->_get('variables')['skill'];
 
-        self::assertEquals($skill->getUid(), $assignedSkill->getUid());
+        self::assertSame($skill->getUid(), $assignedSkill->getUid());
     }
 }

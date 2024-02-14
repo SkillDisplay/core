@@ -1,9 +1,15 @@
 <?php
+
+use SkillDisplay\Skills\Domain\Model\Skill;
+use SkillDisplay\Skills\Hook\RecordLabels;
+use TYPO3\CMS\Core\Resource\File;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill',
         'label' => 'title',
-        'label_userFunc' => \SkillDisplay\Skills\Hook\RecordLabels::class . '->skill',
+        'label_userFunc' => RecordLabels::class . '->skill',
         'descriptionColumn' => 'int_notes',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
@@ -12,15 +18,14 @@ return [
         'languageField' => 'sys_language_uid',
         'transOrigPointerField' => 'l10n_parent',
         'transOrigDiffSourceField' => 'l10n_diffsource',
-		'delete' => 'deleted',
+        'delete' => 'deleted',
         'enablecolumns' => [
-			'disabled' => 'hidden',
-			'starttime' => 'starttime',
+            'disabled' => 'hidden',
+            'starttime' => 'starttime',
             'endtime' => 'endtime',
         ],
         'searchFields' => 'title,description,goals,uuid',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_skill.png',
-        'setToDefaultOnCopy' => 'uuid'
     ],
     'types' => [
         0 => ['showitem' => '
@@ -34,7 +39,7 @@ return [
             --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, hidden, starttime, endtime, visibility,
             --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:notes, int_notes,
             --div--;Import, uuid, imported',
-        ]
+        ],
     ],
     'palettes' => [
         'language' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource'],
@@ -43,11 +48,7 @@ return [
         'sys_language_uid' => [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.language',
-            'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'special' => 'languages'
-            ],
+            'config' => ['type' => 'language'],
         ],
         'l10n_parent' => [
             'displayCond' => 'FIELD:sys_language_uid:>:0',
@@ -60,7 +61,7 @@ return [
                 ],
                 'foreign_table' => 'tx_skills_domain_model_skill',
                 'foreign_table_where' => 'AND tx_skills_domain_model_skill.pid=###CURRENT_PID### AND tx_skills_domain_model_skill.sys_language_uid IN (-1,0)',
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'l10n_diffsource' => [
@@ -75,8 +76,8 @@ return [
                 'type' => 'check',
                 'items' => [
                     1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-                    ]
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
                 ],
             ],
         ],
@@ -89,7 +90,7 @@ return [
                 'eval' => 'datetime',
                 'default' => 0,
                 'behaviour' => [
-                    'allowLanguageSynchronization' => true
+                    'allowLanguageSynchronization' => true,
                 ],
             ],
         ],
@@ -102,20 +103,20 @@ return [
                 'eval' => 'datetime',
                 'default' => 0,
                 'behaviour' => [
-                    'allowLanguageSynchronization' => true
+                    'allowLanguageSynchronization' => true,
                 ],
             ],
         ],
-	    'title' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.title',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 30,
+        'title' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.title',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
                 'max' => 255,
-			    'eval' => 'trim,required'
-			],
-	    ],
+                'eval' => 'trim,required',
+            ],
+        ],
         'path_segment' => [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:pages.slug',
@@ -126,25 +127,25 @@ return [
                 'generatorOptions' => [
                     'fields' => ['title'],
                     'replacements' => [
-                        '/' => '-'
+                        '/' => '-',
                     ],
                 ],
                 'fallbackCharacter' => '-',
                 'eval' => 'unique',
-                'default' => ''
-            ]
+                'default' => '',
+            ],
         ],
-	    'description' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.description',
-	        'config' => [
-			    'type' => 'text',
-			    'cols' => 40,
-			    'rows' => 15,
-			    'eval' => 'trim,required',
+        'description' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.description',
+            'config' => [
+                'type' => 'text',
+                'cols' => 40,
+                'rows' => 15,
+                'eval' => 'trim,required',
                 'enableRichtext' => true,
-			],
-	    ],
+            ],
+        ],
         'goals' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.goals',
@@ -156,79 +157,79 @@ return [
                 'enableRichtext' => true,
             ],
         ],
-	    'icon' => [
-	        'exclude' => false,
+        'icon' => [
+            'exclude' => false,
             'l10n_mode' => 'exclude',
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.icon',
-	        'config' => [
-			    'type' => 'input',
-			    'size' => 10,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.icon',
+            'config' => [
+                'type' => 'input',
+                'size' => 10,
                 'max' => 255,
-			    'eval' => 'trim'
-			],
-	    ],
-	    'image' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.image',
-	        'config' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::getFileFieldTCAConfig(
-			    'image',
-			    [
-			        'appearance' => [
-			            'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference'
-			        ],
+                'eval' => 'trim',
+            ],
+        ],
+        'image' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.image',
+            'config' => ExtensionManagementUtility::getFileFieldTCAConfig(
+                'image',
+                [
+                    'appearance' => [
+                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
+                    ],
                     'overrideChildTca' => [
                         'types' => [
                             0 => [
                                 'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
-                                --palette--;;filePalette'
+                                --palette--;;filePalette',
                             ],
-                            \TYPO3\CMS\Core\Resource\File::FILETYPE_TEXT => [
+                            File::FILETYPE_TEXT => [
                                 'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
-                                --palette--;;filePalette'
+                                --palette--;;filePalette',
                             ],
-                            \TYPO3\CMS\Core\Resource\File::FILETYPE_IMAGE => [
+                            File::FILETYPE_IMAGE => [
                                 'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
-                                --palette--;;filePalette'
+                                --palette--;;filePalette',
                             ],
-                            \TYPO3\CMS\Core\Resource\File::FILETYPE_AUDIO => [
+                            File::FILETYPE_AUDIO => [
                                 'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
-                                --palette--;;filePalette'
+                                --palette--;;filePalette',
                             ],
-                            \TYPO3\CMS\Core\Resource\File::FILETYPE_VIDEO => [
+                            File::FILETYPE_VIDEO => [
                                 'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
-                                --palette--;;filePalette'
+                                --palette--;;filePalette',
                             ],
-                            \TYPO3\CMS\Core\Resource\File::FILETYPE_APPLICATION => [
+                            File::FILETYPE_APPLICATION => [
                                 'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
-                                --palette--;;filePalette'
-                            ]
-                        ]
-			        ],
-			        'maxitems' => 1
-			    ],
-			    $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-			),
-	    ],
-	    'placeholder' => [
-	        'exclude' => false,
+                                --palette--;;filePalette',
+                            ],
+                        ],
+                    ],
+                    'maxitems' => 1,
+                ],
+                $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
+            ),
+        ],
+        'placeholder' => [
+            'exclude' => false,
             'l10n_mode' => 'exclude',
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.placeholder',
-	        'config' => [
-			    'type' => 'check',
-			    'items' => [
-			        1 => [
-			            0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'
-			        ]
-			    ],
-			    'default' => 0
-			]
-	    ],
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.placeholder',
+            'config' => [
+                'type' => 'check',
+                'items' => [
+                    1 => [
+                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
+                    ],
+                ],
+                'default' => 0,
+            ],
+        ],
         'dormant' => [
             'exclude' => false,
             'l10n_mode' => 'exclude',
@@ -238,22 +239,21 @@ return [
                 'renderType' => 'inputDateTime',
                 'eval' => 'int,datetime',
                 'default' => 0,
-            ]
+            ],
         ],
-	    'brands' => [
-	        'exclude' => true,
+        'brands' => [
+            'exclude' => true,
             'l10n_mode' => 'exclude',
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.brands',
-	        'config' => [
-			    'type' => 'group',
-                'internal_type' => 'db',
-			    'foreign_table' => 'tx_skills_domain_model_brand',
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.brands',
+            'config' => [
+                'type' => 'group',
+                'foreign_table' => 'tx_skills_domain_model_brand',
                 'allowed' => 'tx_skills_domain_model_brand',
-			    'MM' => 'tx_skills_skill_brand_mm',
-			    'size' => 10,
-			    'autoSizeMax' => 30,
+                'MM' => 'tx_skills_skill_brand_mm',
+                'size' => 10,
+                'autoSizeMax' => 30,
                 'minitems' => 0,
-			    'maxitems' => 9999,
+                'maxitems' => 9999,
                 'fieldControl' => [
                     'editPopup' => [
                         'disabled' => true,
@@ -262,23 +262,23 @@ return [
                         'disabled' => true,
                     ],
                 ],
-			],
-	    ],
-	    'tags' => [
-	        'exclude' => false,
+            ],
+        ],
+        'tags' => [
+            'exclude' => false,
             'l10n_mode' => 'exclude',
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.tags',
-	        'config' => [
-			    'type' => 'select',
-			    'renderType' => 'selectMultipleSideBySide',
-			    'foreign_table' => 'tx_skills_domain_model_tag',
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.tags',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectMultipleSideBySide',
+                'foreign_table' => 'tx_skills_domain_model_tag',
                 'foreign_table_where' => 'AND tx_skills_domain_model_tag.sys_language_uid IN (0,-1) ORDER BY tx_skills_domain_model_tag.title',
-			    'MM' => 'tx_skills_skill_tag_mm',
-			    'size' => 10,
-			    'autoSizeMax' => 30,
+                'MM' => 'tx_skills_skill_tag_mm',
+                'size' => 10,
+                'autoSizeMax' => 30,
                 'minitems' => 0,
-			    'maxitems' => 9999,
-			    'multiple' => 0,
+                'maxitems' => 9999,
+                'multiple' => 0,
                 'fieldControl' => [
                     'editPopup' => [
                         'disabled' => false,
@@ -287,8 +287,8 @@ return [
                         'disabled' => false,
                     ],
                 ],
-			],
-	    ],
+            ],
+        ],
         'domain_tag' => [
             'exclude' => false,
             'l10n_mode' => 'exclude',
@@ -300,7 +300,7 @@ return [
                 'foreign_table_where' => 'AND tx_skills_domain_model_tag.sys_language_uid IN (0,-1) AND tx_skills_domain_model_tag.domain_tag = 1 ORDER BY tx_skills_domain_model_tag.title',
                 'minitems' => 0,
                 'maxitems' => 1,
-                'default' => 0
+                'default' => 0,
             ],
         ],
         'owner' => [
@@ -313,15 +313,15 @@ return [
                 'foreign_table' => 'fe_users',
                 'foreign_table_where' => 'ORDER BY fe_users.username',
                 'items' => [
-                    ['', 0]
+                    ['', 0],
                 ],
-                'default' => 0
+                'default' => 0,
             ],
         ],
-	    'links' => [
-	        'exclude' => false,
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.links',
-	        'config' => [
+        'links' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.links',
+            'config' => [
                 'type' => 'inline',
                 'foreign_table' => 'tx_skills_domain_model_link',
                 'foreign_field' => 'skill',
@@ -334,29 +334,29 @@ return [
                     'levelLinksPosition' => 'top',
                     'useSortable' => 1,
                 ],
-			],
-	    ],
-	    'requirements' => [
-	        'exclude' => false,
+            ],
+        ],
+        'requirements' => [
+            'exclude' => false,
             'l10n_mode' => 'exclude',
-	        'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.requirements',
-	        'config' => [
-			    'type' => 'inline',
-			    'foreign_table' => 'tx_skills_domain_model_requirement',
-			    'foreign_field' => 'skill',
-			    'foreign_sortby' => 'sorting',
+            'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skill.requirements',
+            'config' => [
+                'type' => 'inline',
+                'foreign_table' => 'tx_skills_domain_model_requirement',
+                'foreign_field' => 'skill',
+                'foreign_sortby' => 'sorting',
                 'minitems' => 0,
-			    'maxitems' => 9999,
-			    'appearance' => [
-			        'collapseAll' => true,
-			        'levelLinksPosition' => 'both',
-			        'showSynchronizationLink' => 1,
-			        'showPossibleLocalizationRecords' => 1,
-			        'useSortable' => 1,
-			        'showAllLocalizationLink' => 1
-			    ],
-			],
-	    ],
+                'maxitems' => 9999,
+                'appearance' => [
+                    'collapseAll' => true,
+                    'levelLinksPosition' => 'both',
+                    'showSynchronizationLink' => 1,
+                    'showPossibleLocalizationRecords' => 1,
+                    'useSortable' => 1,
+                    'showAllLocalizationLink' => 1,
+                ],
+            ],
+        ],
         'uuid' => [
             'exclude' => true,
             'label' => 'UUID',
@@ -384,8 +384,8 @@ return [
             'config' => [
                 'type' => 'text',
                 'rows' => 10,
-                'cols' => 30
-            ]
+                'cols' => 30,
+            ],
         ],
         'visibility' => [
             'exclude' => true,
@@ -395,10 +395,10 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.public', \SkillDisplay\Skills\Domain\Model\Skill::VISIBILITY_PUBLIC],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.members', \SkillDisplay\Skills\Domain\Model\Skill::VISIBILITY_ORGANISATION]
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.public', Skill::VISIBILITY_PUBLIC],
+                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.members', Skill::VISIBILITY_ORGANISATION],
                 ],
-                'default' => \SkillDisplay\Skills\Domain\Model\Skill::VISIBILITY_ORGANISATION,
+                'default' => Skill::VISIBILITY_ORGANISATION,
             ],
         ],
     ],
