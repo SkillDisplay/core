@@ -43,12 +43,22 @@ class Certification extends AbstractEntity
             '_only' => [
                 'uid',
                 'name',
+                'tags',
                 'mediaPublicUrl',
                 'brand',
+                'tags',
                 'firstCategoryTitle',
             ],
             '_descend' => [
                 'brand' => Brand::JsonViewMinimalConfiguration,
+                'tags' => [
+                    '_descendAll' => [
+                        '_only' => [
+                            'uid',
+                            'title',
+                        ],
+                    ],
+                ],
             ],
         ],
     ];

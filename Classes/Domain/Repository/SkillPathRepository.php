@@ -108,7 +108,8 @@ class SkillPathRepository extends BaseRepository
         foreach ($skillSet->getSkills() as $skill) {
             $skills[$skill->getDomainTag() ? $skill->getDomainTag()->getTitle() : '-'][] = $skill;
         }
-        if ($skills['-']) {
+        // move those without domain tag to last position in the array
+        if (!empty($skills['-'])) {
             $noDomainSkills = $skills['-'];
             unset($skills['-']);
             $skills['-'] = $noDomainSkills;

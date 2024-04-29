@@ -65,10 +65,9 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                    ],
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
+                'default' => 0,
             ],
         ],
         'name' => [
@@ -304,10 +303,9 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                    ],
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
+                'default' => 0,
             ],
         ],
         'members' => [
@@ -353,9 +351,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                    ],
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 1,
             ],
@@ -366,9 +362,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                    ],
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 0,
             ],
@@ -388,9 +382,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    1 => [
-                        0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                    ],
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 1,
             ],
@@ -464,8 +456,8 @@ return [
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_category.categories',
             'config' => [
                 'type' => 'category',
-                'size' => 5,
-                'relation' => 'oneToOne',
+                'size' => 10,
+                'maxitems' => 1,
             ],
         ],
     ],

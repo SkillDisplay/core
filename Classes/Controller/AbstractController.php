@@ -63,14 +63,13 @@ abstract class AbstractController extends ActionController implements LoggerAwar
         try {
             $response = parent::callActionMethod($request);
         } catch (AuthenticationException $e) {
-            $response = new Response($e->getMessage(), 403);
+            $response = new Response(statusCode: 403, reasonPhrase: $e->getMessage());
         } catch (TermsException $e) {
             $response = new RedirectResponse($this->addBaseUriIfNecessary($e->getUrl()), 303);
         }
-        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        if ($this->isAjax && $origin) {
+        if ($this->isAjax) {
             $response = $response
-                ->withHeader('Access-Control-Allow-Origin', $origin)
+                ->withHeader('Access-Control-Allow-Origin', $_SERVER['HTTP_ORIGIN'] ?? '*')
                 ->withHeader('Access-Control-Allow-Credentials', 'true');
         }
         return $response;

@@ -60,7 +60,7 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
                 // store all found possible query parameters to remove them during inflation from the parameters to avoid
                 // a cHash being generated for them
                 $this->queryMapping[$queryParam] = $actionParamName;
-                $deflatedQueryParams[$queryParam] = $parameters[$this->namespace][$actionParamName];
+                $deflatedQueryParams[$queryParam] = $parameters[$this->namespace][$actionParamName] ?? '';
                 unset($parameters[$this->namespace][$actionParamName]);
             }
             // contains all given parameters, even if not used as variables in route

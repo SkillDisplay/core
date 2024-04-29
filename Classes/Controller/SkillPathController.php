@@ -69,6 +69,7 @@ class SkillPathController extends AbstractController
                 'brand',
                 'certificate',
                 'legitimationDate',
+                'tags',
                 'firstCategoryTitle',
             ];
             $descendConfig = [
@@ -239,6 +240,7 @@ class SkillPathController extends AbstractController
                         'progressPercentage',
                         'brand',
                         'certificate',
+                        'tags',
                         'firstCategoryTitle',
                     ],
                     '_descend' => [
@@ -270,6 +272,14 @@ class SkillPathController extends AbstractController
                         'progress' => [],
                         'progressPercentage' => [],
                         'brand' => Brand::JsonViewMinimalConfiguration,
+                        'tags' => [
+                            '_descendAll' => [
+                                '_only' => [
+                                    'uid',
+                                    'title',
+                                ],
+                            ],
+                        ],
                     ],
                 ],
             ];

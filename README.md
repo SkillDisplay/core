@@ -14,6 +14,8 @@ See LICENSE.txt provided with this package.
 
 For some PDF generation the executable `weasyprint` (https://weasyprint.readthedocs.io/en/stable/) is necessary on the server.
 
+The site must have `$GLOBALS['TYPO3_CONF_VARS']['FE']['cacheHash']['enforceValidation'] = false` for the API to work.
+
 ## Development
 
 ### Using yarn and gulp

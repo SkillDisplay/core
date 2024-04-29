@@ -539,6 +539,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
     {
         $setGroup = count($targets) > 1;
         $certs = $this->certificationRepository->findBySkill($source);
+        $tags = [];
         foreach ($certs as $cert) {
             if (!$cert->getRequestGroup() && $setGroup) {
                 $cert->setRequestGroup('skillSplit-' . time());
@@ -549,7 +550,12 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
                 $this->certificationRepository->add($newCert);
                 $newCert = $cert->copy();
             }
+            if ($cert->getUser()) {
+                $tags[] = $source->getCacheTag($cert->getUser()->getUid());
+            }
         }
+
+        GeneralUtility::makeInstance(CacheManager::class)->flushCachesByTags($tags);
     }
 
     /**

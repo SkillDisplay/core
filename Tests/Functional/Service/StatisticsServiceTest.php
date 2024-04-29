@@ -140,20 +140,20 @@ class StatisticsServiceTest extends AbstractFunctionalTestCaseBase
         self::assertSame(0, $statistics->getLastMonthIssued());
         self::assertSame(16, $statistics->getSumIssued());
         self::assertSame([
-                0 => 9,
-                1 => 0,
-                2 => 0,
-                3 => 0,
-                4 => 0,
-                5 => 0,
-                6 => 1,
-                7 => 0,
-                8 => 0,
-                9 => 0,
-                10 => 1,
-                11 => 13,
-                12 => 0,
-            ], $statistics->getMonthlyScores());
+            0 => 9,
+            1 => 0,
+            2 => 0,
+            3 => 0,
+            4 => 0,
+            5 => 0,
+            6 => 1,
+            7 => 0,
+            8 => 0,
+            9 => 0,
+            10 => 1,
+            11 => 13,
+            12 => 0,
+        ], $statistics->getMonthlyScores());
 
         self::assertSame([
             3 => 1,
@@ -162,33 +162,33 @@ class StatisticsServiceTest extends AbstractFunctionalTestCaseBase
         ], $statistics->getInterests());
 
         self::assertSame([
-                'tier1' => [
-                    'total' => 0,
-                    'verified' => 0,
-                    'potential' => 0,
-                ],
-                'tier2' => [
-                    'total' => 5,
-                    'verified' => 4,
-                    'potential' => 0,
-                ],
-                'tier3' => [
-                    'total' => 0,
-                    'verified' => 0,
-                    'potential' => 0,
-                ],
-                'tier4' => [
-                    'total' => 10,
-                    'verified' => 6,
-                    'potential' => 0,
-                ],
-            ], $statistics->getPotential());
+            'tier1' => [
+                'total' => 0,
+                'verified' => 0,
+                'potential' => 0,
+            ],
+            'tier2' => [
+                'total' => 5,
+                'verified' => 4,
+                'potential' => 0,
+            ],
+            'tier3' => [
+                'total' => 0,
+                'verified' => 0,
+                'potential' => 0,
+            ],
+            'tier4' => [
+                'total' => 10,
+                'verified' => 6,
+                'potential' => 0,
+            ],
+        ], $statistics->getPotential());
 
         self::assertSame([
-                'tier3' => 5,
-                'tier4' => 6,
-                'tier2' => 4,
-            ], $statistics->getComposition()['Skilldisplay']);
+            'tier3' => 5,
+            'tier4' => 6,
+            'tier2' => 4,
+        ], $statistics->getComposition()['Skilldisplay']);
 
         foreach ($this->brandRepository->findAll() as $brand) {
             $statistics = $this->organisationStatisticsRepository->getOrganisationStatisticsForBrand($brand->getUid());

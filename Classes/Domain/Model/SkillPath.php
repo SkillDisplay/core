@@ -21,10 +21,12 @@ use SkillDisplay\Skills\Service\VerificationService;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
+use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class SkillPath extends AbstractEntity
@@ -37,10 +39,19 @@ class SkillPath extends AbstractEntity
             'mediaPublicUrl',
             'progressPercentage',
             'legitimationDate',
+            'tags',
             'firstCategoryTitle',
         ],
         '_descend' => [
             'progressPercentage' => [],
+            'tags' => [
+                '_descendAll' => [
+                    '_only' => [
+                        'uid',
+                        'title',
+                    ],
+                ],
+            ],
         ],
     ];
 
@@ -52,10 +63,19 @@ class SkillPath extends AbstractEntity
             'mediaPublicUrl',
             'brand',
             'skillCount',
+            'tags',
             'firstCategoryTitle',
         ],
         '_descend' => [
             'brand' => Brand::JsonViewMinimalConfiguration,
+            'tags' => [
+                '_descendAll' => [
+                    '_only' => [
+                        'uid',
+                        'title',
+                    ],
+                ],
+            ],
         ],
     ];
 
@@ -97,6 +117,12 @@ class SkillPath extends AbstractEntity
     protected ObjectStorage $links;
 
     /**
+     * @var ObjectStorage<Tag>
+     * @Lazy
+     */
+    protected ObjectStorage|LazyObjectStorage $tags;
+
+    /**
      * @var ObjectStorage<Category>
      */
     protected ObjectStorage $categories;
@@ -127,6 +153,7 @@ class SkillPath extends AbstractEntity
         $this->skills = new ObjectStorage();
         $this->media = new ObjectStorage();
         $this->links = new ObjectStorage();
+        $this->tags = new ObjectStorage();
         $this->categories = new ObjectStorage();
     }
 
@@ -424,6 +451,31 @@ class SkillPath extends AbstractEntity
     public function getLinks(): ObjectStorage
     {
         return $this->links;
+    }
+
+    public function addTag(Tag $tag): void
+    {
+        $this->tags->attach($tag);
+    }
+
+    public function removeTag(Tag $tagToRemove): void
+    {
+        $this->tags->detach($tagToRemove);
+    }
+
+    /**
+     * Returns the tags
+     *
+     * @return ObjectStorage<Tag>
+     */
+    public function getTags(): ObjectStorage
+    {
+        return $this->tags;
+    }
+
+    public function setTags(ObjectStorage $tags): void
+    {
+        $this->tags = $tags;
     }
 
     public function getSyllabusLayoutFile(): int

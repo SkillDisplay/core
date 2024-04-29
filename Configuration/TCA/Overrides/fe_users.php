@@ -20,9 +20,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                1 => [
-                    0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                ],
+                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -33,9 +31,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                1 => [
-                    0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                ],
+                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -125,9 +121,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                1 => [
-                    0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                ],
+                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 1,
         ],
@@ -151,9 +145,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                1 => [
-                    0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                ],
+                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -229,7 +221,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'input',
             'renderType' => 'inputDateTime',
-            'eval' => 'int,datetime',
+            'eval' => 'datetime',
             'default' => 0,
             'readOnly' => true,
         ],
@@ -264,9 +256,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                1 => [
-                    0 => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled',
-                ],
+                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -307,7 +297,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'input',
             'renderType' => 'inputDateTime',
-            'eval' => 'int,datetime',
+            'eval' => 'datetime',
             'default' => 0,
             'readOnly' => true,
         ],

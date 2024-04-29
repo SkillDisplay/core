@@ -28,6 +28,9 @@ return [
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_reward.active',
             'config' => [
                 'type' => 'check',
+                'items' => [
+                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                ],
                 'default' => 0,
             ],
         ],

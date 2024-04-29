@@ -127,6 +127,7 @@ CREATE TABLE tx_skills_domain_model_skillpath
 	media                   int(11) UNSIGNED    DEFAULT '0'   NOT NULL,
 	skills                  int(11) UNSIGNED    DEFAULT '0'   NOT NULL,
 	links                   int(11) UNSIGNED    DEFAULT '0'   NOT NULL,
+	tags                    int(11) UNSIGNED    DEFAULT '0'   NOT NULL,
 	legitimation_user       int(11) UNSIGNED    DEFAULT '0'   NOT NULL,
 	legitimation_date       int(11) UNSIGNED    DEFAULT '0'   NOT NULL,
 	uuid                    varchar(40),
@@ -424,6 +425,17 @@ CREATE TABLE tx_skills_skillset_brand_mm
 
 # Tags of skill
 CREATE TABLE tx_skills_skill_tag_mm
+(
+	uid_local       int(11) UNSIGNED DEFAULT '0' NOT NULL,
+	uid_foreign     int(11) UNSIGNED DEFAULT '0' NOT NULL,
+	sorting         int(11) UNSIGNED DEFAULT '0' NOT NULL,
+	sorting_foreign int(11) UNSIGNED DEFAULT '0' NOT NULL,
+
+	KEY uid_local (uid_local),
+	KEY uid_foreign (uid_foreign)
+);
+
+CREATE TABLE tx_skills_skillset_tag_mm
 (
 	uid_local       int(11) UNSIGNED DEFAULT '0' NOT NULL,
 	uid_foreign     int(11) UNSIGNED DEFAULT '0' NOT NULL,

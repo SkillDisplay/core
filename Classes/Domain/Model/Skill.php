@@ -147,7 +147,7 @@ class Skill extends AbstractEntity
      * @Lazy
      * @Cascade("remove")
      */
-    protected FileReference|LazyLoadingProxy|null $image;
+    protected FileReference|LazyLoadingProxy|null $image = null;
 
     /**
      * @var ObjectStorage<Brand>
