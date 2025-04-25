@@ -19,7 +19,7 @@ use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
  */
 class SessionService
 {
-    public const SESSION_KEY = 'skills_ses_';
+    public const string SESSION_KEY = 'skills_ses_';
 
     /**
      * Set session data.

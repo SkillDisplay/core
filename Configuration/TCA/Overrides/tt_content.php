@@ -1,57 +1,66 @@
 <?php
 
+declare(strict_types=1);
+
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
 
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'Skills',
-    'Skills-Skills'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_skills'] = 'layout,pages,recursive';
+$pluginConfigNew = [
+    ['Organisations', true],
+    ['Skills', false],
+    ['UserRegister', false],
+    ['UserEdit', false],
+    ['ShortLink', false],
+    ['Routing', false],
+    ['Api', false],
+    ['Anonymous', false],
+];
 
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'Users',
-    'Skills-Users'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_users'] = 'layout,pages,recursive';
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_addlist']['skills_users'] = 'pi_flexform';
-ExtensionManagementUtility::addPiFlexFormValue('skills_users', 'FILE:EXT:skills/Configuration/FlexForms/flexform_users.xml');
+foreach ($pluginConfigNew as $pluginConfigItem) {
+    $pluginNameUpperCamelCase = $pluginConfigItem[0];
+    $pluginNameSnakeCase = GeneralUtility::camelCaseToLowerCaseUnderscored($pluginNameUpperCamelCase);
+    $pluginNameDashCase = 'skills-' . str_replace('_', '-', $pluginNameSnakeCase);
+    $pluginNameNoCase = str_replace('_', '', $pluginNameSnakeCase);
+    $contentTypeName = 'skills_' . $pluginNameNoCase;
 
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'ShortLink',
-    'Skills-Short links'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_shortlink'] = 'layout,pages,recursive';
+    ExtensionUtility::registerPlugin(
+        'Skills',
+        $pluginNameUpperCamelCase,
+        'LLL:EXT:skills/Resources/Private/Language/backend.xlf:plugin.skills_' . $pluginNameSnakeCase . '.title',
+        $pluginNameDashCase,
+        'skills'
+    );
 
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'Routing',
-    'Skills-Routing'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_routing'] = 'layout,pages,recursive';
+    if ($pluginConfigItem[1] ?? false) {
+        ExtensionManagementUtility::addPiFlexFormValue(
+            '*',
+            'FILE:EXT:skills/Configuration/FlexForms/flexform_' . $pluginNameSnakeCase . '.xml',
+            $contentTypeName
+        );
 
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'Organisations',
-    'Skills-Organisations'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_organisations'] = 'layout,pages,recursive';
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_addlist']['skills_organisations'] = 'pi_flexform';
-ExtensionManagementUtility::addPiFlexFormValue('skills_organisations', 'FILE:EXT:skills/Configuration/FlexForms/flexform_organisations.xml');
+        $GLOBALS['TCA']['tt_content']['types'][$contentTypeName]['showitem'] = '
+        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:general,
+            --palette--;;general,
+            --palette--;;headers,
+        --div--;LLL:EXT:skills/Resources/Private/Language/backend.xlf:plugin.tab,
+            pi_flexform,
+        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:language,
+            --palette--;;language,
+        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:access,
+            --palette--;;hidden,
+            --palette--;;access,';
+    } else {
+        $GLOBALS['TCA']['tt_content']['types'][$contentTypeName]['showitem'] = '
+        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:general,
+            --palette--;;general,
+            --palette--;;headers,
+        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:language,
+            --palette--;;language,
+        --div--;LLL:EXT:core/Resources/Private/Language/Form/locallang_tabs.xlf:access,
+            --palette--;;hidden,
+            --palette--;;access,';
+    }
 
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'Api',
-    'Skills-Api'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_api'] = 'layout,pages,recursive';
-
-ExtensionUtility::registerPlugin(
-    'Skills',
-    'Anonymous',
-    'Skills-Anonymous-Login'
-);
-$GLOBALS['TCA']['tt_content']['types']['list']['subtypes_excludelist']['skills_anonymous_login'] = 'layout,pages,recursive';
+    $GLOBALS['TCA']['tt_content']['ctrl']['typeicon_classes'][$contentTypeName] = $pluginNameDashCase;
+}

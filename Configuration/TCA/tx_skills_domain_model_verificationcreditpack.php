@@ -8,7 +8,6 @@ return [
         'label_alt_force' => true,
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'cruser_id' => 'cruser_id',
         'default_orderby' => 'crdate DESC',
         'searchFields' => 'title,brand_name',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_verificationcreditpack.svg',
@@ -22,20 +21,17 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditpack.valuta',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'size' => 15,
-                'eval' => 'required,datetime',
+                'required' => true,
             ],
         ],
         'valid_thru' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditpack.valid_thru',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'size' => 15,
-                'eval' => 'datetime',
                 'default' => 0,
             ],
         ],
@@ -56,7 +52,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 200,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'current_points' => [
@@ -72,17 +69,17 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditpack.initial_points',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 10,
                 'max' => 50,
-                'eval' => 'required,int',
+                'required' => true,
             ],
         ],
         'price' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditpack.price',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 10,
                 'max' => 10,
                 'range' => [
@@ -90,14 +87,15 @@ return [
                     'lower' => 0.00,
                 ],
                 'default' => 0.00,
-                'eval' => 'required,double2',
+                'format' => 'decimal',
+                'required' => true,
             ],
         ],
         'price_charged' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditpack.price_charged',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 10,
                 'max' => 10,
                 'range' => [
@@ -105,7 +103,8 @@ return [
                     'lower' => 0.00,
                 ],
                 'default' => 0.00,
-                'eval' => 'required,double2',
+                'format' => 'decimal',
+                'required' => true,
             ],
         ],
         'user' => [
@@ -117,7 +116,7 @@ return [
                 'foreign_table' => 'fe_users',
                 'foreign_table_where' => 'ORDER BY fe_users.username',
                 'items' => [
-                    ['', 0],
+                    ['label' => '', 'value' => 0],
                 ],
                 'default' => 0,
             ],
@@ -140,7 +139,8 @@ return [
                 'type' => 'input',
                 'size' => 50,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'user_username' => [

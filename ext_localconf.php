@@ -18,7 +18,6 @@ use SkillDisplay\Skills\Controller\SkillPathController;
 use SkillDisplay\Skills\Controller\UserController;
 use SkillDisplay\Skills\Controller\VerificationCreditController;
 use SkillDisplay\Skills\Controller\VerifierController;
-use SkillDisplay\Skills\Domain\Model\FileReference;
 use SkillDisplay\Skills\Domain\Model\Notification;
 use SkillDisplay\Skills\Domain\Repository\SkillGroupRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
@@ -28,18 +27,12 @@ use SkillDisplay\Skills\Routing\RestApiEnhancer;
 use SkillDisplay\Skills\Routing\UidMapper;
 use SkillDisplay\Skills\Service\NotificationService;
 use SkillDisplay\Skills\Service\ShortLinkService;
-use SkillDisplay\Skills\TypeConverter\ObjectStorageConverter;
-use SkillDisplay\Skills\TypeConverter\UploadedFileReferenceConverter;
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\Frontend\VariableFrontend;
 use TYPO3\CMS\Core\Log\Writer\FileWriter;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\Container\Container;
 use TYPO3\CMS\Extbase\Utility\ExtensionUtility;
-
-ExtensionUtility::registerTypeConverter(UploadedFileReferenceConverter::class);
-ExtensionUtility::registerTypeConverter(ObjectStorageConverter::class);
 
 // these controller/action combinations must be allowed also in the ShortLink plugin below!
 ShortLinkService::addHandler('userConfirm', ['User', 'confirm']);
@@ -61,9 +54,6 @@ $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['clea
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['enhancers']['RestApi'] = RestApiEnhancer::class;
 $GLOBALS['TYPO3_CONF_VARS']['SYS']['routing']['aspects']['UidMapper'] = UidMapper::class;
 
-GeneralUtility::makeInstance(Container::class)
-    ->registerImplementation(\TYPO3\CMS\Extbase\Domain\Model\FileReference::class, FileReference::class);
-
 ExtensionManagementUtility::addTypoScriptSetup(trim(
     '
     config.pageTitleProviders {
@@ -84,19 +74,34 @@ ExtensionUtility::configurePlugin(
     // non-cacheable actions
     [
         SkillPathController::class => 'listByBrand',
-    ]
+    ],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 ExtensionUtility::configurePlugin(
     'Skills',
-    'Users',
+    'UserRegister',
     [
-        UserController::class => 'new, create, confirm, confirmEmail, success, terms, acceptTerms',
+        UserController::class => 'new, create, confirm, success, terms, acceptTerms',
     ],
     // non-cacheable actions
     [
-        UserController::class => 'new, create, confirm, confirmEmail, terms, acceptTerms',
-    ]
+        UserController::class => 'new, create, confirm, success, terms, acceptTerms',
+    ],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
+);
+
+ExtensionUtility::configurePlugin(
+    'Skills',
+    'UserEdit',
+    [
+        UserController::class => 'edit, update, updateEmail, updatePassword, confirmEmail, terms, acceptTerms',
+    ],
+    // non-cacheable actions
+    [
+        UserController::class => 'edit, update, updateEmail, updatePassword, confirmEmail, terms, acceptTerms',
+    ],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 ExtensionUtility::configurePlugin(
@@ -110,7 +115,8 @@ ExtensionUtility::configurePlugin(
     [
         ShortLinkController::class => 'handle',
         UserController::class => 'confirm,confirmEmail',
-    ]
+    ],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 ExtensionUtility::configurePlugin(
@@ -122,7 +128,8 @@ ExtensionUtility::configurePlugin(
     // non-cacheable actions
     [
         UserController::class => 'route',
-    ]
+    ],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 ExtensionUtility::configurePlugin(
@@ -130,7 +137,9 @@ ExtensionUtility::configurePlugin(
     'Organisations',
     [
         OrganisationController::class => 'list,show',
-    ]
+    ],
+    [],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 $apiActions = [
@@ -138,7 +147,7 @@ $apiActions = [
     SkillPathController::class => 'list,showApi,certificateDownload,syllabusForSetPdf,completeDownloadForSetPdf,progressForSet,getAwardsForSkillSet',
     SkillController::class => 'show,skillUpAjax',
     VerifierController::class => 'show,forSkill,listOfUser',
-    UserController::class => 'starCertifierAjax,show,countries,baseData,updatePassword,patrons,updateNotifications,updateEmail,updateSocialPlatforms,updateProfile,publicProfile,downloadPublicProfilePdf,publicProfileVerifications,getOrganizationsForCurrentUser,getAllAwards,updateAwardSelection',
+    UserController::class => 'starCertifierAjax,show,countries,baseData,updatePassword,patrons,updateNotifications,updateEmail,updateSocialPlatforms,delete,updateProfile,publicProfile,downloadPublicProfilePdf,publicProfileVerifications,getOrganizationsForCurrentUser,getAllAwards,updateAwardSelection',
     OrganisationController::class => 'leave,joinOrganisation,removeMember,createInvitationCodesAjax,organisationStatistics,downloadCsvStatistics,show,setAccountOverdraw,managerList,getBillingInformation,verificationList',
     SearchController::class => 'search',
     CampaignController::class => 'getForUser',
@@ -153,7 +162,8 @@ ExtensionUtility::configurePlugin(
     'Api',
     $apiActions,
     // non-cacheable actions
-    $apiActions
+    $apiActions,
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 ExtensionUtility::configurePlugin(
@@ -165,7 +175,8 @@ ExtensionUtility::configurePlugin(
     // non-cacheable actions
     [
         UserController::class => 'anonymousRequest, anonymousCreate',
-    ]
+    ],
+    ExtensionUtility::PLUGIN_TYPE_CONTENT_ELEMENT
 );
 
 $GLOBALS['TYPO3_CONF_VARS']['LOG']['SkillDisplay']['Skills']['writerConfiguration'] = [

@@ -44,10 +44,13 @@ class ShortLinkService implements SingletonInterface
         return $shortlink->getHash();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function handleShortlink(string $hash): array
     {
-        /** @var Shortlink $shortlink */
-        $shortlink = $this->shortLinkRepo->findByHash($hash)->getFirst();
+        /** @var ?Shortlink $shortlink */
+        $shortlink = $this->shortLinkRepo->findBy(['hash' => $hash])->getFirst();
         if (!$shortlink) {
             throw new InvalidArgumentException('No shortlink for hash "' . $hash . '" available.', 1474505953);
         }

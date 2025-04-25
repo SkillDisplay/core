@@ -23,10 +23,10 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class Certification extends AbstractEntity
 {
-    public const TYPE_GROUPED_BY_DATE = 0;
-    public const TYPE_GROUPED_BY_BRAND = 1;
+    public const int TYPE_GROUPED_BY_DATE = 0;
+    public const int TYPE_GROUPED_BY_BRAND = 1;
 
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         'skills' => [
             '_descendAll' => [
                 '_only' => [
@@ -46,7 +46,6 @@ class Certification extends AbstractEntity
                 'tags',
                 'mediaPublicUrl',
                 'brand',
-                'tags',
                 'firstCategoryTitle',
             ],
             '_descend' => [
@@ -122,7 +121,7 @@ class Certification extends AbstractEntity
         if ($this->getTier4()) {
             return 4;
         }
-        throw new InvalidArgumentException('A verification must have a level. uid:' . $this->uid);
+        throw new InvalidArgumentException('A verification must have a level. uid:' . $this->uid, 6174244460);
     }
 
     public function isValid(): bool
@@ -146,7 +145,7 @@ class Certification extends AbstractEntity
             /** @var Repository $repo */
             $repo = GeneralUtility::makeInstance($GLOBALS['EXTCONF']['skills']['SkillGroups'][$parts[0]]);
             /** @var SkillPath|SkillGroup $result */
-            $result = $repo->findByUid((int)$parts[1]);
+            $result = $repo->findBy(['uid' => (int)$parts[1]])->getFirst();
             return $result;
         }
         return null;

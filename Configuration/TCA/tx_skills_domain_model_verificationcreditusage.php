@@ -19,17 +19,17 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditusage.points',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 5,
                 'max' => 5,
-                'eval' => 'required,int',
+                'required' => true,
             ],
         ],
         'price' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditusage.price',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 10,
                 'max' => 10,
                 'range' => [
@@ -37,7 +37,8 @@ return [
                     'lower' => 0.00,
                 ],
                 'default' => 0.00,
-                'eval' => 'required,double2',
+                'format' => 'decimal',
+                'required' => true,
             ],
         ],
         'credit_pack' => [

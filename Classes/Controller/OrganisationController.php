@@ -19,6 +19,7 @@ use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certification;
+use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\InvitationCode;
 use SkillDisplay\Skills\Domain\Model\OrganisationStatistics;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -132,9 +133,6 @@ class OrganisationController extends AbstractController
             $this->view->assign('skillSets', $skillSets);
             $this->view->assign('statistics', $stats);
         } else {
-            // set this global variable for news filtering
-            $GLOBALS['currentBrandId'] = $organisation->getUid();
-
             $verifications = $this->getVerifications($organisation);
 
             GeneralUtility::makeInstance(PageTitleProvider::class)->setTitle($organisation->getName());
@@ -179,7 +177,7 @@ class OrganisationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 6763258670);
         }
         if (!$this->view instanceof JsonView) {
             return $this->htmlResponse('');
@@ -197,6 +195,7 @@ class OrganisationController extends AbstractController
         $msg->setTo($user->getEmail());
 
         $managers = $this->userRepository->findManagers($organisation);
+        /** @var User $manager */
         foreach ($managers as $manager) {
             $msg->addBcc($manager->getEmail());
         }
@@ -209,7 +208,7 @@ class OrganisationController extends AbstractController
     {
         $loggedInUser = $this->getCurrentUser();
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 9251499211);
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
             return $this->jsonResponse('{"error": "User not allowed to remove member of brand"}');
@@ -227,6 +226,7 @@ class OrganisationController extends AbstractController
         $msg->setTo($user->getEmail());
 
         $managers = $this->userRepository->findManagers($organisation);
+        /** @var User $manager */
         foreach ($managers as $manager) {
             $msg->addBcc($manager->getEmail());
         }
@@ -239,7 +239,7 @@ class OrganisationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 5096069558);
         }
         if ($user->isAnonymous()) {
             throw new InvalidArgumentException('User may not be anonymous', 347856234);
@@ -265,7 +265,6 @@ class OrganisationController extends AbstractController
                 LocalizationUtility::translate('organisation.listmy.join.error.usedCode.text', 'skills')
             );
         } else {
-            /** @var Brand $orga */
             $brand = $invitation->getBrand();
             $alreadyMember = false;
             foreach ($user->getOrganisations() as $orga) {
@@ -300,6 +299,7 @@ class OrganisationController extends AbstractController
                 $msg->setTo($user->getEmail());
 
                 $managers = $this->userRepository->findManagers($brand);
+                /** @var User $manager */
                 foreach ($managers as $manager) {
                     if (GeneralUtility::validEmail($manager->getEmail())) {
                         $msg->addBcc($manager->getEmail());
@@ -307,7 +307,9 @@ class OrganisationController extends AbstractController
                 }
                 $msg->send();
 
-                GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
+                /** @var PersistenceManager $pm */
+                $pm = GeneralUtility::makeInstance(PersistenceManager::class);
+                $pm->persistAll();
                 /** @var EventDispatcher $eventDispatcher */
                 $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
                 $eventDispatcher->dispatch(new OrganisationJoinedEvent($brand, $user));
@@ -331,10 +333,10 @@ class OrganisationController extends AbstractController
     {
         $loggedInUser = $this->getCurrentUser(false);
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 7357152031);
         }
         if (!$loggedInUser->getManagedBrands()->contains($brand)) {
-            throw new AuthenticationException('Not a manager of this organisation');
+            throw new AuthenticationException('Not a manager of this organisation', 1790412721);
         }
         $codes = [];
         for ($i = 0; $i < $amount; $i++) {
@@ -404,10 +406,10 @@ class OrganisationController extends AbstractController
     {
         $loggedInUser = $this->getCurrentUser(false);
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 3107087013);
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
-            throw new AuthenticationException('Not a manager of this organisation');
+            throw new AuthenticationException('Not a manager of this organisation', 1033645899);
         }
         $data = [];
         $data['address'] = $organisation->getBillingAddress();
@@ -428,10 +430,11 @@ class OrganisationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 5691448734);
         }
         $validAccess = false;
         $verifiers = $this->verifierRepository->findByBrandId($organisation->getUid());
+        /** @var Certifier $verifier */
         foreach ($verifiers as $verifier) {
             if ($verifier->getUser()->getUid() === $user->getUid()) {
                 $validAccess = true;
@@ -447,7 +450,7 @@ class OrganisationController extends AbstractController
             }
         }
         if (!$validAccess) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 8771168510);
         }
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -465,14 +468,14 @@ class OrganisationController extends AbstractController
     {
         $loggedInUser = $this->getCurrentUser(false, $apiKey);
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 5586241527);
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
-            throw new AuthenticationException('Not a manager of this organisation');
+            throw new AuthenticationException('Not a manager of this organisation', 9355847581);
         }
         $stats = $this->organisationStatisticsRepository->getOrganisationStatisticsForBrand($organisation->getUid());
         if ($stats) {
-            $stats->setLimitInterestToSkillSets($this->skillSetRepository->findAllVisible([$organisation]));
+            $stats->setLimitInterestToSkillSets($this->skillSetRepository->findAllVisible([$organisation->getUid()]));
         } else {
             // there are no statistics for this brand yet, send empty one
             $stats = new OrganisationStatistics();
@@ -499,10 +502,10 @@ class OrganisationController extends AbstractController
     {
         $loggedInUser = $this->getCurrentUser(false, $apiKey);
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 6227153446);
         }
         if (!$loggedInUser->getManagedBrands()->contains($organisation)) {
-            throw new AuthenticationException('Not a manager of this organisation');
+            throw new AuthenticationException('Not a manager of this organisation', 5435810436);
         }
         $lines = [];
         /** @var User $member */
@@ -511,6 +514,7 @@ class OrganisationController extends AbstractController
                 $lines = $this->addVerificationEntryToArray($lines, $certification);
             }
         }
+        /** @var Certifier $certifier */
         foreach ($this->verifierRepository->findByBrandId($organisation->getUid()) as $certifier) {
             foreach ($this->certificationRepository->findAcceptedOrDeniedByUser(null, $certifier) as $certification) {
                 $lines = $this->addVerificationEntryToArray($lines, $certification);
@@ -519,9 +523,7 @@ class OrganisationController extends AbstractController
 
         $lines = $this->removeDuplicates($lines);
 
-        usort($lines, function ($a, $b) {
-            return $a['uid'] - $b['uid'];
-        });
+        usort($lines, fn($a, $b) => $a['uid'] - $b['uid']);
 
         if ($type === 'csv') {
             //set the column names

@@ -14,15 +14,14 @@ class UserOrganisationsService
 {
     /**
      * @param User|null $user
-     * @return Brand[]
+     * @return int[]
      */
     public static function getOrganisationsOrEmpty(?User $user): array
     {
-        if ($user) {
-            return $user->getOrganisations()->toArray();
+        if (!$user) {
+            return [];
         }
-
-        return [];
+        return array_map(fn(Brand $brand) => $brand->getUid(), $user->getOrganisations()->toArray());
     }
 
     /**
@@ -32,23 +31,16 @@ class UserOrganisationsService
      */
     public static function isUserMemberOfOrganisations(ObjectStorage|array $brands, ?User $user): bool
     {
-        $organisations = [];
-        foreach (UserOrganisationsService::getOrganisationsOrEmpty($user) as $organisation) {
-            $organisations[] = $organisation->getUid();
-        }
-
-        $inOrganisation = false;
-
+        $organisations = UserOrganisationsService::getOrganisationsOrEmpty($user);
         if ($organisations !== []) {
             foreach ($brands as $brand) {
                 if (in_array($brand->getUid(), $organisations)) {
-                    $inOrganisation = true;
-                    break;
+                    return true;
                 }
             }
         }
 
-        return $inOrganisation;
+        return false;
     }
 
     public static function isSkillPathVisibleForUser(SkillPath $path, ?User $user): bool

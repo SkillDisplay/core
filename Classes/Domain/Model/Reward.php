@@ -20,10 +20,10 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Reward extends AbstractEntity
 {
-    public const TYPE_BADGE = 'badge';
-    public const TYPE_CERTIFICATE = 'certificate';
-    public const TYPE_AFFILIATE = 'affiliate';
-    public const TYPE_DOWNLOAD = 'download';
+    public const string TYPE_BADGE = 'badge';
+    public const string TYPE_CERTIFICATE = 'certificate';
+    public const string TYPE_AFFILIATE = 'affiliate';
+    public const string TYPE_DOWNLOAD = 'download';
 
     protected string $title = '';
     protected string $reward = '';
@@ -45,7 +45,7 @@ class Reward extends AbstractEntity
     protected int $active = 0;
     protected bool $linkSkillpath = true;
 
-    public const ApiJsonViewConfiguration = [
+    public const array ApiJsonViewConfiguration = [
         '_only' => [
             'uid', 'title', 'description', 'level', 'brand', 'skillpath', 'linkSkillpath',
         ],
@@ -60,6 +60,11 @@ class Reward extends AbstractEntity
     ];
 
     public function __construct()
+    {
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
     {
         $this->prerequisites = new ObjectStorage();
     }
@@ -109,7 +114,7 @@ class Reward extends AbstractEntity
         return $this->availabilityStart;
     }
 
-    public function setAvailabilityStart(DateTime $availabilityStart = null): void
+    public function setAvailabilityStart(?DateTime $availabilityStart = null): void
     {
         $this->availabilityStart = $availabilityStart;
     }
@@ -119,7 +124,7 @@ class Reward extends AbstractEntity
         return $this->availabilityEnd;
     }
 
-    public function setAvailabilityEnd(DateTime $availabilityEnd = null): void
+    public function setAvailabilityEnd(?DateTime $availabilityEnd = null): void
     {
         $this->availabilityEnd = $availabilityEnd;
     }
@@ -129,7 +134,7 @@ class Reward extends AbstractEntity
         return $this->validUntil;
     }
 
-    public function setValidUntil(DateTime $validUntil = null): void
+    public function setValidUntil(?DateTime $validUntil = null): void
     {
         $this->validUntil = $validUntil;
     }
@@ -172,7 +177,7 @@ class Reward extends AbstractEntity
         return $this->validForOrganisation;
     }
 
-    public function setValidForOrganisation(Brand $validForOrganisation = null): void
+    public function setValidForOrganisation(?Brand $validForOrganisation = null): void
     {
         $this->validForOrganisation = $validForOrganisation;
     }

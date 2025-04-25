@@ -24,9 +24,7 @@ class CertificationCredit extends AbstractEntity
     protected string $title = '';
     protected float $price = 0.0;
 
-    /**
-     * @Lazy
-     */
+    #[Lazy]
     protected User|LazyLoadingProxy|null $user = null;
 
     protected string $invoiceNumber = '';

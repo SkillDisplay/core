@@ -28,7 +28,7 @@ class PaymentController extends AbstractController
     {
         $loggedInUser = $this->getCurrentUser();
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 7429003113);
         }
 
         $data = [
@@ -43,11 +43,8 @@ class PaymentController extends AbstractController
         }
 
         if ($loggedInUser->getManagedBrands()->contains($organisation)) {
-            $client = null;
             if (class_exists(\Stripe\StripeClient::class) && $this->settings['stripeKey']) {
                 $client = new \Stripe\StripeClient($this->settings['stripeKey']);
-            }
-            if ($client) {
                 $subscriptionId = $this->getSubscriptionId($organisation);
                 if ($subscriptionId) {
                     $subscription = $client->subscriptions->retrieve($subscriptionId, ['expand' => ['customer']]);
@@ -88,7 +85,7 @@ class PaymentController extends AbstractController
 
         $loggedInUser = $this->getCurrentUser();
         if (!$loggedInUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 4228675771);
         }
 
         $error = '';

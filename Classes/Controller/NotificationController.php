@@ -35,7 +35,7 @@ class NotificationController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('User not logged in');
+            throw new AuthenticationException('User not logged in', 6250834728);
         }
         $notifications = $this->notificationService->getNotificationsForUser($user);
         if ($this->view instanceof JsonView) {
@@ -57,7 +57,7 @@ class NotificationController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('User not logged in');
+            throw new AuthenticationException('User not logged in', 6557521236);
         }
         $this->notificationService->deleteNotifications($user, $notificationIds);
         $this->view->assign('success', true);

@@ -31,6 +31,7 @@ abstract class AbstractUserValidator extends AbstractValidator
         } elseif (!GeneralUtility::validEmail($user->getEmail())) {
             $this->addError($this->getErrorMessage('emailInvalid'), 1471702627);
         } else {
+            /** @var UserRepository $userRepository */
             $userRepository = GeneralUtility::makeInstance(UserRepository::class);
             if ($userRepository->findByUsername($user->getEmail())) {
                 $this->addError($this->getErrorMessage('userDuplicate'), 1471702625);

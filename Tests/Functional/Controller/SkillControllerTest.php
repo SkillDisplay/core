@@ -18,10 +18,11 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
 {
     use SimulateLoginTrait;
 
-    protected SkillController|MockObject|AccessibleObjectInterface $subject;
+    protected SkillController&MockObject&AccessibleObjectInterface $subject;
 
     protected SkillRepository $skillRepository;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -40,15 +41,16 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
         $this->initController($this->subject);
     }
 
+    #[\Override]
     protected function setUpDatabase(): void
     {
-        $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/user_access_test.csv');
     }
 
     /**
      * @test
      */
-    public function showsPublicSkill()
+    public function showsPublicSkill(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(2);
@@ -62,7 +64,7 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function hidesInternalSkill()
+    public function hidesInternalSkill(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);
@@ -74,7 +76,7 @@ class SkillControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function showsInternalSkillForMember()
+    public function showsInternalSkillForMember(): void
     {
         $this->simulateLogin();
         /** @var Skill $skill */

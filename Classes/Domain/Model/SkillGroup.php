@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Domain\Model;
 
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -25,20 +26,20 @@ class SkillGroup extends AbstractEntity
 
     /** @var ObjectStorage<Link> */
     protected ObjectStorage $links;
-    protected ?CertificationRepository $certificationRepository = null;
+
     protected ?User $user = null;
     protected string $skillupCommentPlaceholder = '';
     protected string $skillupCommentPreset = '';
 
     public function __construct()
     {
-        $this->skills = new ObjectStorage();
-        $this->links = new ObjectStorage();
+        $this->initializeObject();
     }
 
-    public function injectCertificationRepository(CertificationRepository $certificationRepository): void
+    public function initializeObject(): void
     {
-        $this->certificationRepository = $certificationRepository;
+        $this->skills = new ObjectStorage();
+        $this->links = new ObjectStorage();
     }
 
     public function setUserForCompletedChecks(User $user): void
@@ -61,7 +62,8 @@ class SkillGroup extends AbstractEntity
         if (!$this->user) {
             return $certStats;
         }
-        $certifications = $this->certificationRepository->findBySkillsAndUser($this->skills->toArray(), $this->user);
+        $certificationRepository = GeneralUtility::makeInstance(CertificationRepository::class);
+        $certifications = $certificationRepository->findBySkillsAndUser($this->skills->toArray(), $this->user);
         foreach ($certifications as $cert) {
             $certStats->addCertification($cert);
         }

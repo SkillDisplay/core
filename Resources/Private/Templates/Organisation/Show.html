@@ -80,10 +80,6 @@
 			<hr />
 		</f:then>
 	</f:if>
-	<h2>{f:translate(id:'brand.show.news')}</h2>
-	<div>
-		<f:cObject typoscriptObjectPath="lib.organisationNews" data="{organisation.uid}" />
-	</div>
 	<f:link.action action="list" class="btn btn-secondary">{f:translate(id:'brand.show.back')}</f:link.action>
 </f:section>
 

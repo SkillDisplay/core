@@ -20,7 +20,7 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class OrganisationStatistics extends AbstractEntity
 {
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid',
             'brand',
@@ -186,11 +186,14 @@ class OrganisationStatistics extends AbstractEntity
 
     public function getComposition(): array
     {
+        /** @var BrandRepository $brandRepository */
         $brandRepository = GeneralUtility::makeInstance(BrandRepository::class);
         $compositionWithBrandName = [];
         $composition = (array)json_decode($this->composition, true);
         foreach ($composition as $brandId => $tiers) {
-            $compositionWithBrandName[$brandRepository->findByUid($brandId)->getName()] = $tiers;
+            /** @var Brand $brand */
+            $brand = $brandRepository->findByUid($brandId);
+            $compositionWithBrandName[$brand->getName()] = $tiers;
         }
         return $compositionWithBrandName;
     }
@@ -232,6 +235,7 @@ class OrganisationStatistics extends AbstractEntity
 
     public function getInterestSets(): array
     {
+        /** @var SkillPathRepository $skillSetRepository */
         $skillSetRepository = GeneralUtility::makeInstance(SkillPathRepository::class);
 
         $skillSets = [];

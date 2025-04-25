@@ -15,8 +15,7 @@ namespace SkillDisplay\Skills\Service;
 
 use DateTime;
 use DateTimeImmutable;
-use Doctrine\DBAL\Driver\ResultStatement;
-use Doctrine\DBAL\ForwardCompatibility\Result;
+use Doctrine\DBAL\Statement;
 use Exception;
 use SkillDisplay\Skills\Domain\Model\Award;
 use SkillDisplay\Skills\Domain\Model\Brand;
@@ -39,7 +38,7 @@ use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class StatisticsService
 {
-    private const RANK_ASSIGNMENT = [
+    private const array RANK_ASSIGNMENT = [
         3 => 95,
         2 => 75,
         1 => 50,
@@ -127,7 +126,7 @@ class StatisticsService
                                 'level' => $level,
                                 'rank' => $achievedRank,
                             ])
-                            ->execute();
+                            ->executeStatement();
                     }
                 }
             }
@@ -152,7 +151,7 @@ class StatisticsService
                         $qbCertifications->expr()->isNotNull('c.grant_date'),
                         $qbCertifications->expr()->isNull('c.revoke_date')
                     )
-                    ->execute();
+                    ->executeQuery();
                 $certs = $statement->fetchAllAssociative();
                 $statement->free();
 
@@ -260,11 +259,10 @@ class StatisticsService
 
         $statementVerifications = $this->initCertificationsStatement();
 
-        /** @var Brand[] $brands */
         $brands = $this->brandRepository->findAllWithMembers();
-        /** @var SkillPath[] $skillSets */
         $skillSets = $this->skillSetRepository->findAll();
 
+        /** @var Brand $brand */
         foreach ($brands as $brand) {
             $brandId = $brand->getUid();
 
@@ -323,9 +321,9 @@ class StatisticsService
 
                 $statementVerifications->bindValue(1, $member['user']);
                 $statementVerifications->bindValue(2, $brandId);
-                $statementVerifications->execute();
-                $memberCerts = $statementVerifications->fetchAllAssociative();
-                $statementVerifications->free();
+                $result = $statementVerifications->executeQuery();
+                $memberCerts = $result->fetchAllAssociative();
+                $result->free();
 
                 $userIsActiveCurrent = false;
                 $userIsActiveLast = false;
@@ -342,7 +340,7 @@ class StatisticsService
                         $userIsActiveLast = true;
                     }
 
-                    /** @var Skill $skill */
+                    /** @var ?Skill $skill */
                     $skill = $this->skillRepository->findByUid($cert['skill_id']);
                     if (!$skill) {
                         continue;
@@ -381,7 +379,7 @@ class StatisticsService
                         }
                         foreach ($set['skill_ids'] as $skillId) {
                             $potentialIds[$level]['verified'][] = $skillId;
-                            /** @var Skill $skill */
+                            /** @var ?Skill $skill */
                             $skill = $this->skillRepository->findByUid($skillId);
                             if (!$skill) {
                                 continue;
@@ -452,7 +450,7 @@ class StatisticsService
                     $lastYearCerts[] = $cert;
                 }
 
-                /** @var Skill $skill */
+                /** @var ?Skill $skill */
                 $skill = $this->skillRepository->findByUid($cert['skill_id']);
                 if ($skill) {
                     foreach ($skill->getBrands() as $skillBrand) {
@@ -474,6 +472,7 @@ class StatisticsService
             // Get Verifications for Brand Certifiers
             // TODO only correct if certifier is never deleted from brand
             $certifiers = $this->certifierRepository->findByBrandId($brandId);
+            /** @var Certifier $certifier */
             foreach ($certifiers as $certifier) {
                 $certifierList[] = $certifier->getUid();
                 $certifierCerts = $this->certificationRepository->findAcceptedByCertifier($certifier);
@@ -522,8 +521,8 @@ class StatisticsService
         foreach ($users as $user) {
             $monthlyScores = array_fill(1, 12, 0);
             $statementVerifications->bindValue(1, $user->getUid());
-            $statementVerifications->execute();
-            $certs = $statementVerifications->fetchAllAssociative();
+            $result = $statementVerifications->executeQuery();
+            $certs = $result->fetchAllAssociative();
 
             foreach ($certs as $cert) {
                 $date = new DateTime($cert['grant_date']);
@@ -565,7 +564,7 @@ class StatisticsService
         return count($qb->executeQuery()->fetchAllAssociative());
     }
 
-    private function initCertificationsStatement(): \Doctrine\DBAL\Driver\Statement|ResultStatement|Result|int
+    private function initCertificationsStatement(): Statement
     {
         $qbCertifications = GeneralUtility::makeInstance(ConnectionPool::class)
             ->getQueryBuilderForTable('tx_skills_domain_model_certification');
@@ -580,7 +579,7 @@ class StatisticsService
                 $qbCertifications->expr()->isNull('c.revoke_date')
             )
             ->orderBy('c.grant_date')
-            ->executeQuery();
+            ->prepare();
     }
 
     private function getAllUserIdsForBrand(int $brandId): array
@@ -600,9 +599,6 @@ class StatisticsService
 
     /**
      * returns the number of skillpoints for all users of the given brand grouped by the brand of the skill
-     *
-     * @param int $brandUid
-     * @return array
      */
     private function getExpertiseForBrand(int $brandUid): array
     {

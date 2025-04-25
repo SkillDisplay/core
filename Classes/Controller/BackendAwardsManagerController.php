@@ -50,6 +50,7 @@ class BackendAwardsManagerController extends BackendController
         $award->setActive($award->getActive() == 1 ? 0 : 1);
         $this->rewardRepository->update($award);
 
+        /** @var DataHandler $dataHandler */
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start([
             'tx_skills_domain_model_reward_activation' => [
@@ -73,6 +74,7 @@ class BackendAwardsManagerController extends BackendController
         $reward->setDescription($description);
         $mainBrandId = DataHandlerHook::getDefaultBrandIdsOfBackendUser()[0] ?? 0;
 
+        /** @var Brand $brand */
         $brand = $this->brandRepository->findByUid($mainBrandId);
         $level = (int)$brand->getFirstCategory()->getDescription();
         $reward->setLevel($level);
@@ -80,7 +82,7 @@ class BackendAwardsManagerController extends BackendController
         $reward->setType('badge');
         $reward->setActive(1);
 
-        /** @var Brand $brand */
+        /** @var ?Brand $brand */
         $brand = $this->brandRepository->findByUid(DataHandlerHook::getDefaultBrandIdsOfBackendUser()[0] ?? 0);
         if ($brand) {
             $reward->setBrand($brand);

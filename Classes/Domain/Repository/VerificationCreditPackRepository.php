@@ -26,7 +26,6 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 class VerificationCreditPackRepository extends BaseRepository
 {
     /**
-     * @param Brand $organisation
      * @return VerificationCreditPack[]
      */
     public function findAvailable(Brand $organisation): array
@@ -45,6 +44,7 @@ class VerificationCreditPackRepository extends BaseRepository
             'validThru' => QueryInterface::ORDER_DESCENDING,
             'valuta' => QueryInterface::ORDER_ASCENDING,
         ]);
+        /** @var VerificationCreditPack[] $packs */
         $packs = $q->execute()->toArray();
 
         $q->matching(
@@ -56,7 +56,9 @@ class VerificationCreditPackRepository extends BaseRepository
             )
         );
 
-        return array_merge($packs, $q->execute()->toArray());
+        /** @var VerificationCreditPack[] $packs2 */
+        $packs2 = $q->execute()->toArray();
+        return array_merge($packs, $packs2);
     }
 
     public function getAvailableCredit(int $organisationId, ?DateTime $date = null): int
@@ -74,7 +76,7 @@ class VerificationCreditPackRepository extends BaseRepository
                     'valuta',
                     $qb->createNamedParameter($date ? $date->getTimestamp() : $now, Connection::PARAM_INT)
                 ),
-                $qb->expr()->orX(
+                $qb->expr()->or(
                     $qb->expr()->eq('valid_thru', $qb->createNamedParameter(0, Connection::PARAM_INT)),
                     $qb->expr()->gt(
                         'valid_thru',
@@ -106,11 +108,7 @@ class VerificationCreditPackRepository extends BaseRepository
         return (int)$result['points'];
     }
 
-    /**
-     * @param Brand $brand
-     * @return VerificationCreditPack[]|QueryResultInterface
-     */
-    public function findByBrand(Brand $brand): array|QueryResultInterface
+    public function findByBrand(Brand $brand): QueryResultInterface
     {
         $query = $this->createQuery();
         return $query->matching($query->equals('brand', $brand))->execute();

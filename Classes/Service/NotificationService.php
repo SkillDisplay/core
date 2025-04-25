@@ -24,12 +24,7 @@ class NotificationService implements SingletonInterface
     /** @var NotificationHandlerInterface[] */
     protected static array $handlers = [];
 
-    protected NotificationRepository $notificationRepository;
-
-    public function __construct(NotificationRepository $notificationRepository)
-    {
-        $this->notificationRepository = $notificationRepository;
-    }
+    public function __construct(protected NotificationRepository $notificationRepository) {}
 
     public static function registerHandler(string $type, NotificationHandlerInterface $handler): void
     {

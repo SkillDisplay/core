@@ -17,7 +17,8 @@ class ExportController extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this
             ->setDescription('Export a given list of SkillSets to a file')
@@ -38,12 +39,9 @@ class ExportController extends Command
 
     /**
      * Executes the command for adding the lock file
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $skillSets = $input->getArgument('skillSets');
         $targetFileName = $input->getOption('output');

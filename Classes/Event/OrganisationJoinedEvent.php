@@ -7,11 +7,11 @@ namespace SkillDisplay\Skills\Event;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\User;
 
-class OrganisationJoinedEvent
+readonly class OrganisationJoinedEvent
 {
     public function __construct(
-        private readonly Brand $organisation,
-        private readonly User $user
+        private Brand $organisation,
+        private User $user
     ) {}
 
     public function getOrganisation(): Brand

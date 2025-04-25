@@ -15,11 +15,13 @@ class RecordLabels implements SingletonInterface
     public function skill(array &$params): void
     {
         $row = BackendUtility::getRecord($params['table'], $params['row']['uid'], '*', '', false);
-        $partable = 'tx_skills_domain_model_tag';
-        $par = BackendUtility::getRecord($partable, $row['domain_tag'], '*', '', false);
-        $params['title'] = $row['title'];
-        if ($par) {
-            $params['title'] .= ' (' . BackendUtility::getRecordTitle($partable, $par) . ')';
+        if ($row) {
+            $partable = 'tx_skills_domain_model_tag';
+            $par = BackendUtility::getRecord($partable, $row['domain_tag'], '*', '', false);
+            $params['title'] = $row['title'];
+            if ($par) {
+                $params['title'] .= ' (' . BackendUtility::getRecordTitle($partable, $par) . ')';
+            }
         }
     }
 }

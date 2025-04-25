@@ -1,15 +1,12 @@
 ﻿*~
 *.bak
-*.map
 .DS_Store
+/.Build/
+/node_modules/
 /composer.lock
 /.php-cs-fixer.cache
 /.php-cs-fixer.php
-
-/.Build/
-/node_modules/
-
-# Sonar Lint
-.idea/sonarlint
+/.phpunit.result.cache
+/phpstan.neon
 
 /Resources/Private/MailTemplates/app.css

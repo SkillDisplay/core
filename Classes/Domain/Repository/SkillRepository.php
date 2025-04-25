@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
-use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -24,6 +23,7 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * The repository for Skills
+ * @extends BaseRepository<Skill>
  */
 class SkillRepository extends BaseRepository
 {
@@ -47,7 +47,7 @@ class SkillRepository extends BaseRepository
                 $qb->expr()->eq('s.sys_language_uid', 0)
             )
             ->orderBy('s.sorting')
-            ->execute()->fetchAllAssociative();
+            ->executeQuery()->fetchAllAssociative();
 
         if ($rows) {
             $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
@@ -86,16 +86,15 @@ class SkillRepository extends BaseRepository
     }
 
     /**
-     * @param string $searchWord
-     * @param array $organisationsOfUser
-     * @return Skill[]
+     * @param int[] $organisationsOfUser
+     * @phpstan-return list<Skill>
      * @throws InvalidQueryException
      */
     public function findBySearchWord(string $searchWord, array $organisationsOfUser): array
     {
         $q = $this->getQuery();
         $constraints = [];
-        $searchWords = str_getcsv($searchWord, ' ');
+        $searchWords = str_getcsv($searchWord, ' ', '"', '\\');
         $searchWords = array_filter($searchWords);
         foreach ($searchWords as $searchWord) {
             // escape SQL like special chars
@@ -125,7 +124,7 @@ class SkillRepository extends BaseRepository
      * returns conditions for the visibility of a skill
      *
      * @param QueryInterface $q
-     * @param Brand[] $organisationsOfUser
+     * @param int[] $organisationsOfUser
      * @return array
      */
     private function getVisibilityConditions(QueryInterface $q, array $organisationsOfUser): array
@@ -134,12 +133,9 @@ class SkillRepository extends BaseRepository
 
         $conditions[] = $q->equals('visibility', Skill::VISIBILITY_PUBLIC);
         if ($organisationsOfUser) {
-            $brandIds = array_map(function (Brand $b) {
-                return $b->getUid();
-            }, $organisationsOfUser);
             try {
                 $conditions[] = $q->logicalAnd(
-                    $q->in('brands.uid', $brandIds),
+                    $q->in('brands.uid', $organisationsOfUser),
                     $q->equals('visibility', Skill::VISIBILITY_ORGANISATION),
                 );
             } catch (InvalidQueryException) {

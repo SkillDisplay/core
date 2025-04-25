@@ -15,12 +15,14 @@ class CleanupController extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this->setDescription('Removes stale _mm records and removes invalid tag_mm records pointing to wrong languages.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
 

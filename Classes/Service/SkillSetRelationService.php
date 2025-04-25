@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service;
 
-use Doctrine\DBAL\Driver\Exception;
 use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -23,12 +22,11 @@ use SkillDisplay\Skills\Domain\Repository\RecommendedSkillSetRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use TYPO3\CMS\Core\Registry;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class SkillSetRelationService
 {
-    public const REGISTRY_SKILL_SETS = 'recommendationSetsToUpdate';
-    public const REGISTRY_USERS = 'recommendationUsersToUpdate';
+    public const string REGISTRY_SKILL_SETS = 'recommendationSetsToUpdate';
+    public const string REGISTRY_USERS = 'recommendationUsersToUpdate';
 
     public function __construct(
         protected readonly SkillPathRepository $skillSetRepository,
@@ -49,9 +47,6 @@ class SkillSetRelationService
         }
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     public function updateScoreWithSet(User $user, SkillPath $skillSet): void
     {
         $this->recommendedSkillSetRepository->deleteRecommendations($user->getUid(), $skillSet->getUid(), 0);
@@ -59,53 +54,44 @@ class SkillSetRelationService
 
         $setsWithOverlap = $this->skillSetRepository->findOverlappingSets($skillSet, UserOrganisationsService::getOrganisationsOrEmpty($user));
         if ($setsWithOverlap->count()) {
-            $this->calculateScoreWithRelatedSets($skillSet, $user, $setsWithOverlap);
+            $this->calculateScoreWithRelatedSets($skillSet, $user->getUid(), $setsWithOverlap);
             /** @var SkillPath $sourceSet */
             foreach ($setsWithOverlap as $sourceSet) {
-                $this->calculateScoreWithRelatedSets($sourceSet, $user, [$skillSet]);
+                $this->calculateScoreWithRelatedSets($sourceSet, $user->getUid(), [$skillSet]);
             }
         }
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     public function calculateScoresBySourceSet(User $user, SkillPath $skillSet): void
     {
         $this->recommendedSkillSetRepository->deleteRecommendations($user->getUid(), $skillSet->getUid(), 0);
 
         $setsWithOverlap = $this->skillSetRepository->findOverlappingSets($skillSet, UserOrganisationsService::getOrganisationsOrEmpty($user));
         if ($setsWithOverlap->count()) {
-            $this->calculateScoreWithRelatedSets($skillSet, $user, $setsWithOverlap);
+            $this->calculateScoreWithRelatedSets($skillSet, $user->getUid(), $setsWithOverlap);
         }
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     public function calculateByUser(User $user): void
     {
         $this->recommendedSkillSetRepository->deleteRecommendations($user->getUid(), 0, 0);
 
-        $organisationsOfUser = UserOrganisationsService::getOrganisationsOrEmpty($user);
-        $skillSets = $this->skillSetRepository->findAllVisible($organisationsOfUser);
+        $skillSets = $this->skillSetRepository->findAllVisible(UserOrganisationsService::getOrganisationsOrEmpty($user));
         foreach ($skillSets as $skillSet) {
             $this->calculateScoresBySourceSet($user, $skillSet);
         }
     }
 
-    private function calculateScoreWithRelatedSets(SkillPath $skillSet, User $user, $setsWithOverlap): void
+    private function calculateScoreWithRelatedSets(SkillPath $skillSet, int $userId, $setsWithOverlap): void
     {
         $verifications = $this->certificationRepository->findByGrantDateAndBrandsAndSkillSets(
             null,
             null,
             [],
             [$skillSet],
-            $user
+            $userId
         );
-        $completedSkillIds = array_map(function (Certification $c) {
-            return $c->getSkill()->getUid();
-        }, $verifications->toArray());
+        $completedSkillIds = array_map(fn(Certification $c) => $c->getSkill()->getUid(), $verifications->toArray());
         $completedSkillIds = array_unique($completedSkillIds);
         $allSkillIds = $skillSet->getSkillIds();
         $missingSkillIds = array_diff($allSkillIds, $completedSkillIds);
@@ -126,9 +112,9 @@ class SkillSetRelationService
                     $jaccard = (float)$intersectCount / $mergeCount;
                     $this->recommendedSkillSetRepository->insertForSkillSet(
                         $type['type'],
-                        $user,
-                        $skillSet,
-                        $relatedSet,
+                        $userId,
+                        $skillSet->getUid(),
+                        $relatedSet->getUid(),
                         $jaccard * $relatedSet->getPopularityLog2(),
                         $jaccard
                     );
@@ -137,10 +123,6 @@ class SkillSetRelationService
         }
     }
 
-    /**
-     * @throws InvalidQueryException
-     * @throws Exception
-     */
     public function calculateForSkill(User $user, Skill $skill): void
     {
         $this->recommendedSkillSetRepository->deleteForSkill($user, $skill);
@@ -151,9 +133,7 @@ class SkillSetRelationService
         }
 
         $verifications = $this->certificationRepository->findBySkillsAndUser([$skill], $user, false);
-        $completedSkillIds = array_map(function (Certification $c) {
-            return $c->getSkill()->getUid();
-        }, $verifications->toArray());
+        $completedSkillIds = array_map(fn(Certification $c) => $c->getSkill()->getUid(), $verifications->toArray());
         $completedSkillIds = array_unique($completedSkillIds);
         $allSkillIds = [$skill->getUid()];
         $missingSkillIds = array_diff($allSkillIds, $completedSkillIds);

@@ -20,52 +20,76 @@ use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use TYPO3\CMS\Core\Cache\CacheManager;
-use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
+use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
-use TYPO3\CMS\Extbase\Domain\Model\FrontendUser;
+use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Service\ImageService;
 
-class User extends FrontendUser implements JsonSerializable
+class User extends AbstractEntity implements JsonSerializable
 {
-    public const JsonUserViewConfiguration = [
+    public const array JsonUserViewConfiguration = [
         '_only' => [
             'uid', 'firstName', 'lastName', 'email', 'userAvatar',
         ],
     ];
 
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         'managedOrganizations' => [
             '_descendAll' => Brand::JsonViewConfiguration,
         ],
     ];
 
-    protected bool $disable = false;
+    protected string $username = '';
+    protected string $password = '';
 
     /**
-     * @Validate("NotEmpty")
+     * @var ObjectStorage<FrontendUserGroup>
      */
+    protected ObjectStorage $usergroup;
+
+    protected string $name = '';
+    protected string $firstName = '';
+    protected string $middleName = '';
+    protected string $lastName = '';
+    protected string $address = '';
+    protected string $telephone = '';
+    protected string $fax = '';
+    protected string $email = '';
+    protected string $title = '';
+    protected string $zip = '';
+    protected string $city = '';
+    protected string $country = '';
+    protected string $www = '';
+    protected string $company = '';
+
+    /**
+     * @var ObjectStorage<FileReference>
+     */
+    protected ObjectStorage $image;
+
+    protected ?DateTime $lastlogin = null;
+
+    #[Validate(['validator' => 'NotEmpty'])]
     protected bool $publishSkills = false;
 
-    /**
-     * virtual not stored
-     */
+    #[Transient]
     protected string $passwordRepeat = '';
+    #[Transient]
+    protected bool $terms = false;
 
-    /** @var bool */
+    protected bool $disable = false;
     protected bool $newsletter = false;
 
-    /**
-     * @Cascade("remove")
-     */
+    #[Cascade(['value' => 'remove'])]
     protected ?FileReference $avatar = null;
 
     /** @var ObjectStorage<Certifier> */
@@ -74,26 +98,21 @@ class User extends FrontendUser implements JsonSerializable
     /**
      * Brands the user is a manager for.
      *
-     * @var ObjectStorage<Brand>
-     * @Lazy
+     * @var ObjectStorage<Brand>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $managedBrands;
 
     /**
      * Brands the user is member of
      *
-     * @var ObjectStorage<Brand>
-     * @Lazy
+     * @var ObjectStorage<Brand>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $organisations;
 
     protected bool $mailPush = false;
     protected string $mailLanguage = 'en';
-
-    /**
-     * virtual property
-     */
-    protected bool $terms = false;
     protected string $linkedin = '';
     protected string $xing = '';
     protected string $github = '';
@@ -110,10 +129,16 @@ class User extends FrontendUser implements JsonSerializable
 
     public function __construct()
     {
-        parent::__construct();
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
+    {
         $this->favouriteCertifiers = new ObjectStorage();
         $this->managedBrands = new ObjectStorage();
         $this->organisations = new ObjectStorage();
+        $this->usergroup = new ObjectStorage();
+        $this->image = new ObjectStorage();
     }
 
     public function getPendingCertifications(): array
@@ -161,6 +186,7 @@ class User extends FrontendUser implements JsonSerializable
      * which is a value of any type other than a resource.
      * @since 5.4.0
      */
+    #[\Override]
     public function jsonSerialize(): array
     {
         return $this->toJsonData();
@@ -249,15 +275,10 @@ class User extends FrontendUser implements JsonSerializable
         return $this->avatar;
     }
 
-    /**
-     * Returns the avatar
-     *
-     * @return FileReference|File
-     */
-    public function getAvatar(): File|FileReference
+    public function getAvatar()
     {
-        if (!$this->avatar || !$this->avatar->getOriginalResource()) {
-            $placeholder = PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName('EXT:skills/Resources/Public/Images/anonymoususer.png'));
+        if (!$this->avatar) {
+            $placeholder = PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName('EXT:skills/Resources/Public/Images/anonymoususer1.png'));
             return GeneralUtility::makeInstance(ResourceFactory::class)->getFileObjectFromCombinedIdentifier($placeholder);
         }
         return $this->avatar;
@@ -304,7 +325,7 @@ class User extends FrontendUser implements JsonSerializable
         return $stats;
     }
 
-    public function setAvatar(FileReference $avatar = null): void
+    public function setAvatar(?FileReference $avatar = null): void
     {
         $this->avatar = $avatar;
     }
@@ -321,7 +342,7 @@ class User extends FrontendUser implements JsonSerializable
 
     public function setUsername($username): void
     {
-        parent::setUsername($username);
+        $this->username = $username;
         $this->setEmail($username);
     }
 
@@ -550,8 +571,9 @@ class User extends FrontendUser implements JsonSerializable
 
     public function isCertifier(): bool
     {
-        $count = GeneralUtility::makeInstance(CertifierRepository::class)->countByUser($this);
-        return $count > 0;
+        /** @var CertifierRepository $repo */
+        $repo = GeneralUtility::makeInstance(CertifierRepository::class);
+        return $repo->count(['user' => $this]) > 0;
     }
 
     public function isLocked(): bool
@@ -641,5 +663,222 @@ class User extends FrontendUser implements JsonSerializable
             ];
         }
         return $data;
+    }
+
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    /**
+     * Sets the usergroups. Keep in mind that the property is called "usergroup"
+     * although it can hold several usergroups.
+     *
+     * @param ObjectStorage<FrontendUserGroup> $usergroup
+     */
+    public function setUsergroup(ObjectStorage $usergroup): void
+    {
+        $this->usergroup = $usergroup;
+    }
+
+    public function addUsergroup(FrontendUserGroup $usergroup): void
+    {
+        $this->usergroup->attach($usergroup);
+    }
+
+    public function removeUsergroup(FrontendUserGroup $usergroup): void
+    {
+        $this->usergroup->detach($usergroup);
+    }
+
+    /**
+     * Returns the usergroups. Keep in mind that the property is called "usergroup"
+     * although it can hold several usergroups.
+     *
+     * @return ObjectStorage<FrontendUserGroup> An object storage containing the usergroup
+     */
+    public function getUsergroup(): ObjectStorage
+    {
+        return $this->usergroup;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setFirstName(string $firstName): void
+    {
+        $this->firstName = $firstName;
+    }
+
+    public function getFirstName(): string
+    {
+        return $this->firstName;
+    }
+
+    public function setMiddleName(string $middleName): void
+    {
+        $this->middleName = $middleName;
+    }
+
+    public function getMiddleName(): string
+    {
+        return $this->middleName;
+    }
+
+    public function setLastName(string $lastName): void
+    {
+        $this->lastName = $lastName;
+    }
+
+    public function getLastName(): string
+    {
+        return $this->lastName;
+    }
+
+    public function setAddress(string $address): void
+    {
+        $this->address = $address;
+    }
+
+    public function getAddress(): string
+    {
+        return $this->address;
+    }
+
+    public function setTelephone(string $telephone): void
+    {
+        $this->telephone = $telephone;
+    }
+
+    public function getTelephone(): string
+    {
+        return $this->telephone;
+    }
+
+    public function setFax(string $fax): void
+    {
+        $this->fax = $fax;
+    }
+
+    public function getFax(): string
+    {
+        return $this->fax;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function setZip(string $zip): void
+    {
+        $this->zip = $zip;
+    }
+
+    public function getZip(): string
+    {
+        return $this->zip;
+    }
+
+    public function setCity(string $city): void
+    {
+        $this->city = $city;
+    }
+
+    public function getCity(): string
+    {
+        return $this->city;
+    }
+
+    public function setCountry(string $country): void
+    {
+        $this->country = $country;
+    }
+
+    public function getCountry(): string
+    {
+        return $this->country;
+    }
+
+    public function setWww(string $www): void
+    {
+        $this->www = $www;
+    }
+
+    public function getWww(): string
+    {
+        return $this->www;
+    }
+
+    public function setCompany(string $company): void
+    {
+        $this->company = $company;
+    }
+
+    public function getCompany(): string
+    {
+        return $this->company;
+    }
+
+    /**
+     * Sets the image value
+     *
+     * @param ObjectStorage<FileReference> $image
+     */
+    public function setImage(ObjectStorage $image): void
+    {
+        $this->image = $image;
+    }
+
+    /**
+     * Gets the image value
+     *
+     * @return ObjectStorage<FileReference>
+     */
+    public function getImage(): ObjectStorage
+    {
+        return $this->image;
+    }
+
+    public function setLastlogin(DateTime $lastlogin): void
+    {
+        $this->lastlogin = $lastlogin;
+    }
+
+    public function getLastlogin(): ?DateTime
+    {
+        return $this->lastlogin;
     }
 }

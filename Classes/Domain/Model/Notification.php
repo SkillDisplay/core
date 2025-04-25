@@ -17,10 +17,10 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Notification extends AbstractEntity
 {
-    public const TYPE_VERIFICATION_GRANTED = 'VERIFICATION_GRANTED';
-    public const TYPE_VERIFICATION_REVOKED = 'VERIFICATION_REVOKED';
-    public const TYPE_VERIFICATION_REJECTED = 'VERIFICATION_REJECTED';
-    public const TYPE_VERIFICATION_REQUESTED = 'VERIFICATION_REQUESTED';
+    public const string TYPE_VERIFICATION_GRANTED = 'VERIFICATION_GRANTED';
+    public const string TYPE_VERIFICATION_REVOKED = 'VERIFICATION_REVOKED';
+    public const string TYPE_VERIFICATION_REJECTED = 'VERIFICATION_REJECTED';
+    public const string TYPE_VERIFICATION_REQUESTED = 'VERIFICATION_REQUESTED';
 
     protected int $crdate = 0;
     protected ?User $user = null;
@@ -28,7 +28,7 @@ class Notification extends AbstractEntity
     protected string $reference = '';
     protected string $message = '';
 
-    public const ApiJsonViewConfiguration = [
+    public const array ApiJsonViewConfiguration = [
         '_only' => [
             'uid',
             'crdate',

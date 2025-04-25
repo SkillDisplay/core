@@ -20,14 +20,10 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Link extends AbstractEntity
 {
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $title = '';
 
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $url = '';
     protected string $color = '';
     protected int $tstamp = 0;
@@ -74,7 +70,7 @@ class Link extends AbstractEntity
     {
         $link = [
             'uuid' => $this->uuid,
-            'type' => get_class($this),
+            'type' => static::class,
             'uid' => $this->getUid(),
 
             'data' => [

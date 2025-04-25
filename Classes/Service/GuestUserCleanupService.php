@@ -27,11 +27,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class GuestUserCleanupService
 {
-    public const TIME_LIMIT = '-14 days';
+    public const string TIME_LIMIT = '-14 days';
 
     protected SessionBackendInterface $sessionBackend;
 
-    private DateTimeImmutable $limit;
+    private readonly DateTimeImmutable $limit;
 
     private array $toDelete = [];
 
@@ -161,7 +161,6 @@ class GuestUserCleanupService
         /** @var DataHandler $tce */
         $tce = GeneralUtility::makeInstance(DataHandler::class);
         $tce->dontProcessTransformations = true;
-        $tce->checkSimilar = false;
         $tce->start([], $cmd);
 
         return $tce;

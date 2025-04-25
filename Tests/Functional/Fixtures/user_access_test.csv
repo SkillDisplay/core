@@ -1,0 +1,48 @@
+fe_users
+,uid,tx_extbase_type,pid,username,password,first_name,last_name,email,publish_skills,verifiers,mail_push
+,1,Tx_Skills_User,4,muster,Something,Max,Muster,max@muster.at,1,1,
+,2,Tx_Skills_User,4,muster2,Something,Max,Muster,max2@muster.at,1,1,0
+
+tx_skills_domain_model_brand
+,uid,pid,name,description,logo,url,members,credit_overdraw
+,1,3,Skilldisplay,lorem ipsum,1,https://www.skilldisplay.eu,1,1
+
+tx_skills_user_organisation_mm
+,uid_local,uid_foreign
+,1,1
+
+tx_skills_domain_model_skillpath
+,uid,pid,name,brands,skills,visibility
+,1,3,CMS Certified Developer 9,1,1,1
+,2,3,CMS Certified Developer 10,1,1,0
+
+tx_skills_skillset_brand_mm
+,uid_local,uid_foreign
+,1,1
+,2,1
+
+tx_skills_domain_model_skill
+,uid,pid,title,goals,description,brands,visibility
+,1,3,TestSkill1,lorem ipsuum,lorem ipsum,1,1
+,2,3,TestSkill2,lorem ipsuum,lorem ipsum,1,0
+
+tx_skills_skill_brand_mm
+,uid_local,uid_foreign,sorting
+,1,1,2
+,2,1,2
+
+tx_skills_skillpath_skill_mm
+,uid_local,uid_foreign
+,1,1
+,1,2
+
+tx_skills_domain_model_certification
+,uid,pid,tier1,tier2,tier3,tier4,grant_date,skill,user,certifier,brand,revoke_reason,comment
+,1,3,1,0,0,0,2019-06-23 03:48:35,1,1,0,1,,
+,2,3,1,0,0,0,2019-06-23 03:48:35,2,1,0,1,,
+,3,3,1,0,0,0,2019-06-23 03:48:35,1,2,0,1,none,my username on platform X is g0nE
+,4,3,1,0,0,0,2019-06-23 03:48:35,2,2,1,1,,
+
+tx_skills_domain_model_certifier
+,uid,pid,user,brand,permissions
+,1,3,1,1,1

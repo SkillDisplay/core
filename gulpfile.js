@@ -53,8 +53,8 @@ let Tasks = {
 
     let res = gulp
       .src(Tasks.sources.css)
-      .pipe(sass({
-        includePaths: scssPaths
+      .pipe(sass.sync({
+        loadPaths: scssPaths
       }).on('error', sass.logError));
 
     if (!Tasks.devContext) {
@@ -70,8 +70,8 @@ let Tasks = {
     // Compile Sass into CSS
     sass: function () {
       return gulp.src('Resources/Private/MailTemplatesSrc/scss/app.scss')
-        .pipe(sass({
-          includePaths: ['node_modules/foundation-emails/scss']
+        .pipe(sass.sync({
+          loadPaths: ['node_modules/foundation-emails/scss']
         }).on('error', sass.logError))
         .pipe(uncss({
             html: [Tasks.mail.dest + '/**/*.html']

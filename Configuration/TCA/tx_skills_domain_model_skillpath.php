@@ -3,7 +3,6 @@
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Hook\SkillsProcFunc;
 use TYPO3\CMS\Core\Resource\File;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 
 return [
     'ctrl' => [
@@ -11,7 +10,6 @@ return [
         'label' => 'name',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'cruser_id' => 'cruser_id',
         'languageField' => 'sys_language_uid',
         'transOrigPointerField' => 'l10n_parent',
         'transOrigDiffSourceField' => 'l10n_diffsource',
@@ -51,7 +49,7 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['', 0],
+                    ['label' => '', 'value' => 0],
                 ],
                 'foreign_table' => 'tx_skills_domain_model_skillpath',
                 'foreign_table_where' => 'AND tx_skills_domain_model_skillpath.pid=###CURRENT_PID### AND tx_skills_domain_model_skillpath.sys_language_uid IN (-1,0)',
@@ -69,7 +67,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                    ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 0,
             ],
@@ -78,9 +76,7 @@ return [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.starttime',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
-                'eval' => 'datetime',
+                'type' => 'datetime',
                 'default' => 0,
                 'behaviour' => [
                     'allowLanguageSynchronization' => true,
@@ -91,9 +87,7 @@ return [
             'exclude' => true,
             'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.endtime',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
-                'eval' => 'datetime',
+                'type' => 'datetime',
                 'default' => 0,
                 'behaviour' => [
                     'allowLanguageSynchronization' => true,
@@ -107,7 +101,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'path_segment' => [
@@ -135,57 +130,57 @@ return [
                 'type' => 'text',
                 'cols' => 40,
                 'rows' => 15,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
                 'enableRichtext' => true,
+                'required' => true,
             ],
         ],
         'media' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.media',
-            'config' => ExtensionManagementUtility::getFileFieldTCAConfig(
-                'media',
-                [
-                    'appearance' => [
-                        'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
-                    ],
-                    'overrideChildTca' => [
-                        'types' => [
-                            0 => [
-                                'showitem' => '
+            'config' => [
+                //## !!! Watch out for fieldName different from columnName
+                'type' => 'file',
+                'allowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'],
+                'appearance' => [
+                    'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
+                ],
+                'overrideChildTca' => [
+                    'types' => [
+                        0 => [
+                            'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                                 --palette--;;filePalette',
-                            ],
-                            File::FILETYPE_TEXT => [
-                                'showitem' => '
+                        ],
+                        File::FILETYPE_TEXT => [
+                            'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                                 --palette--;;filePalette',
-                            ],
-                            File::FILETYPE_IMAGE => [
-                                'showitem' => '
+                        ],
+                        File::FILETYPE_IMAGE => [
+                            'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                                 --palette--;;filePalette',
-                            ],
-                            File::FILETYPE_AUDIO => [
-                                'showitem' => '
+                        ],
+                        File::FILETYPE_AUDIO => [
+                            'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                                 --palette--;;filePalette',
-                            ],
-                            File::FILETYPE_VIDEO => [
-                                'showitem' => '
+                        ],
+                        File::FILETYPE_VIDEO => [
+                            'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                                 --palette--;;filePalette',
-                            ],
-                            File::FILETYPE_APPLICATION => [
-                                'showitem' => '
+                        ],
+                        File::FILETYPE_APPLICATION => [
+                            'showitem' => '
                                 --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                                 --palette--;;filePalette',
-                            ],
                         ],
                     ],
-                    'maxitems' => 999,
                 ],
-                $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-            ),
+                'maxitems' => 999,
+            ],
         ],
         'brands' => [
             'exclude' => false,
@@ -228,11 +223,10 @@ return [
             'l10n_mode' => 'exclude',
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.legitimation_date',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'size' => 15,
-                'eval' => 'date',
                 'default' => 0,
+                'format' => 'date',
             ],
         ],
         'skills' => [
@@ -284,11 +278,9 @@ return [
             'exclude' => true,
             'label' => 'Imported on',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'size' => 12,
-                'eval' => 'datetime',
-                'default' => '0',
+                'default' => 0,
                 'readOnly' => true,
             ],
         ],
@@ -299,10 +291,6 @@ return [
                 'type' => 'group',
                 'allowed' => 'sys_file',
                 'foreign_table' => 'sys_file',
-                'appearance' => [
-                    'elementBrowserAllowed' => 'pdf',
-                    'elementBrowserType' => 'file',
-                ],
                 'size' => 1,
                 'maxitems' => 1,
                 'minitems' => 0,
@@ -313,15 +301,8 @@ return [
             'exclude' => true,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.certificate_link',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputLink',
+                'type' => 'link',
                 'size' => 30,
-                'max' => 100,
-                'eval' => 'trim',
-                'softref' => 'typolink',
-                'fieldControl' => [
-                    'linkPopup' => [],
-                ],
             ],
         ],
         'certificate_layout_file' => [
@@ -331,10 +312,6 @@ return [
                 'type' => 'group',
                 'allowed' => 'sys_file',
                 'foreign_table' => 'sys_file',
-                'appearance' => [
-                    'elementBrowserAllowed' => 'html',
-                    'elementBrowserType' => 'file',
-                ],
                 'fieldWizard' => ['recordsOverview' => ['disabled' => true]],
                 'size' => 1,
                 'maxitems' => 1,
@@ -350,9 +327,9 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.public', SkillPath::VISIBILITY_PUBLIC],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.members', SkillPath::VISIBILITY_ORGANISATION],
-                    ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.link', SkillPath::VISIBILITY_LINK],
+                    ['label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.public', 'value' => SkillPath::VISIBILITY_PUBLIC],
+                    ['label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.members', 'value' => SkillPath::VISIBILITY_ORGANISATION],
+                    ['label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_skillpath.visibility.link', 'value' => SkillPath::VISIBILITY_LINK],
                 ],
                 'default' => SkillPath::VISIBILITY_ORGANISATION,
             ],

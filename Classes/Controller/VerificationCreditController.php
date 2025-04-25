@@ -36,7 +36,7 @@ class VerificationCreditController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user || !$user->getManagedBrands()->contains($organisation)) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 8676857181);
         }
 
         $this->verificationService->setCreditSettings($this->settings['credits']);
@@ -73,8 +73,9 @@ class VerificationCreditController extends AbstractController
     {
         $user = $this->getCurrentUser(false, $apiKey);
         if (!$user || !$user->getManagedBrands()->contains($organisation)) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 8649879778);
         }
+        /** @var VerificationCreditPack[] $packs */
         $packs = [];
         if ($organisation) {
             $packs = $this->verificationCreditPackRepository->findByBrand($organisation)->toArray();

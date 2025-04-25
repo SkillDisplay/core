@@ -18,7 +18,7 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class VerificationCreditPack extends AbstractEntity
 {
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid',
             'title',

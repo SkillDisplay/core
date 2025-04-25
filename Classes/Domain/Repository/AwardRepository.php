@@ -48,7 +48,7 @@ class AwardRepository extends BaseRepository
             )
         );
         $q->setOrderings(['rank' => QueryInterface::ORDER_DESCENDING]);
-        /** @var Award $member */
+        /** @var ?Award $member */
         $member = $q->execute()->getFirst();
 
         $q = $this->createQuery();

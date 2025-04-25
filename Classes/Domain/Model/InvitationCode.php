@@ -17,15 +17,13 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class InvitationCode extends AbstractEntity
 {
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $code = '';
     protected ?Brand $brand = null;
     protected ?DateTime $expires = null;
     protected ?User $createdBy = null;
     protected ?User $usedBy = null;
-    protected ?DateTime $usedAt;
+    protected ?DateTime $usedAt = null;
 
     public function getCode(): string
     {

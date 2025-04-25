@@ -48,9 +48,6 @@
 			<trans-unit id="brand.show.back" resname="brand.show.back">
 				<source>Back to partner listing</source>
 			</trans-unit>
-			<trans-unit id="brand.show.news" resname="brand.show.news">
-				<source>News</source>
-			</trans-unit>
 			<trans-unit id="brand.show.number_of_verifications" resname="brand.show.number_of_verifications">
 				<source>Number of verifications issued:</source>
 			</trans-unit>

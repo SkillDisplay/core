@@ -25,7 +25,7 @@ class GrantedReward extends AbstractEntity
     protected bool $selectedByUser = false;
     protected int $positionIndex = 0;
 
-    public const ApiJsonViewConfiguration = [
+    public const array ApiJsonViewConfiguration = [
         '_only' => [
             'uid', 'positionIndex', 'reward',
         ],
@@ -44,7 +44,7 @@ class GrantedReward extends AbstractEntity
         $this->selectedByUser = $selectedByUser;
     }
 
-    public function getReward(): Reward
+    public function getReward(): ?Reward
     {
         return $this->reward;
     }
@@ -54,7 +54,7 @@ class GrantedReward extends AbstractEntity
         $this->reward = $reward;
     }
 
-    public function getUser(): User
+    public function getUser(): ?User
     {
         return $this->user;
     }
@@ -69,7 +69,7 @@ class GrantedReward extends AbstractEntity
         return $this->validUntil;
     }
 
-    public function setValidUntil(DateTime $validUntil = null): void
+    public function setValidUntil(?DateTime $validUntil = null): void
     {
         $this->validUntil = $validUntil;
     }

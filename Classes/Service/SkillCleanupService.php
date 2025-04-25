@@ -133,7 +133,6 @@ readonly class SkillCleanupService
         $dataHandler->isImporting = true;
         $dataHandler->enableLogging = false;
         $dataHandler->dontProcessTransformations = true;
-        $dataHandler->checkSimilar = false;
 
         $dataHandler->start([], $cmd);
 
@@ -148,13 +147,13 @@ readonly class SkillCleanupService
      * @param int $key
      * @param callable|null $handleChildren
      */
-    private function fetchAndDeleteNestedData(string $table, string $column, int $key, callable $handleChildren = null): void
+    private function fetchAndDeleteNestedData(string $table, string $column, int $key, ?callable $handleChildren = null): void
     {
         $result = $this->fetchNestedData($table, $column, $key, $handleChildren);
         $this->deleteWithDataHandler($table, $result);
     }
 
-    private function fetchNestedData(string $table, string $column, int $key, callable $handleChildren = null): array
+    private function fetchNestedData(string $table, string $column, int $key, ?callable $handleChildren = null): array
     {
         /** @var QueryBuilder $qb */
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)

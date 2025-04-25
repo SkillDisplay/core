@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 /**
  * This file is part of the "Skill Display" Extension for TYPO3 CMS.
  *
@@ -12,26 +13,21 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\ViewHelpers;
 
-use Closure;
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 class InArrayViewHelper extends AbstractViewHelper
 {
-    use CompileWithRenderStatic;
-
-    public function initializeArguments()
+    public function initializeArguments(): void
     {
         parent::initializeArguments();
         $this->registerArgument('needle', 'mixed', '', true);
         $this->registerArgument('haystack', 'array', '', true);
     }
 
-    public static function renderStatic(array $arguments, Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
+    public function render(): bool
     {
-        $needle = $arguments['needle'];
-        $haystack = $arguments['haystack'];
+        $needle = (string)$this->arguments['needle'];
+        $haystack = (array)$this->arguments['haystack'];
         return in_array($needle, $haystack);
     }
 }

@@ -18,10 +18,12 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Domain\Model\Brand;
+use SkillDisplay\Skills\Domain\Model\Campaign;
 use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
+use SkillDisplay\Skills\Domain\Model\VerificationCreditUsage;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\CampaignRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
@@ -33,9 +35,6 @@ use SkillDisplay\Skills\Domain\Repository\VerificationCreditPackRepository;
 use SkillDisplay\Skills\Domain\Repository\VerificationCreditUsageRepository;
 use SkillDisplay\Skills\Service\VerificationService;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class CertificationController extends AbstractController
 {
@@ -58,7 +57,7 @@ class CertificationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 8903810176);
         }
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -71,8 +70,8 @@ class CertificationController extends AbstractController
         $verificationOwner = $verification->getUser();
         $userIsVerifier = $verification->getCertifier() && $user === $verification->getCertifier()->getUser();
 
-        $group = $verification->getRequestGroup();
         $verificationJson = $verification->toJsonData($userIsVerifier, !$userIsVerifier && $user !== $verificationOwner);
+        $group = $verification->getRequestGroup();
         if ($group) {
             $certs = $this->certificationRepository->findByRequestGroup($group)->toArray();
             /** @var Certification $cert */
@@ -106,7 +105,7 @@ class CertificationController extends AbstractController
     }
 
     /**
-     * note: no type annotation for $verifications since it can be array|Objectstorage but extbase can't deal with it
+     * note: no type annotation for $verifications since it can be array|ObjectStorage but extbase can't deal with it
      *
      * @param array $verifications
      * @param bool $accept
@@ -114,9 +113,6 @@ class CertificationController extends AbstractController
      * @param bool $revoke
      * @param string $reason
      * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws InvalidQueryException
-     * @throws UnknownObjectException
      */
     public function modifyAction(
         $verifications,
@@ -127,11 +123,11 @@ class CertificationController extends AbstractController
     ): ResponseInterface {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 7108249656);
         }
 
         if (!($accept xor $decline xor $revoke)) {
-            throw new InvalidArgumentException('Wrong arguments. You need to define exactly 1 action.');
+            throw new InvalidArgumentException('Wrong arguments. You need to define exactly 1 action.', 7106791197);
         }
 
         $this->verificationService->setCreditSettings($this->settings['credits']);
@@ -143,7 +139,7 @@ class CertificationController extends AbstractController
         $certObjects = [];
         $verification = null;
         foreach ($verifications as $verificationId) {
-            /** @var Certification $verification */
+            /** @var ?Certification $verification */
             $verification = $this->certificationRepository->findByUid($verificationId);
             if (!$verification) {
                 $errorMessage = 'Invalid verification ID ' . $verificationId;
@@ -193,11 +189,11 @@ class CertificationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 8325379366);
         }
         $success = true;
-        /** @var Certification $certification */
         foreach ($verifications as $certificationId) {
+            /** @var ?Certification $certification */
             $certification = $this->certificationRepository->findByUid($certificationId);
             if ($certification) {
                 if ($certification->getUser()->getUid() === $user->getUid()) {
@@ -207,7 +203,7 @@ class CertificationController extends AbstractController
                     break;
                 }
             } else {
-                throw new InvalidArgumentException('Given certification id is invalid:' . $certificationId);
+                throw new InvalidArgumentException('Given certification id is invalid:' . $certificationId, 3420227456);
             }
         }
 
@@ -254,7 +250,7 @@ class CertificationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 3543270713);
         }
         $groups = $this->certificationRepository->findPendingByCertifierUser($user, 5);
 
@@ -277,14 +273,13 @@ class CertificationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 4155755648);
         }
         $verifications = [];
 
         if ($verifier->getUser() && $verifier->getUser()->getUid() === $user->getUid()) {
             $groups = $this->certificationRepository->findByCertifier($verifier);
             $verifications = static::convertGroupsToJson($groups);
-            /** @var VerificationService $verificationService */
             $this->verificationService->setCreditSettings($this->settings['credits']);
 
             foreach ($verifications as &$request) {
@@ -294,6 +289,7 @@ class CertificationController extends AbstractController
                     $certs = [$this->certificationRepository->findByUid($request['uid'])];
                 }
                 $neededPoints = $this->verificationService->calculatePointsNeeded($certs);
+                /** @var Brand $organisation */
                 $organisation = $this->brandRepository->findByUid((int)$request['brandId']);
                 $request['canBeAccepted'] = $certs[0]->isPending() && ($organisation->getCreditOverdraw() ||
                         $this->verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));
@@ -317,7 +313,7 @@ class CertificationController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user || !$user->getManagedBrands()->contains($organisation)) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 2694705601);
         }
         $groups = $this->certificationRepository->findAcceptedByOrganisation($organisation, new DateTime('@0'), new DateTime());
         $usages = [];
@@ -332,11 +328,12 @@ class CertificationController extends AbstractController
                 $points += $cert->getPoints();
                 $price += $cert->getPrice();
             }
-            if ($cert) {
+            if (isset($cert)) {
                 $billingDate = $cert->getGrantDate();
                 $creditUsages = $this->verificationCreditUsageRepository->findByVerification($cert)->toArray();
                 if (count($creditUsages) > 0) {
                     $fullySettled = true;
+                    /** @var VerificationCreditUsage $usage */
                     foreach ($creditUsages as $usage) {
                         $pack = $usage->getCreditPack();
                         if ($pack->getInitialPoints() > 0) {
@@ -373,7 +370,7 @@ class CertificationController extends AbstractController
     {
         $user = $this->getCurrentUser(false, $apiKey);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 5955638498);
         }
         $groups = $this->certificationRepository->findByUser($user);
         $verifications = static::convertGroupsToJson($groups);
@@ -392,7 +389,7 @@ class CertificationController extends AbstractController
         return $this->createResponse();
     }
 
-    public function createAction(string $apiKey): ResponseInterface
+    public function createAction(string $apiKey = ''): ResponseInterface
     {
         $response = [
             'Version' => '1.0',
@@ -409,22 +406,9 @@ class CertificationController extends AbstractController
             $this->view->setConfiguration($configuration);
         }
 
-        if ($apiKey === '') {
-            $response['ErrorMessage'] = 'Missing API key';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
-
         $postData = file_get_contents('php://input');
         if ($postData === '') {
             $response['ErrorMessage'] = 'No data sent';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
-
-        $userOfRequest = $this->getCurrentUser(false, $apiKey);
-        if (!$userOfRequest) {
-            $response['ErrorMessage'] = 'Invalid API key';
             $this->view->assignMultiple($response);
             return $this->createResponse();
         }
@@ -438,87 +422,73 @@ class CertificationController extends AbstractController
         $username = $data['Username'] ?? '';
         $autoConfirm = $data['AutoConfirm'] ?? false;
         $campaignId = $data['CampaignId'] ?? null;
-
-        if ($signatureFromClient === '') {
-            $response['ErrorMessage'] = 'Missing signature';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
-        if ($skillId === 0 && $skillSetId === 0) {
-            $response['ErrorMessage'] = 'No skill or skillset given';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
         $tier = Skill::LevelTierMap[$level] ?? 0;
-        if (!$tier) {
-            $response['ErrorMessage'] = 'Invalid level';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
-        if ($verifierId === 0 && $level !== 'self') {
-            $response['ErrorMessage'] = 'Missing verifierId';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
 
-        /** @var Certifier $verifier */
-        $verifier = null;
-        $secret = 'sdself';
-        if ($level !== 'self') {
-            $verifier = $this->certifierRepository->findByUid($verifierId);
-            if (!$verifier) {
-                $response['ErrorMessage'] = 'Invalid verifier';
-                $this->view->assignMultiple($response);
-                return $this->createResponse();
+        $userOfRequest = $this->getCurrentUser(false, $apiKey);
+
+        $isUserByApiKey = $userOfRequest && $apiKey;
+        $isSelfVerification = $level === 'self';
+        $autoConfirm = $autoConfirm && !$isSelfVerification && $isUserByApiKey;
+        $isSignatureRequired = $autoConfirm || $isUserByApiKey;
+
+        $errorMessage = '';
+        if (!$userOfRequest) {
+            $errorMessage = 'Invalid API key or missing login';
+        } elseif (!$tier) {
+            $errorMessage = 'Invalid level';
+        } elseif ($skillId === 0 && $skillSetId === 0) {
+            $errorMessage = 'No skill or skillset given';
+        } elseif ($isUserByApiKey && $username === '') {
+            $errorMessage = 'No username';
+        } elseif ($isSignatureRequired && $signatureFromClient === '') {
+            $errorMessage = 'Missing signature';
+        } elseif (!$isSelfVerification && $verifierId === 0) {
+            $errorMessage = 'Missing verifierId';
+        } else {
+            /** @var ?Certifier $verifier */
+            $verifier = $verifierId ? $this->certifierRepository->findByUid($verifierId) : null;
+            // we never allow a different user logged-in users
+            $user = $isUserByApiKey ? $this->userRepository->findByUsername($username) : $userOfRequest;
+            /** @var ?Campaign $campaign */
+            $campaign = $campaignId ? $this->campaignRepository->findByUid($campaignId) : null;
+
+            if ($verifierId && !$verifier) {
+                $errorMessage = 'Invalid verifier';
+            } elseif (!$user) {
+                $errorMessage = 'Invalid username';
+            } elseif ($campaignId && !$campaign) {
+                $errorMessage = 'Invalid campaign';
+            } elseif ($isSignatureRequired) {
+                $secret = $verifier->getSharedApiSecret();
+                if ($secret === '') {
+                    $errorMessage = 'Verifier has no shared secret';
+                } else {
+                    $data['Signature'] = '';
+                    $signature = hash('sha256', json_encode($data) . $secret);
+                    $signatureOk = hash_equals($signature, $signatureFromClient);
+                    if (!$signatureOk) {
+                        $errorMessage = 'Invalid signature';
+                    }
+                }
             }
-            $secret = $verifier->getSharedApiSecret();
-            if ($secret === '') {
-                $response['ErrorMessage'] = 'Verifier has no shared secret';
-                $this->view->assignMultiple($response);
-                return $this->createResponse();
-            }
         }
 
-        $data['Signature'] = '';
-        $signature = hash('sha256', json_encode($data) . $secret);
-        $signatureOk = hash_equals($signature, $signatureFromClient);
-        if (!$signatureOk) {
-            $response['ErrorMessage'] = 'Invalid signature';
+        if ($errorMessage) {
+            $response['ErrorMessage'] = $errorMessage;
             $this->view->assignMultiple($response);
             return $this->createResponse();
-        }
-
-        if ($username === '') {
-            $response['ErrorMessage'] = 'No username';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
-        $user = $this->userRepository->findByUsername($username);
-        if (!$user) {
-            $response['ErrorMessage'] = 'Invalid username';
-            $this->view->assignMultiple($response);
-            return $this->createResponse();
-        }
-
-        $campaign = null;
-        if ($campaignId) {
-            $campaign = $this->campaignRepository->findByUid($campaignId);
-            if (!$campaign) {
-                $response['ErrorMessage'] = 'Invalid campaign';
-                $this->view->assignMultiple($response);
-            }
         }
 
         $this->verificationService->setCreditSettings($this->settings['credits']);
         if ($skillId) {
-            /** @var Skill $skill */
+            /** @var ?Skill $skill */
             $skill = $this->skillRepository->findByUid($skillId);
             if (!$skill) {
                 $response['ErrorMessage'] = 'Invalid skillId';
                 $this->view->assignMultiple($response);
                 return $this->createResponse();
             }
-            if ($tier !== 3) {
+            if ($tier !== Skill::LevelTierMap['self']) {
                 $allowedVerifiers = $this->verificationService->getVerifiersForSkills([$skill], $user, $tier);
                 $verifierHasPermissions = false;
                 foreach ($allowedVerifiers as $v) {
@@ -541,7 +511,7 @@ class CertificationController extends AbstractController
                 $response['Verifications'] = $result['verifications'];
             }
         } elseif ($skillSetId) {
-            /** @var SkillPath $skillSet */
+            /** @var ?SkillPath $skillSet */
             $skillSet = $this->skillSetRepository->findByUid($skillSetId);
             if (!$skillSet) {
                 $response['ErrorMessage'] = 'Invalid skillSetId';
@@ -593,6 +563,13 @@ class CertificationController extends AbstractController
             $verification = $group['certs'][0];
             $jsonData = $verification->toJsonData();
             $jsonData['skillCount'] = count($group['certs']);
+            /** @var Certification $cert */
+            foreach ($group['certs'] as $cert) {
+                $skill = $cert->getSkill();
+                if ($skill) {
+                    $jsonData['skills'][] = $skill->getUid();
+                }
+            }
             return $jsonData;
         }, $groups);
     }

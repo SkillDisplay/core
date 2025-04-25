@@ -24,12 +24,14 @@ class GuestUserController extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this->setDescription('Cleanup old guest users');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         (new GuestUserCleanupService())->run();
         return Command::SUCCESS;

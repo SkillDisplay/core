@@ -21,10 +21,7 @@ use SkillDisplay\Skills\Domain\Repository\GrantedRewardRepository;
 use SkillDisplay\Skills\Domain\Repository\RewardRepository;
 use SkillDisplay\Skills\Event\VerificationUpdatedEvent;
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\Exception\AspectNotFoundException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 readonly class RewardService
@@ -36,11 +33,6 @@ readonly class RewardService
 
     /**
      * Slot implementation for "certificationUpdated"
-     *
-     * @param VerificationUpdatedEvent $event
-     * @throws AspectNotFoundException
-     * @throws IllegalObjectTypeException
-     * @throws InvalidQueryException
      */
     public function checkRewardsReachedForCertifications(VerificationUpdatedEvent $event): void
     {
@@ -53,6 +45,7 @@ readonly class RewardService
             $skill = $cert->getSkill();
             $skillRewards = $this->rewardRepository->findByCertification($cert);
             $skillSetRewards = $this->rewardRepository->findForSkillSets($user, (string)($cert->getLevelNumber()));
+            /** @var Reward $reward */
             foreach ($skillRewards as $reward) {
                 $this->checkRewardReached($user, $reward, $skill);
             }
@@ -64,15 +57,6 @@ readonly class RewardService
         }
     }
 
-    /**
-     * @param User $user
-     * @param Reward $reward
-     * @param Skill|null $skill
-     * @param SkillPath|null $requestGroupSkillSet
-     * @throws IllegalObjectTypeException
-     * @throws InvalidQueryException
-     * @throws AspectNotFoundException
-     */
     public function checkRewardReached(User $user, Reward $reward, ?Skill $skill = null, ?SkillPath $requestGroupSkillSet = null): void
     {
         $existingReward = $this->grantedRewardRepository->findByRewardAndUser($reward, $user);
@@ -120,7 +104,9 @@ readonly class RewardService
             $grant->setValidUntil($reward->getValidUntil());
             $this->grantedRewardRepository->add($grant);
 
-            GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
+            /** @var PersistenceManager $persistenceManager */
+            $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+            $persistenceManager->persistAll();
         }
     }
 }

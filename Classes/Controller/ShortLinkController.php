@@ -17,7 +17,6 @@ use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Service\ShortLinkService;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Http\ForwardResponse;
 
 class ShortLinkController extends AbstractController
@@ -31,7 +30,7 @@ class ShortLinkController extends AbstractController
 
     public function handleAction(): ResponseInterface
     {
-        $shortLinkHash = GeneralUtility::_GET('regcode');
+        $shortLinkHash = $this->request->getQueryParams()['regcode'] ?? null;
         if (!$shortLinkHash) {
             return $this->htmlResponse('No code specified');
         }

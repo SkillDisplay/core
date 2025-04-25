@@ -97,19 +97,15 @@ class BackendVseController extends BackendController
         $this->tagRepository->setDefaultOrderings(['title' => QueryInterface::ORDER_ASCENDING]);
         $tags = $this->tagRepository->findAll();
 
-        $data_with_title = function ($elem) {
-            return [
-                'uid' => $elem->getUid(),
-                'name' => $elem->getTitle(),
-            ];
-        };
+        $data_with_title = fn($elem) => [
+            'uid' => $elem->getUid(),
+            'name' => $elem->getTitle(),
+        ];
 
-        $data_with_name = function ($elem) {
-            return [
-                'uid' => $elem->getUid(),
-                'name' => $elem->getName(),
-            ];
-        };
+        $data_with_name = fn($elem) => [
+            'uid' => $elem->getUid(),
+            'name' => $elem->getName(),
+        ];
 
         $dataSources[] = [
             'label' => 'SkillSets',

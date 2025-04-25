@@ -6,7 +6,6 @@ return [
         'label' => 'title',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'cruser_id' => 'cruser_id',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_campaign.png',
         'searchFields' => 'title,user',
     ],
@@ -21,7 +20,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'user' => [

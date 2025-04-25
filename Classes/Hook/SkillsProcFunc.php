@@ -34,14 +34,13 @@ class SkillsProcFunc
             ->where(
                 $qb->expr()->eq('uid', $qb->createPositionalParameter(1, Connection::PARAM_INT))
             )
-            ->execute();
+            ->prepare();
 
         foreach ($configuration['items'] as $key => $item) {
-
             $statementSkill->bindValue(1, $item[1]);
-            $statementSkill->execute();
-            $skill = $statementSkill->fetchAllAssociative();
-            $statementSkill->free();
+            $result = $statementSkill->executeQuery();
+            $skill = $result->fetchAllAssociative();
+            $result->free();
 
             if (count($skill) !== 1 || !$accessCheck->readAccess($skill[0]['pid'])) {
                 unset($configuration['items'][$key]);
@@ -55,8 +54,6 @@ class SkillsProcFunc
         if (!$brandIds) {
             return;
         }
-        $configuration['items'] = array_filter($configuration['items'], function (array $item) use ($brandIds) {
-            return in_array($item[1], $brandIds, true);
-        });
+        $configuration['items'] = array_filter($configuration['items'], fn(array $item) => in_array($item[1], $brandIds, true));
     }
 }

@@ -21,9 +21,9 @@ class CreateUserValidator extends AbstractUserValidator
      * Check if $value is valid. If it is not valid, needs to add an error
      * to result.
      *
-     * @param User $user
+     * @param ?User $user
      */
-    protected function isValid($user)
+    protected function isValid($user): void
     {
         if (!$user instanceof User) {
             $this->addError('The given object is not a User object.', 1471702618);

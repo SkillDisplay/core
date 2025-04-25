@@ -8,7 +8,6 @@ return [
         'label_alt_force' => true,
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'cruser_id' => 'cruser_id',
         'searchFields' => 'revoke_reason,comment',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_certification.png',
     ],
@@ -39,7 +38,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                    ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 0,
             ],
@@ -50,7 +49,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                    ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 0,
             ],
@@ -61,7 +60,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                    ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 0,
             ],
@@ -72,7 +71,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                    ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 0,
             ],
@@ -81,11 +80,9 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certification.grant_date',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'dbType' => 'datetime',
                 'size' => 12,
-                'eval' => 'datetime',
                 'checkbox' => 0,
                 'default' => null,
             ],
@@ -94,11 +91,9 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certification.deny_date',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'dbType' => 'datetime',
                 'size' => 12,
-                'eval' => 'datetime',
                 'checkbox' => 0,
                 'default' => null,
             ],
@@ -107,11 +102,9 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certification.expire_date',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'dbType' => 'datetime',
                 'size' => 12,
-                'eval' => 'datetime',
                 'checkbox' => 0,
                 'default' => null,
             ],
@@ -120,11 +113,9 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_certification.revoke_date',
             'config' => [
-                'type' => 'input',
-                'renderType' => 'inputDateTime',
+                'type' => 'datetime',
                 'dbType' => 'datetime',
                 'size' => 12,
-                'eval' => 'datetime',
                 'checkbox' => 0,
                 'default' => null,
             ],
@@ -167,7 +158,7 @@ return [
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'tx_skills_domain_model_certifier',
                 'items' => [
-                    ['Certibot', 0],
+                    ['label' => 'Certibot', 'value' => 0],
                 ],
                 'default' => 0,
             ],
@@ -181,7 +172,7 @@ return [
                 'foreign_table' => 'tx_skills_domain_model_brand',
                 'foreign_table_where' => 'AND tx_skills_domain_model_brand.sys_language_uid IN (0,-1) ORDER BY tx_skills_domain_model_brand.name',
                 'items' => [
-                    ['', 0],
+                    ['label' => '', 'value' => 0],
                 ],
                 'default' => 0,
             ],
@@ -195,7 +186,7 @@ return [
                 'foreign_table' => 'tx_skills_domain_model_campaign',
                 'foreign_table_where' => 'ORDER BY tx_skills_domain_model_campaign.title',
                 'items' => [
-                    ['', 0],
+                    ['label' => '', 'value' => 0],
                 ],
                 'default' => 0,
             ],
@@ -227,7 +218,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'user_username' => [
@@ -237,7 +229,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'user_firstname' => [
@@ -247,7 +240,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'user_lastname' => [
@@ -257,7 +251,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'verifier_name' => [
@@ -267,7 +262,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'brand_name' => [
@@ -277,7 +273,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 255,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'group_name' => [
@@ -296,7 +293,7 @@ return [
             'config' => [
                 'type' => 'check',
                 'items' => [
-                    ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                    ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
                 ],
                 'default' => 1,
             ],
@@ -305,17 +302,17 @@ return [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditusage.points',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 5,
                 'max' => 5,
-                'eval' => 'required,int',
+                'required' => true,
             ],
         ],
         'price' => [
             'exclude' => false,
             'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_verificationcreditusage.price',
             'config' => [
-                'type' => 'input',
+                'type' => 'number',
                 'size' => 10,
                 'max' => 10,
                 'range' => [
@@ -323,7 +320,8 @@ return [
                     'lower' => 0.00,
                 ],
                 'default' => 0.00,
-                'eval' => 'required,double2',
+                'format' => 'decimal',
+                'required' => true,
             ],
         ],
         'user_memberships' => [

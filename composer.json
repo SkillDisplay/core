@@ -19,16 +19,16 @@
 		"email": "support@skilldisplay.eu"
 	},
 	"require": {
-		"php": "^8.2",
+		"php": "^8.3",
 		"ext-json": "*",
-		"typo3/cms-core": "^11.5",
+		"typo3/cms-core": "^12.4",
+		"typo3/cms-install": "^12.4",
 		"bithost-gmbh/pdfviewhelpers": "^3",
-		"sjbr/static-info-tables": "^11",
-		"reelworx/t3-mailservice": "^2"
+		"sjbr/static-info-tables": "^12",
+		"reelworx/t3-mailservice": "^3"
 	},
 	"require-dev": {
-		"typo3/minimal": "^11.5",
-		"typo3/testing-framework": "7.x-dev"
+		"typo3/testing-framework": "8.x-dev"
 	},
 	"autoload": {
 		"psr-4": {
@@ -49,10 +49,9 @@
 	},
 	"extra": {
 		"branch-alias": {
-			"dev-master": "115.x-dev"
+			"dev-master": "116.x-dev"
 		},
 		"typo3/cms": {
-			"app-dir": ".Build",
 			"web-dir": ".Build/web",
 			"extension-key": "skills"
 		}

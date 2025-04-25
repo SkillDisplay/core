@@ -17,17 +17,11 @@ use TYPO3\CMS\Core\Routing\Aspect\StaticMappableAspectInterface;
 
 class UidMapper implements StaticMappableAspectInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function generate(string $value): ?string
     {
         return $value;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function resolve(string $value): ?string
     {
         return $value;

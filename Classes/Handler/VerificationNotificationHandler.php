@@ -10,6 +10,7 @@ use SkillDisplay\Skills\Domain\Model\User;
 
 class VerificationNotificationHandler implements NotificationHandlerInterface
 {
+    #[\Override]
     public function buildNotification(User $user, string $type, $referenceEntity): Notification
     {
         $notification = new Notification();

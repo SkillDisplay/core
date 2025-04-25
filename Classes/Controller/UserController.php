@@ -28,7 +28,6 @@ use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\FileReference;
 use SkillDisplay\Skills\Domain\Model\GrantedReward;
 use SkillDisplay\Skills\Domain\Model\Password;
-use SkillDisplay\Skills\Domain\Model\Tag;
 use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Domain\Repository\AwardRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
@@ -45,27 +44,18 @@ use TCPDF2DBarcode;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\RedirectResponse;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Resource\DuplicationBehavior;
-use TYPO3\CMS\Core\Resource\Exception\ExistingTargetFolderException;
-use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
-use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderReadPermissionsException;
-use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderWritePermissionsException;
 use TYPO3\CMS\Core\Resource\File as FalFile;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Session\UserSessionManager;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Type\File\FileInfo;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\IgnoreValidation;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Http\ForwardResponse;
-use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Validation\Exception\InvalidValidationOptionsException;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 
 class UserController extends AbstractController
@@ -86,7 +76,6 @@ class UserController extends AbstractController
 
     protected function initializeAction(): void
     {
-        parent::initializeAction();
         $this->userManager->setAcceptedUserGroup($this->settings['acceptedUserGroup']);
         $this->userManager->setStoragePid($this->settings['feUserStoragePid']);
     }
@@ -104,7 +93,7 @@ class UserController extends AbstractController
             }
             return new RedirectResponse($this->addBaseUriIfNecessary($redirect), 303);
         }
-        $redirect = GeneralUtility::_GP('redirect_url');
+        $redirect = $this->request->getParsedBody()['redirect_url'] ?? $this->request->getQueryParams()['redirect_url'] ?? '';
         if ($redirect && str_contains((string)parse_url($redirect, PHP_URL_HOST), 'skilldisplay.eu')) {
             SessionService::set('redirect', $redirect);
         }
@@ -116,7 +105,7 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in');
+            throw new RuntimeException('No user logged in', 4237161679);
         }
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -136,12 +125,6 @@ class UserController extends AbstractController
         return $this->createResponse();
     }
 
-    /**
-     * @param bool $terms
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
     public function acceptTermsAction(bool $terms): ResponseInterface
     {
         if ($terms) {
@@ -161,15 +144,15 @@ class UserController extends AbstractController
      *
      * @param User|null $newUser
      * @return ResponseInterface
-     * @IgnoreValidation("newUser")
      */
+    #[IgnoreValidation(['argumentName' => 'newUser'])]
     public function newAction(?User $newUser = null): ResponseInterface
     {
         $currentUser = $this->getCurrentUser(false);
         if (!$newUser && $currentUser) {
             $newUser = $currentUser;
         }
-        if ($shortLinkHash = GeneralUtility::_GET('regcode')) {
+        if ($shortLinkHash = $this->request->getQueryParams()['regcode'] ?? null) {
             try {
                 $shortLink = $this->shortLinkService->handleShortlink($shortLinkHash);
                 return (new ForwardResponse($shortLink['action']))
@@ -200,11 +183,11 @@ class UserController extends AbstractController
      *
      * @param User $newUser
      * @return ResponseInterface
-     * @Validate(validator="SkillDisplay.Skills:CreateUser", param="newUser")
      */
+    #[Validate(['validator' => 'SkillDisplay.Skills:CreateUser', 'param' => 'newUser'])]
     public function createAction(User $newUser): ResponseInterface
     {
-        $newUser->setMailLanguage($this->getTSFE()->getLanguage()->getTwoLetterIsoCode());
+        $newUser->setMailLanguage($this->getTSFE()->getLanguage()->getLocale()->getLanguageCode());
         $newUser->setTermsAccepted(new DateTime());
         $newUser->setAnonymous(false);
         if ($newUser->getUid()) {
@@ -256,7 +239,7 @@ class UserController extends AbstractController
             $msg->setTo($user->getEmail());
             $msg->send();
         } catch (RuntimeException) {
-            $this->addFlashMessage('', 'Invalid user', AbstractMessage::ERROR);
+            $this->addFlashMessage('', 'Invalid user', ContextualFeedbackSeverity::ERROR);
             return new ForwardResponse('new');
         }
         return $this->createResponse();
@@ -266,10 +249,10 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 3189436297);
         }
         if ($grantedReward->getUser() !== $user) {
-            throw new RuntimeException('Award does not belong to user.');
+            throw new RuntimeException('Award does not belong to user.', 7100791163);
         }
         $grantedReward->setSelectedByUser($positionIndex > 0);
         $grantedReward->setPositionIndex($positionIndex);
@@ -285,7 +268,7 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 8504449623);
         }
         $awards = $this->grantedRewardRepository->findByUser($user)->toArray();
         $awardsToDisplay = [];
@@ -312,22 +295,6 @@ class UserController extends AbstractController
         return $this->createResponse();
     }
 
-    /**
-     * @param string $firstName
-     * @param string $lastName
-     * @param string $avatarBase64
-     * @param string $company
-     * @param string $address
-     * @param string $city
-     * @param string $zip
-     * @param string $country
-     * @return ResponseInterface
-     * @throws ExistingTargetFolderException
-     * @throws InsufficientFolderAccessPermissionsException
-     * @throws InsufficientFolderReadPermissionsException
-     * @throws InsufficientFolderWritePermissionsException
-     * @throws InvalidValidationOptionsException
-     */
     public function updateProfileAction(
         string $firstName,
         string $lastName,
@@ -340,7 +307,7 @@ class UserController extends AbstractController
     ): ResponseInterface {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 4320000543);
         }
 
         if (!$user->isLocked()) {
@@ -371,9 +338,11 @@ class UserController extends AbstractController
             } elseif ($bytesWritten > 0) {
                 [$storageId, $objectIdentifier] = GeneralUtility::trimExplode(':', $this->settings['avatarFolder']);
                 if ((int)$storageId <= 0 || empty($objectIdentifier)) {
-                    throw new RuntimeException('Invalid combined identifier: ' . $this->settings['avatarFolder']);
+                    throw new RuntimeException('Invalid combined identifier: ' . $this->settings['avatarFolder'], 9077933222);
                 }
-                $storage = GeneralUtility::makeInstance(ResourceFactory::class)->getStorageObject((int)$storageId);
+                /** @var ResourceFactory $resourceFactory */
+                $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+                $storage = $resourceFactory->getStorageObject((int)$storageId);
                 if ($storage->hasFolder($objectIdentifier)) {
                     $folder = $storage->getFolder($objectIdentifier);
                 } else {
@@ -409,7 +378,7 @@ class UserController extends AbstractController
     ): ResponseInterface {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 6052011691);
         }
         $user->setWww($website);
         $user->setTwitter($twitter);
@@ -435,7 +404,7 @@ class UserController extends AbstractController
 
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 1255214442);
         }
 
         $checkResult = $this->userManager->validatePassword($pass);
@@ -468,7 +437,7 @@ class UserController extends AbstractController
     ): ResponseInterface {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 2185864411);
         }
         $user->setMailPush($mailPush);
         $user->setMailLanguage($mailLanguage);
@@ -490,10 +459,10 @@ class UserController extends AbstractController
             return new ForwardResponse('new');
         }
         try {
-            /** @var User $user */
+            /** @var ?User $user */
             $user = $this->userRepository->findDisabledByUid((int)$this->request->getArgument('uid'));
             if (!$user) {
-                throw new RuntimeException('Invalid user');
+                throw new RuntimeException('Invalid user', 8576433016);
             }
             $this->userManager->activateEmail($user);
 
@@ -507,7 +476,7 @@ class UserController extends AbstractController
 
             $this->view->assign('user', $user);
         } catch (RuntimeException $e) {
-            $this->addFlashMessage('', 'Invalid user', AbstractMessage::ERROR);
+            $this->addFlashMessage('', 'Invalid user', ContextualFeedbackSeverity::ERROR);
             $this->logger->warning('Invalid user while confirming new email', ['exception' => $e, 'user' => $user]);
             return new ForwardResponse('new');
         }
@@ -518,7 +487,7 @@ class UserController extends AbstractController
     {
         $currentUser = $this->getCurrentUser();
         if (!$currentUser) {
-            throw new RuntimeException('No user logged in.');
+            throw new RuntimeException('No user logged in.', 7489080791);
         }
         if ($newEmail !== $currentUser->getEmail()) {
             $currentUser->setPendingEmail($newEmail);
@@ -556,11 +525,17 @@ class UserController extends AbstractController
         return $this->createResponse();
     }
 
-    /**
-     * @throws IllegalObjectTypeException
-     * @throws NoSuchArgumentException
-     * @throws UnknownObjectException
-     */
+    public function deleteAction(): ResponseInterface
+    {
+        $currentUser = $this->getCurrentUser(false);
+        $this->userManager->delete($currentUser);
+        $this->view->assign('success', true);
+        if ($this->view instanceof JsonView) {
+            $this->view->setVariablesToRender(['success']);
+        }
+        return $this->createResponse();
+    }
+
     public function starCertifierAjaxAction(): ResponseInterface
     {
         /** @var JsonView $view */
@@ -569,16 +544,16 @@ class UserController extends AbstractController
         $view->assign('success', true);
 
         $uid = $this->request->hasArgument('uid') ? (int)$this->request->getArgument('uid')
-            : (int)GeneralUtility::_POST('uid');
+            : (int)($this->request->getParsedBody()['uid'] ?? null);
         $star = ($this->request->hasArgument('star') ? $this->request->getArgument('star')
-                : GeneralUtility::_POST('star')) === 'true';
+                : $this->request->getParsedBody()['star'] ?? null) === 'true';
 
         if (!$uid) {
             $view->assign('success', false);
             return $this->createResponse();
         }
 
-        /** @var Certifier $certifier */
+        /** @var ?Certifier $certifier */
         $certifier = $this->certifierRepository->findByUid($uid);
         if (!$certifier) {
             $view->assign('success', false);
@@ -606,9 +581,7 @@ class UserController extends AbstractController
                 'code' => $c->getIsoCodeA2(),
             ];
         }
-        usort($countries, function (array $a, array $b) {
-            return $a['name'] <=> $b['name'];
-        });
+        usort($countries, fn(array $a, array $b) => $a['name'] <=> $b['name']);
 
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -627,7 +600,7 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser(false);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 1554001798);
         }
 
         if ($this->view instanceof JsonView) {
@@ -645,7 +618,7 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 4074969362);
         }
         $patrons = [];
         /** @var Brand $organisation */
@@ -655,9 +628,7 @@ class UserController extends AbstractController
                 $patrons[$patron->getUid()] = $patron;
             }
         }
-        usort($patrons, function (Brand $a, Brand $b) {
-            return $b->getName() <=> $a->getName();
-        });
+        usort($patrons, fn(Brand $a, Brand $b) => $b->getName() <=> $a->getName());
         if ($this->view instanceof JsonView) {
             $configuration = [
                 'patrons' => [],
@@ -669,10 +640,7 @@ class UserController extends AbstractController
         return $this->createResponse();
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
-    public function publicProfileAction(User $user = null): ResponseInterface
+    public function publicProfileAction(?User $user = null): ResponseInterface
     {
         $profile = [];
         $configuration = [
@@ -710,9 +678,6 @@ class UserController extends AbstractController
         return $this->createResponse();
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     private function getPublicProfile(User $user): array
     {
         $acceptedCertifications = $user->getSkillUpStats();
@@ -745,10 +710,10 @@ class UserController extends AbstractController
     {
         $currentUser = $this->getCurrentUser(false);
         if (!$currentUser) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 1327049855);
         }
         if (!$user->getPublishSkills() && $currentUser !== $user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 3813980212);
         }
         if ($type === Certification::TYPE_GROUPED_BY_DATE) {
             if ($this->view instanceof JsonView) {
@@ -810,9 +775,6 @@ class UserController extends AbstractController
         }, $groups)));
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     public function downloadPublicProfilePdfAction(): ResponseInterface
     {
         $user = $this->getCurrentUser(false);
@@ -932,7 +894,7 @@ class UserController extends AbstractController
                 continue;
             }
 
-            /** @var Brand $brand */
+            /** @var ?Brand $brand */
             $brand = $skill->getBrands()->getArray()[0] ?? null;
             if (!$brand) {
                 continue;
@@ -945,7 +907,6 @@ class UserController extends AbstractController
                 ];
             }
 
-            /** @var Tag $domainTag */
             $domainTag = $skill->getDomainTag();
             $domainTagId = $domainTag ? $domainTag->getUid() : 0;
 
@@ -972,26 +933,18 @@ class UserController extends AbstractController
         // sort skills and remove uids from array keys to get a real JSON array
         array_walk($groupedByBrandAndDomain, function (array &$brand) {
             array_walk($brand['tags'], function (array &$skillTags) {
-                usort($skillTags['skills'], function (array $a, array $b) {
-                    return $a['skill']['title'] <=> $b['skill']['title'];
-                });
-                $skillTags['skills'] = array_values($skillTags['skills']);
+                usort($skillTags['skills'], fn(array $a, array $b) => $a['skill']['title'] <=> $b['skill']['title']);
             });
-            usort($brand['tags'], function (array $a, array $b) {
-                return $a['_domain'] <=> $b['_domain'];
-            });
-            $brand['tags'] = array_values($brand['tags']);
+            usort($brand['tags'], fn(array $a, array $b) => $a['_domain'] <=> $b['_domain']);
         });
-        usort($groupedByBrandAndDomain, function (array $a, array $b) {
-            return $a['_brandTitle'] <=> $b['_brandTitle'];
-        });
-        return array_values($groupedByBrandAndDomain);
+        usort($groupedByBrandAndDomain, fn(array $a, array $b) => $a['_brandTitle'] <=> $b['_brandTitle']);
+        return $groupedByBrandAndDomain;
     }
 
     public function anonymousRequestAction(): ResponseInterface
     {
-        $redirect = GeneralUtility::_GP('redirect_url');
-        if ($redirect && str_contains((string)parse_url($redirect, PHP_URL_HOST), 'skilldisplay.eu')) {
+        $redirect = $this->request->getParsedBody()['redirect_url'] ?? $this->request->getQueryParams()['redirect_url'] ?? null;
+        if ($redirect && str_contains((string)parse_url((string)$redirect, PHP_URL_HOST), 'skilldisplay.eu')) {
             SessionService::set('redirect', $redirect);
         }
         return $this->createResponse();
@@ -1041,7 +994,7 @@ class UserController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 2533347348);
         }
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -1059,7 +1012,9 @@ class UserController extends AbstractController
 
     protected function createFileReferenceFromFalFileObject(FalFile $file): FileReference
     {
-        $falFileReference = GeneralUtility::makeInstance(ResourceFactory::class)->createFileReferenceObject(
+        /** @var ResourceFactory $resourceFactory */
+        $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+        $falFileReference = $resourceFactory->createFileReferenceObject(
             [
                 'uid_local' => $file->getUid(),
                 'uid_foreign' => uniqid('NEW_'),
@@ -1067,7 +1022,7 @@ class UserController extends AbstractController
                 'crop' => null,
             ]
         );
-        $fileReference = GeneralUtility::makeInstance(FileReference::class);
+        $fileReference = new FileReference();
         $fileReference->setOriginalResource($falFileReference);
         return $fileReference;
     }

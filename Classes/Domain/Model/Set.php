@@ -24,11 +24,16 @@ class Set extends AbstractEntity
      * skills
      *
      * @var ObjectStorage<SetSkill>
-     * @Cascade("remove")
      */
+    #[Cascade(['value' => 'remove'])]
     protected ObjectStorage $skills;
 
     public function __construct()
+    {
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
     {
         $this->skills = new ObjectStorage();
     }

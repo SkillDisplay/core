@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
-use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -30,20 +29,20 @@ class SkillPathRepository extends BaseRepository
     ];
 
     /**
-     * @param Skill $skill
      * @return SkillPath[]
-     * @throws InvalidQueryException
      */
     public function findBySkill(Skill $skill): array
     {
         $q = $this->createQuery();
         $q->matching($q->contains('skills', $skill->getUid()));
-        return $q->execute()->toArray();
+        /** @var SkillPath[] $res */
+        $res = $q->execute()->toArray();
+        return $res;
     }
 
     /**
      * @param string $searchWord
-     * @param Brand[] $organisationsOfUser
+     * @param int[] $organisationsOfUser
      * @return array
      * @throws InvalidQueryException
      */
@@ -77,7 +76,7 @@ class SkillPathRepository extends BaseRepository
     }
 
     /**
-     * @param Brand[] $organisationsOfUser
+     * @param int[] $organisationsOfUser
      * @return array
      */
     public function findAllVisible(array $organisationsOfUser): array
@@ -124,9 +123,7 @@ class SkillPathRepository extends BaseRepository
         foreach ($skillSet->getSkills() as $skill) {
             $skills[] = $skill;
         }
-        usort($skills, function (Skill $a, Skill $b) {
-            return $a->getTitle() <=> $b->getTitle();
-        });
+        usort($skills, fn(Skill $a, Skill $b) => $a->getTitle() <=> $b->getTitle());
         return $skills;
     }
 
@@ -136,7 +133,7 @@ class SkillPathRepository extends BaseRepository
      * also done in \SkillDisplay\Skills\Domain\Repository\RecommendedSkillSetRepository::findBySkillSet
      *
      * @param QueryInterface $q
-     * @param Brand[] $organisationsOfUser
+     * @param int[] $organisationsOfUser
      * @return array
      */
     private function getVisibilityConditions(QueryInterface $q, array $organisationsOfUser): array
@@ -146,11 +143,8 @@ class SkillPathRepository extends BaseRepository
         $conditions[] = $q->equals('visibility', SkillPath::VISIBILITY_PUBLIC);
         if ($organisationsOfUser) {
             try {
-                $brandIds = array_map(function (Brand $b) {
-                    return $b->getUid();
-                }, $organisationsOfUser);
                 $conditions[] = $q->logicalAnd(
-                    $q->in('brands.uid', $brandIds),
+                    $q->in('brands.uid', $organisationsOfUser),
                     $q->equals('visibility', SkillPath::VISIBILITY_ORGANISATION),
                 );
             } catch (InvalidQueryException) {
@@ -164,15 +158,13 @@ class SkillPathRepository extends BaseRepository
      * Find all skillsets with overlapping skills with set origin, but exclude origin
      *
      * @param SkillPath $origin
-     * @param array $organisationsOfUser
+     * @param int[] $organisationsOfUser
      * @return array|QueryResultInterface
      * @throws InvalidQueryException
      */
     public function findOverlappingSets(SkillPath $origin, array $organisationsOfUser): QueryResultInterface|array
     {
-        $skillIds = array_map(function (Skill $s) {
-            return $s->getUid();
-        }, $origin->getSkills()->toArray());
+        $skillIds = array_map(fn(Skill $s) => $s->getUid(), $origin->getSkills()->toArray());
         $q = $this->createQuery();
         $q->matching(
             $q->logicalAnd(
@@ -194,7 +186,7 @@ class SkillPathRepository extends BaseRepository
      * Find all skillsets with overlapping skill
      *
      * @param Skill $origin
-     * @param array $organisationsOfUser
+     * @param int[] $organisationsOfUser
      * @return array|QueryResultInterface
      */
     public function findOverlappingBySkill(Skill $origin, array $organisationsOfUser): QueryResultInterface|array

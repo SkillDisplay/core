@@ -25,7 +25,7 @@ class AppLinkViewHelper extends AbstractTagBasedViewHelper
     /**
      * Arguments initialization
      */
-    public function initializeArguments()
+    public function initializeArguments(): void
     {
         $this->registerArgument('url', 'string', 'The URL of the App', true);
         $this->registerArgument('appRoute', 'string', 'Route in App', true);
@@ -34,9 +34,6 @@ class AppLinkViewHelper extends AbstractTagBasedViewHelper
         $this->registerArgument('onlyUri', 'bool', 'When true just return the uri');
     }
 
-    /**
-     * @return mixed|string
-     */
     public function render()
     {
         // todo reimplement when App is multilanguage
@@ -47,24 +44,18 @@ class AppLinkViewHelper extends AbstractTagBasedViewHelper
             }
         }
 
-        $url = rtrim($this->arguments['url'], '/') . '/';
-        if ($url !== '') {
-            $url .= $this->arguments['appRoute'];
+        $url = rtrim((string)$this->arguments['url'], '/') . '/' . $this->arguments['appRoute'];
 
-            if ($this->arguments['onlyUri']) {
-                return $url;
-            }
-
-            $this->tag->addAttribute('href', $url);
-            if (!empty($this->arguments['class'])) {
-                $this->tag->addAttribute('class', $this->arguments['class']);
-            }
-            $this->tag->setContent($this->renderChildren());
-            $this->tag->forceClosingTag(true);
-            $result = $this->tag->render();
-        } else {
-            $result = $this->renderChildren();
+        if ($this->arguments['onlyUri']) {
+            return $url;
         }
-        return $result;
+
+        $this->tag->addAttribute('href', $url);
+        if (!empty($this->arguments['class'])) {
+            $this->tag->addAttribute('class', $this->arguments['class']);
+        }
+        $this->tag->setContent($this->renderChildren());
+        $this->tag->forceClosingTag(true);
+        return $this->tag->render();
     }
 }

@@ -24,7 +24,7 @@ class EditUserValidatorTest extends UnitTestCase
     /**
      * @test
      */
-    public function testsForEmptyFirstName()
+    public function testsForEmptyFirstName(): void
     {
         $user = new User();
         $user->setFirstName('');
@@ -36,7 +36,7 @@ class EditUserValidatorTest extends UnitTestCase
     /**
      * @test
      */
-    public function testsForEmptyLastName()
+    public function testsForEmptyLastName(): void
     {
         $user = new User();
         $user->setFirstName('first');
@@ -48,7 +48,7 @@ class EditUserValidatorTest extends UnitTestCase
     /**
      * @test
      */
-    public function validForFirstAndLastName()
+    public function validForFirstAndLastName(): void
     {
         $user = new User();
         $user->setFirstName('first');

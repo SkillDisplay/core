@@ -22,12 +22,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class ExportService extends AbstractImportExportService
 {
-    private SkillPathRepository $skillSetRepository;
-    private BrandRepository $brandRepository;
-    private TagRepository $tagRepository;
-    private LinkRepository $linkRepository;
-    private SkillRepository $skillRepository;
-
     /** @var int[] */
     private array $brandIds = [];
 
@@ -44,18 +38,12 @@ class ExportService extends AbstractImportExportService
     private array $lines = [];
 
     public function __construct(
-        BrandRepository $brandRepository,
-        LinkRepository $linkRepository,
-        SkillPathRepository $skillSetRepository,
-        TagRepository $tagRepository,
-        SkillRepository $skillRepository
-    ) {
-        $this->brandRepository = $brandRepository;
-        $this->linkRepository = $linkRepository;
-        $this->skillSetRepository = $skillSetRepository;
-        $this->tagRepository = $tagRepository;
-        $this->skillRepository = $skillRepository;
-    }
+        private readonly BrandRepository $brandRepository,
+        private readonly LinkRepository $linkRepository,
+        private readonly SkillPathRepository $skillSetRepository,
+        private readonly TagRepository $tagRepository,
+        private readonly SkillRepository $skillRepository
+    ) {}
 
     public static function encodeFileReference(FileReference $file, array &$data, string $fieldName): bool
     {
@@ -126,11 +114,11 @@ class ExportService extends AbstractImportExportService
 
     private function collectSkillSet(int $skillSetId): void
     {
-        /** @var SkillPath $skillSet */
+        /** @var ?SkillPath $skillSet */
         $skillSet = $this->skillSetRepository->findByUid($skillSetId);
 
         if (!$skillSet) {
-            throw new RuntimeException('SkillSet with id ' . $skillSetId . ' cannot be found.');
+            throw new RuntimeException('SkillSet with id ' . $skillSetId . ' cannot be found.', 3675348808);
         }
 
         $this->lines[] = $skillSet->getExportJson();
@@ -184,11 +172,11 @@ class ExportService extends AbstractImportExportService
 
     private function collectSkills(): void
     {
-        /** @var Skill $skill */
         foreach ($this->skillIds as $skillId) {
+            /** @var ?Skill $skill */
             $skill = $this->skillRepository->findByUid($skillId);
             if (!$skill) {
-                throw new RuntimeException('Referenced Skill with uid ' . $skillId . ' not found.');
+                throw new RuntimeException('Referenced Skill with uid ' . $skillId . ' not found.', 1784046579);
             }
             $this->lines[] = $skill->getExportJson();
         }
@@ -196,11 +184,11 @@ class ExportService extends AbstractImportExportService
 
     private function collectTags(): void
     {
-        /** @var Tag $tag */
         foreach ($this->tagIds as $tagId) {
+            /** @var ?Tag $tag */
             $tag = $this->tagRepository->findByUid($tagId);
             if (!$tag) {
-                throw new RuntimeException('Referenced Tag with uid ' . $tagId . ' not found.');
+                throw new RuntimeException('Referenced Tag with uid ' . $tagId . ' not found.', 3860297203);
             }
             $this->lines[] = $tag->getExportJson();
         }
@@ -208,11 +196,11 @@ class ExportService extends AbstractImportExportService
 
     private function collectLinks(): void
     {
-        /** @var Link $link */
         foreach ($this->linkIds as $linkId) {
+            /** @var ?Link $link */
             $link = $this->linkRepository->findByUid($linkId);
             if (!$link) {
-                throw new RuntimeException('Referenced Link with uid ' . $linkId . ' not found.');
+                throw new RuntimeException('Referenced Link with uid ' . $linkId . ' not found.', 9105813917);
             }
             $this->lines[] = $link->getExportJson();
         }
@@ -220,11 +208,11 @@ class ExportService extends AbstractImportExportService
 
     private function collectBrands(): void
     {
-        /** @var Brand $brand */
         foreach ($this->brandIds as $brandId) {
+            /** @var ?Brand $brand */
             $brand = $this->brandRepository->findByUid($brandId);
             if (!$brand) {
-                throw new RuntimeException('Referenced Brand with uid ' . $brandId . ' not found.');
+                throw new RuntimeException('Referenced Brand with uid ' . $brandId . ' not found.', 9187916494);
             }
             $this->lines[] = $brand->getExportJson();
         }
@@ -234,7 +222,7 @@ class ExportService extends AbstractImportExportService
     {
         $file = fopen($targetFileName, 'w+');
         if ($file === false) {
-            throw new RuntimeException($targetFileName . ' cannot be opened for export');
+            throw new RuntimeException($targetFileName . ' cannot be opened for export', 6050567354);
         }
 
         // generate placeholder header

@@ -1,0 +1,5 @@
+tx_skills_domain_model_skillpath
+,uid,pid,name,visibility,brands,skills
+,1,3,CMS Certified Developer 8,0,3,5
+,2,3,CMS Certified Developer 9,0,1,3
+,3,3,CMS Certified Developer 10,0,1,5

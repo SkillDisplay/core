@@ -9,35 +9,33 @@ $columns = [
     'icon' => [
         'exclude' => true,
         'label' => 'Icon',
-        'config' => ExtensionManagementUtility::getFileFieldTCAConfig(
-            'icon',
-            [
-                'appearance' => [
-                    'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
-                ],
-                'foreign_match_fields' => [
-                    'fieldname' => 'icon',
-                    'tablenames' => 'sys_category',
-                    'table_local' => 'sys_file',
-                ],
-                'overrideChildTca' => [
-                    'types' => [
-                        0 => [
-                            'showitem' => '
+        'config' => [
+            //## !!! Watch out for fieldName different from columnName
+            'type' => 'file',
+            'allowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'],
+            'appearance' => [
+                'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
+            ],
+            'foreign_match_fields' => [
+                'fieldname' => 'icon',
+                'tablenames' => 'sys_category',
+            ],
+            'overrideChildTca' => [
+                'types' => [
+                    0 => [
+                        'showitem' => '
                             --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                             --palette--;;filePalette',
-                        ],
-                        File::FILETYPE_IMAGE => [
-                            'showitem' => '
+                    ],
+                    File::FILETYPE_IMAGE => [
+                        'showitem' => '
                             --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                             --palette--;;filePalette',
-                        ],
                     ],
                 ],
-                'maxitems' => 1,
             ],
-            $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-        ),
+            'maxitems' => 1,
+        ],
     ],
 ];
 

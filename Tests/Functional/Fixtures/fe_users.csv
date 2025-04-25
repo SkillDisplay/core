@@ -1,0 +1,10 @@
+fe_users
+,uid,tx_extbase_type,pid,username,password,first_name,last_name,email,publish_skills,verifiers
+,1,Tx_Skills_User,4,muster,Something,Max,Muster,max@muster.at,1,1
+,2,Tx_Skills_User,4,bauer,Something,Berta,Bauer,berta@bauer.at,1,1
+,3,Tx_Skills_User,4,cerny,Something,Caesar,Cerny,caesar@cerny.at,1,1
+,4,Tx_Skills_User,4,Something,Donna,Donna,Darm,donna@darm.at,1,0
+,5,Tx_Skills_User,4,estrich,Something,Erik,Estrich,erik@estrich.at,1,0
+,6,Tx_Skills_User,4,feuer,Something,Franz,Feuer,franz@feuer.at,1,0
+,7,Tx_Skills_User,4,gans,Something,Gustav,Gans,gustav@gans.at,1,0
+,8,Tx_Skills_User,4,hirter,Something,Heinrich,Hirter,heinrich@hirter.at,1,0

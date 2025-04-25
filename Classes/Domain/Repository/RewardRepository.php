@@ -38,12 +38,7 @@ class RewardRepository extends BaseRepository
         return $q->execute();
     }
 
-    /**
-     * @param User $user
-     * @param string $level
-     * @return Reward[]|QueryResultInterface
-     */
-    public function findForSkillSets(User $user, string $level): QueryResultInterface|array
+    public function findForSkillSets(User $user, string $level): QueryResultInterface
     {
         $q = $this->createQuery();
         $constraints = $this->getAvailabilityConstraints($q, $user, false);
@@ -89,9 +84,7 @@ class RewardRepository extends BaseRepository
         $certRepo = GeneralUtility::makeInstance(CertificationRepository::class);
 
         $grantedRewardIds = array_map(
-            function (GrantedReward $reward) {
-                return $reward->getReward()->getUid();
-            },
+            fn(GrantedReward $reward) => $reward->getReward()->getUid(),
             $grantedRepo->findByUser($user)->toArray()
         );
 
@@ -135,9 +128,7 @@ class RewardRepository extends BaseRepository
             $q->equals('validForOrganisation', 0),
         ];
         if ($user && $user->getOrganisations()->count()) {
-            $organisationIds = array_map(function (Brand $b) {
-                return $b->getUid();
-            }, $user->getOrganisations()->toArray());
+            $organisationIds = array_map(fn(Brand $b) => $b->getUid(), $user->getOrganisations()->toArray());
             $orgaConstraint[] = $q->in('validForOrganisation', $organisationIds);
         }
         $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
@@ -163,8 +154,6 @@ class RewardRepository extends BaseRepository
     }
 
     /**
-     * @param User $user
-     * @param SkillPath $set
      * @return Reward[]
      */
     public function getAllForSkillPath(User $user, SkillPath $set): array
@@ -173,11 +162,12 @@ class RewardRepository extends BaseRepository
         $constraints = $this->getAvailabilityConstraints($q, $user, false);
         $constraints[] = $q->equals('skillpath', $set);
         $q->matching($q->logicalAnd(...$constraints));
-        return $q->execute()->toArray();
+        /** @var Reward[] $res */
+        $res = $q->execute()->toArray();
+        return $res;
     }
 
     /**
-     * @param SkillPath $set
      * @return Reward[]
      */
     public function getAllForSkillSetWithoutConstraints(SkillPath $set): array
@@ -185,6 +175,8 @@ class RewardRepository extends BaseRepository
         $q = $this->createQuery();
         $constraints[] = $q->equals('skillpath', $set);
         $q->matching($q->logicalAnd(...$constraints));
-        return $q->execute()->toArray();
+        /** @var Reward[] $res */
+        $res = $q->execute()->toArray();
+        return $res;
     }
 }

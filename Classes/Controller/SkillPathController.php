@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Controller;
 
-use Doctrine\DBAL\Driver\Exception;
 use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
 use SkillDisplay\Skills\Domain\Model\Brand;
@@ -28,12 +27,12 @@ use SkillDisplay\Skills\Service\UserOrganisationsService;
 use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
 use TYPO3\CMS\Core\Http\PropagateResponseException;
 use TYPO3\CMS\Core\Http\RedirectResponse;
+use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
 use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Frontend\Service\TypoLinkCodecService;
 
 class SkillPathController extends AbstractController
 {
@@ -130,7 +129,7 @@ class SkillPathController extends AbstractController
     {
         $user = $this->getCurrentUser(false, $apiKey);
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 7748158717);
         }
         if ($this->view instanceof JsonView) {
             $configuration = [
@@ -168,11 +167,10 @@ class SkillPathController extends AbstractController
      * @param bool $includeFullSkills
      * @param string $apiKey
      * @return ResponseInterface
-     * @throws Exception
      * @throws PageNotFoundException
      * @throws PropagateResponseException
      */
-    public function showApiAction(SkillPath $set = null, bool $includeFullSkills = false, string $apiKey = ''): ResponseInterface
+    public function showApiAction(?SkillPath $set = null, bool $includeFullSkills = false, string $apiKey = ''): ResponseInterface
     {
         $this->assertEntityAvailable($set);
         $user = $this->getCurrentUser(false, $apiKey);
@@ -242,6 +240,8 @@ class SkillPathController extends AbstractController
                         'certificate',
                         'tags',
                         'firstCategoryTitle',
+                        'legitimationDate',
+                        'legitimationUser',
                     ],
                     '_descend' => [
                         'links' => [
@@ -280,6 +280,11 @@ class SkillPathController extends AbstractController
                                 ],
                             ],
                         ],
+                        'legitimationUser' => [
+                            '_only' => [
+                                'firstName', 'lastName', 'userAvatar',
+                            ],
+                        ],
                     ],
                 ],
             ];
@@ -299,7 +304,7 @@ class SkillPathController extends AbstractController
      * @throws PropagateResponseException
      * @throws PageNotFoundException
      */
-    public function showAction(SkillPath $path = null): ResponseInterface
+    public function showAction(?SkillPath $path = null): ResponseInterface
     {
         $this->assertEntityAvailable($path);
         GeneralUtility::makeInstance(PageTitleProvider::class)->setTitle($path->getName());
@@ -314,7 +319,7 @@ class SkillPathController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 9013382348);
         }
         $awards = $this->rewardRepository->getAllForSkillPath($user, $set);
         if ($this->view instanceof JsonView) {
@@ -334,7 +339,7 @@ class SkillPathController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 6399245974);
         }
         $set->setUserForCompletedChecks($user);
         if ($set->getProgressPercentage()['tier1'] === 100.0) {
@@ -342,8 +347,8 @@ class SkillPathController extends AbstractController
                 $typoLinkCodec = GeneralUtility::makeInstance(TypoLinkCodecService::class);
                 $typolinkConfiguration = $typoLinkCodec->decode($set->getCertificateLink());
 
-                preg_match('/.+=(\d+)/', $typolinkConfiguration['url'], $matches);
-                $fileUid = $matches[1];
+                preg_match('/.+=(\d+)/', (string)$typolinkConfiguration['url'], $matches);
+                $fileUid = (int)$matches[1];
                 try {
                     $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
                     $templateFile = $resourceFactory->getFileObject($fileUid);
@@ -369,9 +374,6 @@ class SkillPathController extends AbstractController
         return new RedirectResponse($this->addBaseUriIfNecessary($url), 303);
     }
 
-    /**
-     * @throws FileDoesNotExistException
-     */
     public function syllabusForSetPdfAction(SkillPath $set): never
     {
         if ($set->getVisibility() === SkillPath::VISIBILITY_ORGANISATION &&
@@ -379,38 +381,35 @@ class SkillPathController extends AbstractController
         ) {
             exit();
         }
-        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
-        $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/SyllabusForSet.html');
-        $skills = $this->skillSetRepository->getSkillsForSyllabusDownload($set);
-        if ($set->getSyllabusLayoutFile()) {
-            $templateFile = GeneralUtility::makeInstance(ResourceFactory::class)->getFileObject(
-                $set->getSyllabusLayoutFile()
-            );
-            $pdfView->assign('pdfTemplate', $templateFile->getForLocalProcessing(false));
-        }
-        $pdfView->assign('skills', $skills);
-        $pdfView->assign('set', $set);
-        $pdfView->render();
-        exit();
+        $this->renderSyllabusPdf(
+            'EXT:skills/Resources/Private/PdfTemplates/SyllabusForSet.html',
+            $set,
+            $this->skillSetRepository->getSkillsForSyllabusDownload($set)
+        );
     }
 
-    /**
-     * @throws FileDoesNotExistException
-     */
     public function completeDownloadForSetPdfAction(SkillPath $set): void
     {
         if ($set->getVisibility() === SkillPath::VISIBILITY_ORGANISATION &&
             !UserOrganisationsService::isUserMemberOfOrganisations($set->getBrands(), $this->getCurrentUser())
         ) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 5849770782);
         }
+        $this->renderSyllabusPdf(
+            'EXT:skills/Resources/Private/PdfTemplates/FullDownloadSkillSet.html',
+            $set,
+            $this->skillSetRepository->getSkillsForCompleteDownload($set)
+        );
+    }
+
+    protected function renderSyllabusPdf(string $templatePathAndFilename, SkillPath $set, array $skills): never
+    {
         $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
-        $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/FullDownloadSkillSet.html');
-        $skills = $this->skillSetRepository->getSkillsForCompleteDownload($set);
+        $pdfView->setTemplatePathAndFilename($templatePathAndFilename);
         if ($set->getSyllabusLayoutFile()) {
-            $templateFile = GeneralUtility::makeInstance(ResourceFactory::class)->getFileObject(
-                $set->getSyllabusLayoutFile()
-            );
+            /** @var ResourceFactory $resourceFactory */
+            $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+            $templateFile = $resourceFactory->getFileObject($set->getSyllabusLayoutFile());
             $pdfView->assign('pdfTemplate', $templateFile->getForLocalProcessing(false));
         }
         $pdfView->assign('skills', $skills);

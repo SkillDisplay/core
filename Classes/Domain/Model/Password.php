@@ -9,20 +9,16 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Password extends AbstractEntity
 {
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $password = '';
 
     /**
      * Repetition of Password
-     * @Validate("NotEmpty")
      */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $passwordRepeat = '';
 
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $oldPassword = '';
 
     public function getPassword(): string

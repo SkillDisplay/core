@@ -15,12 +15,14 @@ class SkillCategoryFixController extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this->setDescription('Ensures at least one category is assigned to skills and skillsets based on the primary brand.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->updateSkillSets();
 
@@ -34,7 +36,7 @@ class SkillCategoryFixController extends Command
         $qb = $connectionPool->getQueryBuilderForTable('tx_skills_domain_model_skillpath');
 
         // fetch all skillsets without category
-        $catJoinCond = $qb->expr()->andX(
+        $catJoinCond = $qb->expr()->and(
             $qb->expr()->eq('mm.uid_foreign', 'p.uid'),
             $qb->expr()->eq('mm.tablenames', '\'tx_skills_domain_model_skillpath\''),
             $qb->expr()->eq('mm.fieldname', '\'categories\''),
@@ -50,7 +52,7 @@ class SkillCategoryFixController extends Command
         foreach ($setsWoCat as $skillSet) {
             // fetch first brand
             $brandQb = $connectionPool->getQueryBuilderForTable('tx_skills_domain_model_brand');
-            $brandJoinCond = $brandQb->expr()->andX(
+            $brandJoinCond = $brandQb->expr()->and(
                 $brandQb->expr()->eq('mm.uid_foreign', 'b.uid'),
                 $brandQb->expr()->eq('mm.uid_local', $skillSet['uid'])
             );
@@ -83,7 +85,7 @@ class SkillCategoryFixController extends Command
     {
         $connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
         $catQb = $connectionPool->getQueryBuilderForTable('tx_skills_domain_model_brand');
-        $catJoinCond = $catQb->expr()->andX(
+        $catJoinCond = $catQb->expr()->and(
             $catQb->expr()->eq('mm.uid_local', 'c.uid'),
             $catQb->expr()->eq('mm.uid_foreign', $brandUid),
             $catQb->expr()->eq('mm.tablenames', '\'tx_skills_domain_model_brand\''),

@@ -132,6 +132,8 @@ routeEnhancers:
         _controller: 'User::updateSocialPlatforms'
       - routePath: 'profile/update'
         _controller: 'User::updateProfile'
+      - routePath: 'profile/delete'
+        _controller: 'User::delete'
       - routePath: 'public-profile/pdf'
         _controller: 'User::downloadPublicProfilePdf'
       - routePath: 'public-profile/{user}'

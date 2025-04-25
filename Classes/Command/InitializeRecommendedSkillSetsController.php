@@ -11,25 +11,20 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class InitializeRecommendedSkillSetsController extends Command
 {
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this->setDescription('Calculates recommended SkillSets for all users. Wipes all existing data.');
     }
 
-    /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
-     * @throws InvalidQueryException
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $service = GeneralUtility::makeInstance(SkillSetRelationService::class);
 
@@ -39,7 +34,9 @@ class InitializeRecommendedSkillSetsController extends Command
         $service->calculatePopularityForSets();
 
         $output->writeln('Calculation of scores');
-        $users = GeneralUtility::makeInstance(UserRepository::class)->findAll();
+        /** @var UserRepository $userRepository */
+        $userRepository = GeneralUtility::makeInstance(UserRepository::class);
+        $users = $userRepository->findAll();
         /** @var User $user */
         foreach ($users as $user) {
             if ($user->isAnonymous()) {

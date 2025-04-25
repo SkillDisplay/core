@@ -25,20 +25,20 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
+use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyLoadingProxy;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Skill extends AbstractEntity
 {
-    public const VISIBILITY_PUBLIC = 0;
-    public const VISIBILITY_ORGANISATION = 1;
+    public const int VISIBILITY_PUBLIC = 0;
+    public const int VISIBILITY_ORGANISATION = 1;
 
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid',
             'title',
@@ -108,7 +108,7 @@ class Skill extends AbstractEntity
         ],
     ];
 
-    public const TRANSLATE_FIELDS = [
+    public const array TRANSLATE_FIELDS = [
         'title',
         'description',
         'icon',
@@ -116,7 +116,7 @@ class Skill extends AbstractEntity
         'goals',
     ];
 
-    public const LevelTierMap = [
+    public const array LevelTierMap = [
         'undefined' => 0,
         'self' => 3,
         'education' => 2,
@@ -129,51 +129,43 @@ class Skill extends AbstractEntity
         'tier4' => 4,
     ];
 
-    protected SkillRepository $skillRepository;
-    protected CertificationRepository $certificationRepository;
-    protected SkillPathRepository $skillPathRepository;
-
     private ?User $user = null;
 
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $title = '';
     protected string $description = '';
     protected string $goals = '';
     protected string $icon = '';
 
-    /**
-     * @Lazy
-     * @Cascade("remove")
-     */
+    #[Lazy]
+    #[Cascade(['value' => 'remove'])]
     protected FileReference|LazyLoadingProxy|null $image = null;
 
     /**
-     * @var ObjectStorage<Brand>
-     * @Lazy
+     * @var ObjectStorage<Brand>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $brands;
 
     /**
-     * @var ObjectStorage<Tag>
-     * @Lazy
+     * @var ObjectStorage<Tag>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $tags;
 
     protected ?Tag $domainTag = null;
 
     /**
-     * @var ObjectStorage<Link>
-     * @Lazy
+     * @var ObjectStorage<Link>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $links;
 
     /**
-     * @var ObjectStorage<Requirement>
-     * @Lazy
-     * @Cascade("remove")
+     * @var ObjectStorage<Requirement>|LazyObjectStorage
      */
+    #[Lazy]
+    #[Cascade(['value' => 'remove'])]
     protected ObjectStorage|LazyObjectStorage $requirements;
 
     protected bool $placeholder = false;
@@ -185,18 +177,21 @@ class Skill extends AbstractEntity
     private ?array $progressCache = null;
     protected int $visibility = 0;
 
-    /**
-     * non-persisted property
-     */
+    #[Transient]
     protected array $recommendedSkillSets = [];
 
     public function __construct()
+    {
+        $this->uuid = CertoBot::uuid();
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
     {
         $this->brands = new ObjectStorage();
         $this->tags = new ObjectStorage();
         $this->links = new ObjectStorage();
         $this->requirements = new ObjectStorage();
-        $this->uuid = CertoBot::uuid();
     }
 
     public function getSingleProgressPercentage(): array
@@ -211,12 +206,17 @@ class Skill extends AbstractEntity
             return $stats;
         }
         $cacheKey = 'percent_' . $this->user->getUid() . '_' . $this->getUid();
-        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('skill_progress');
+        /** @var CacheManager $cacheManager */
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+        $cache = $cacheManager->getCache('skill_progress');
         $cachedStats = $cache->get($cacheKey);
         if ($cachedStats) {
             return $cachedStats;
         }
-        $certifications = $this->certificationRepository->findBySkillsAndUser([$this], $this->user);
+
+        /** @var CertificationRepository $certificationRepository */
+        $certificationRepository = GeneralUtility::makeInstance(CertificationRepository::class);
+        $certifications = $certificationRepository->findBySkillsAndUser([$this], $this->user);
         foreach ($certifications as $csor) {
             if ($csor->getGrantDate() && !$csor->getDenyDate() && !$csor->getRevokeDate()) {
                 $stats[$csor->getLevel()] = 100;
@@ -238,9 +238,7 @@ class Skill extends AbstractEntity
             foreach ($requirement->getSets() as $set) {
                 /** @var SetSkill $setskill */
                 foreach ($set->getSkills() as $setskill) {
-                    if ($setskill->getSkill()) {
-                        $setskill->getSkill()->setUserForCompletedChecks($user);
-                    }
+                    $setskill->getSkill()?->setUserForCompletedChecks($user);
                 }
             }
         }
@@ -306,12 +304,16 @@ class Skill extends AbstractEntity
             return $stats;
         }
         $cacheKey = 'completed_' . $this->user->getUid() . '_' . $this->getUid();
-        $cache = GeneralUtility::makeInstance(CacheManager::class)->getCache('skill_progress');
+        /** @var CacheManager $cacheManager */
+        $cacheManager = GeneralUtility::makeInstance(CacheManager::class);
+        $cache = $cacheManager->getCache('skill_progress');
         $cachedStats = $cache->get($cacheKey);
         if ($cachedStats) {
             return $cachedStats;
         }
-        $certifications = $this->certificationRepository->findBySkillsAndUser([$this], $this->user);
+        /** @var CertificationRepository $certificationRepository */
+        $certificationRepository = GeneralUtility::makeInstance(CertificationRepository::class);
+        $certifications = $certificationRepository->findBySkillsAndUser([$this], $this->user);
         foreach ($certifications as $cert) {
             $stats->addCertification($cert);
         }
@@ -597,16 +599,19 @@ class Skill extends AbstractEntity
      */
     public function getSuccessorSkills(): array
     {
-        return $this->skillRepository->findParents($this);
+        /** @var SkillRepository $skillRepository */
+        $skillRepository = GeneralUtility::makeInstance(SkillRepository::class);
+        return $skillRepository->findParents($this);
     }
 
     /**
      * @return SkillPath[]
-     * @throws InvalidQueryException
      */
     public function getContainingPaths(): array
     {
-        return $this->skillPathRepository->findBySkill($this);
+        /** @var SkillPathRepository $skillPathRepository */
+        $skillPathRepository = GeneralUtility::makeInstance(SkillPathRepository::class);
+        return $skillPathRepository->findBySkill($this);
     }
 
     public function getGoals(): string
@@ -634,24 +639,9 @@ class Skill extends AbstractEntity
         return $this->owner;
     }
 
-    public function setOwner(User $owner = null): void
+    public function setOwner(?User $owner = null): void
     {
         $this->owner = $owner;
-    }
-
-    public function injectCertificationRepository(CertificationRepository $certificationRepository): void
-    {
-        $this->certificationRepository = $certificationRepository;
-    }
-
-    public function injectSkillPathRepository(SkillPathRepository $skillPathRepository): void
-    {
-        $this->skillPathRepository = $skillPathRepository;
-    }
-
-    public function injectSkillRepository(SkillRepository $skillRepository): void
-    {
-        $this->skillRepository = $skillRepository;
     }
 
     public function getExportJson(): string
@@ -684,9 +674,9 @@ class Skill extends AbstractEntity
         $requirements = [];
         foreach ($this->getRequirements() as $requirement) {
             $sets = [];
+            /** @var Set $set*/
             foreach ($requirement->getSets() as $set) {
                 $setGroup = [];
-                /** @var Set $set*/
                 foreach ($set->getSkills() as $setSkill) {
                     $skill1 = $setSkill->getSkill();
                     if ($skill1) {
@@ -709,7 +699,7 @@ class Skill extends AbstractEntity
 
         $skill = [
             'uuid' => $this->uuid,
-            'type' => get_class($this),
+            'type' => static::class,
             'uid' => $this->getUid(),
             'data' => $data,
         ];
@@ -723,7 +713,7 @@ class Skill extends AbstractEntity
         }
 
         $image = $this->getImage();
-        if ($image && $image->getOriginalResource()) {
+        if ($image) {
             ExportService::encodeFileReference($image->getOriginalResource(), $skill, 'image');
         }
 

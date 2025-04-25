@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Domain\Model;
 
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
+use SkillDisplay\Skills\Domain\Repository\CategoryRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Service\CertoBot;
 use SkillDisplay\Skills\Service\Importer\ExportService;
@@ -22,16 +23,16 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Annotation\ORM\Cascade;
 use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
+use TYPO3\CMS\Extbase\Annotation\ORM\Transient;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
-use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class SkillPath extends AbstractEntity
 {
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid',
             'name',
@@ -55,7 +56,7 @@ class SkillPath extends AbstractEntity
         ],
     ];
 
-    public const JsonRecommendedViewConfiguration = [
+    public const array JsonRecommendedViewConfiguration = [
         '_only' => [
             'uid',
             'name',
@@ -79,32 +80,28 @@ class SkillPath extends AbstractEntity
         ],
     ];
 
-    public const TRANSLATE_FIELDS = [
+    public const array TRANSLATE_FIELDS = [
         'name',
         'description',
     ];
 
-    public const VISIBILITY_PUBLIC = 0;
-    public const VISIBILITY_ORGANISATION = 1;
-    public const VISIBILITY_LINK = 2;
+    public const int VISIBILITY_PUBLIC = 0;
+    public const int VISIBILITY_ORGANISATION = 1;
+    public const int VISIBILITY_LINK = 2;
 
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $name = '';
 
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $description = '';
 
     /** @var ObjectStorage<Brand> */
     protected ObjectStorage $brands;
 
     /**
-     * @var ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference>
-     * @Cascade("remove")
+     * @var ObjectStorage<FileReference>
      */
+    #[Cascade(['value' => 'remove'])]
     protected ObjectStorage $media;
 
     /** @var ObjectStorage<Skill> */
@@ -112,14 +109,14 @@ class SkillPath extends AbstractEntity
 
     /**
      * @var ObjectStorage<Link>
-     * @Cascade("remove")
      */
+    #[Cascade(['value' => 'remove'])]
     protected ObjectStorage $links;
 
     /**
-     * @var ObjectStorage<Tag>
-     * @Lazy
+     * @var ObjectStorage<Tag>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $tags;
 
     /**
@@ -139,27 +136,23 @@ class SkillPath extends AbstractEntity
     protected int $visibility = 0;
     protected float $popularityLog2 = 0.0;
 
-    /**
-     * non-persisted property
-     */
+    #[Transient]
     protected array $recommendedSkillSets = [];
-
-    protected ?CertificationRepository $certificationRepository = null;
 
     public function __construct()
     {
         $this->uuid = CertoBot::uuid();
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
+    {
         $this->brands = new ObjectStorage();
         $this->skills = new ObjectStorage();
         $this->media = new ObjectStorage();
         $this->links = new ObjectStorage();
         $this->tags = new ObjectStorage();
         $this->categories = new ObjectStorage();
-    }
-
-    public function injectCertificationRepository(CertificationRepository $certificationRepository): void
-    {
-        $this->certificationRepository = $certificationRepository;
     }
 
     public function setUserForCompletedChecks(User $user): void
@@ -203,12 +196,14 @@ class SkillPath extends AbstractEntity
 
     public function getVerifiers(): array
     {
+        /** @var BrandRepository $brandRepo */
         $brandRepo = GeneralUtility::makeInstance(BrandRepository::class);
         return $brandRepo->findVerifierBrandsForPath($this, 0);
     }
 
     public function getCertifiers(): array
     {
+        /** @var BrandRepository $brandRepo */
         $brandRepo = GeneralUtility::makeInstance(BrandRepository::class);
         return $brandRepo->findVerifierBrandsForPath($this, 1);
     }
@@ -235,9 +230,11 @@ class SkillPath extends AbstractEntity
         if ($cachedStats) {
             return $cachedStats;
         }
+
+        $certificationRepository = GeneralUtility::makeInstance(CertificationRepository::class);
         $certifications = [];
         if (!empty($this->skills->toArray())) {
-            $certifications = $this->certificationRepository->findBySkillsAndUser($this->skills->toArray(), $this->user);
+            $certifications = $certificationRepository->findBySkillsAndUser($this->skills->toArray(), $this->user);
         }
 
         foreach ($certifications as $cert) {
@@ -378,12 +375,12 @@ class SkillPath extends AbstractEntity
         return $this->skills->count();
     }
 
-    public function addMedia(\TYPO3\CMS\Extbase\Domain\Model\FileReference $media): void
+    public function addMedia(FileReference $media): void
     {
         $this->media->attach($media);
     }
 
-    public function removeMedia(\TYPO3\CMS\Extbase\Domain\Model\FileReference $mediaToRemove): void
+    public function removeMedia(FileReference $mediaToRemove): void
     {
         $this->media->detach($mediaToRemove);
     }
@@ -391,7 +388,7 @@ class SkillPath extends AbstractEntity
     /**
      * Returns the media
      *
-     * @return ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference>
+     * @return ObjectStorage<FileReference>
      */
     public function getMedia(): ObjectStorage
     {
@@ -401,7 +398,7 @@ class SkillPath extends AbstractEntity
     /**
      * Sets the media
      *
-     * @param ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\FileReference> $media
+     * @param ObjectStorage<FileReference> $media
      */
     public function setMedia(ObjectStorage $media): void
     {
@@ -411,7 +408,7 @@ class SkillPath extends AbstractEntity
     public function getMediaPublicUrl(): string
     {
         $file = $this->getFirstMedia();
-        return $file && $file->getOriginalResource() ? (string)$file->getOriginalResource()->getPublicUrl() : '';
+        return (string)$file?->getOriginalResource()->getPublicUrl();
     }
 
     private function getFirstMedia(): ?FileReference
@@ -504,7 +501,7 @@ class SkillPath extends AbstractEntity
     public function getRecommendedSkills(): array
     {
         $skills = [];
-        $skillIds = array_map(function (Skill $skill) {return $skill->getUid();}, $this->skills->toArray());
+        $skillIds = array_map(fn(Skill $skill) => $skill->getUid(), $this->skills->toArray());
         foreach ($this->skills as $skill) {
             if (!$skill->getCompletedInformation()->isCompleted() && $skill->getCanBeTakenByUser([], $skillIds)) {
                 $skills[] = $skill;
@@ -560,7 +557,7 @@ class SkillPath extends AbstractEntity
 
         $set = [
             'uuid' => $this->uuid,
-            'type' => get_class($this),
+            'type' => static::class,
             'uid' => $this->getUid(),
             'data' => $data,
         ];
@@ -570,7 +567,7 @@ class SkillPath extends AbstractEntity
         $set['skills'] = $skills;
 
         $file = $this->getFirstMedia();
-        if ($file && $file->getOriginalResource()) {
+        if ($file) {
             ExportService::encodeFileReference($file->getOriginalResource(), $set, 'media');
         }
 

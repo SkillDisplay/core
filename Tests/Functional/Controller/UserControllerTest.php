@@ -13,6 +13,7 @@ use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Repository\AwardRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
 use SkillDisplay\Skills\Domain\Repository\CertifierRepository;
+use SkillDisplay\Skills\Domain\Repository\FrontendUserGroupRepository;
 use SkillDisplay\Skills\Domain\Repository\GrantedRewardRepository;
 use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Service\ShortLinkService;
@@ -20,7 +21,6 @@ use SkillDisplay\Skills\Service\UserService;
 use SkillDisplay\Skills\Tests\Functional\SimulateLoginTrait;
 use SkillDisplay\Skills\Validation\Validator\EditUserValidator;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserGroupRepository;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\TestingFramework\Core\AccessibleObjectInterface;
 use TYPO3\TestingFramework\Core\Exception;
@@ -29,10 +29,11 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
 {
     use SimulateLoginTrait;
 
-    protected UserController|MockObject|AccessibleObjectInterface $subject;
+    protected UserController&MockObject&AccessibleObjectInterface $subject;
 
     protected MockObject|UserService $userManager;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -44,7 +45,6 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
 
         $validator = $this->getMockBuilder(EditUserValidator::class)
                           ->onlyMethods(['getErrorMessage'])
-                          ->setConstructorArgs([[], $this->userRepository])
                           ->getMock();
         $validator->method('getErrorMessage')->willReturn('');
         GeneralUtility::addInstance(EditUserValidator::class, $validator);
@@ -70,17 +70,18 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @throws Exception
      */
+    #[\Override]
     protected function setUpDatabase(): void
     {
         $this->importCSVDataSet(__DIR__ . '/../Fixtures/be_users.csv');
         $this->setUpBackendUser(1);
-        $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/user_access_test.csv');
     }
 
     /**
      * @test
      */
-    public function updateProfileFailsForNoLoggedInUser()
+    public function updateProfileFailsForNoLoggedInUser(): void
     {
         $this->expectException(RuntimeException::class);
 
@@ -90,7 +91,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function updateProfileFailsForNoEmptyFirstName()
+    public function updateProfileFailsForNoEmptyFirstName(): void
     {
         $this->simulateLogin();
         $this->userManager->expects(self::never())->method('update');
@@ -104,7 +105,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function updateProfileFailsForNoEmptyLastName()
+    public function updateProfileFailsForNoEmptyLastName(): void
     {
         $this->simulateLogin();
         $this->userManager->expects(self::never())->method('update');
@@ -118,7 +119,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function updateProfileSuccessForValidName()
+    public function updateProfileSuccessForValidName(): void
     {
         $this->simulateLogin();
         $this->userManager->expects(self::once())->method('update')->with($this->currentUser);
@@ -137,7 +138,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
      * @test
      * @throws InvalidQueryException
      */
-    public function publicProfileNotVisibleIfNotEnabled()
+    public function publicProfileNotVisibleIfNotEnabled(): void
     {
         $this->currentUser->setPublishSkills(false);
         $this->subject->publicProfileAction($this->currentUser);
@@ -152,7 +153,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function publicVerificationsHiddenIfUserDoesNotPublish()
+    public function publicVerificationsHiddenIfUserDoesNotPublish(): void
     {
         $this->expectException(AuthenticationException::class);
 
@@ -164,7 +165,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function publicVerificationsByBrandHiddenIfUserDoesNotPublish()
+    public function publicVerificationsByBrandHiddenIfUserDoesNotPublish(): void
     {
         $this->expectException(AuthenticationException::class);
 
@@ -176,7 +177,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function publicVerificationsHidePrivateSkills()
+    public function publicVerificationsHidePrivateSkills(): void
     {
         $this->simulateLogin2();
         $this->subject->publicProfileVerificationsAction($this->currentUser, Certification::TYPE_GROUPED_BY_BRAND);
@@ -188,7 +189,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function publicVerificationsShowsPrivateSkillsForMembers()
+    public function publicVerificationsShowsPrivateSkillsForMembers(): void
     {
         $this->simulateLogin();
         $this->subject->publicProfileVerificationsAction($this->currentUser, Certification::TYPE_GROUPED_BY_BRAND);
@@ -200,7 +201,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function publicVerificationsHidePrivateSkillsForDateType()
+    public function publicVerificationsHidePrivateSkillsForDateType(): void
     {
         $this->simulateLogin2();
         $this->subject->publicProfileVerificationsAction($this->currentUser);
@@ -212,7 +213,7 @@ class UserControllerTest extends AbstractFunctionalControllerTestCaseBase
     /**
      * @test
      */
-    public function publicVerificationsShowsPrivateSkillsForMembersForDateType()
+    public function publicVerificationsShowsPrivateSkillsForMembersForDateType(): void
     {
         $this->simulateLogin();
         $this->subject->publicProfileVerificationsAction($this->currentUser);

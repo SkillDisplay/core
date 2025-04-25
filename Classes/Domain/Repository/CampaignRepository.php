@@ -18,13 +18,14 @@ use SkillDisplay\Skills\Domain\Model\Campaign;
 class CampaignRepository extends BaseRepository
 {
     /**
-     * @param int $userId
      * @return Campaign[]
      */
     public function findByUserId(int $userId): array
     {
         $q = $this->createQuery();
         $q->matching($q->equals('user', $userId));
-        return $q->execute()->toArray();
+        /** @var Campaign[] $res */
+        $res = $q->execute()->toArray();
+        return $res;
     }
 }

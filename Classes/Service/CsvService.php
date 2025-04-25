@@ -26,11 +26,10 @@ class CsvService
      */
     public static function sendCSVFile(array $lines, string $filename): never
     {
-        $lines = array_map(function ($line) {
+        $lines = array_map(fn($line) =>
             //  disabled because of SKILL-1127
             // return mb_convert_encoding(CsvUtility::csvValues($line, ';'), 'iso-8859-1', 'utf-8');
-            return CsvUtility::csvValues($line, ';');
-        }, $lines);
+            CsvUtility::csvValues($line, ';'), $lines);
 
         $content = implode(chr(13) . chr(10), $lines);
 

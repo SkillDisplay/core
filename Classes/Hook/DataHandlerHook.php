@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Hook;
 
-use Doctrine\DBAL\Connection as ConnectionAlias;
+use Doctrine\DBAL\ArrayParameterType;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Repository\RecommendedSkillSetRepository;
@@ -30,9 +30,9 @@ use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Log\LogManager;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class DataHandlerHook
@@ -40,9 +40,8 @@ class DataHandlerHook
     public function processDatamap_preProcessFieldArray(
         &$incomingFieldArray,
         $table,
-        $id,
-        DataHandler $dataHandler
-    ) {
+        $id
+    ): void {
         if ($table === 'tx_skills_domain_model_skill' && isset($incomingFieldArray['visibility']) &&
             (int)$incomingFieldArray['visibility'] === Skill::VISIBILITY_ORGANISATION) {
             if ($this->skillHasPublicSkillSet((int)$id)) {
@@ -54,7 +53,7 @@ class DataHandlerHook
             (int)$incomingFieldArray['visibility'] === SkillPath::VISIBILITY_PUBLIC) {
             if ($this->skillPathHasPrivateSkills((int)$id)) {
                 $incomingFieldArray['visibility'] = SkillPath::VISIBILITY_ORGANISATION;
-                $this->generateFlashMessage('Cannot make SkillSet public due to non-public skills', 'Warning', AbstractMessage::WARNING);
+                $this->generateFlashMessage('Cannot make SkillSet public due to non-public skills', 'Warning', ContextualFeedbackSeverity::WARNING);
             }
         }
     }
@@ -68,7 +67,7 @@ class DataHandlerHook
      * @throws AspectNotFoundException
      * @throws AspectPropertyNotFoundException
      */
-    public function processDatamap_postProcessFieldArray(string $status, string $table, int|string $id, array &$fieldArray, DataHandler $dataHandler)
+    public function processDatamap_postProcessFieldArray(string $status, string $table, int|string $id, array &$fieldArray, DataHandler $dataHandler): void
     {
         if ($table === 'fe_users') {
             if (isset($fieldArray['username'])) {
@@ -81,7 +80,7 @@ class DataHandlerHook
             $newValue = $fieldArray['credit_overdraw'];
             $beUserId = GeneralUtility::makeInstance(Context::class)->getAspect('backend.user')->get('id');
             GeneralUtility::makeInstance(LogManager::class)
-                          ->getLogger(__CLASS__)
+                          ->getLogger(self::class)
                           ->info("Credit overdraw changed to $newValue for Brand ID $id by BE user ID $beUserId");
         }
         if ($table === 'tx_skills_domain_model_verificationcreditpack') {
@@ -92,11 +91,11 @@ class DataHandlerHook
                 }
             }
             if ($fieldArray['valid_thru'] && $fieldArray['valid_thru'] < $fieldArray['valuta']) {
-                $this->generateFlashMessage('Valuta has to be before Valid thru!', 'Error', AbstractMessage::ERROR);
+                $this->generateFlashMessage('Valuta has to be before Valid thru!', 'Error', ContextualFeedbackSeverity::ERROR);
             }
             $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
             if ($fieldArray['initial_points'] == 0 && $fieldArray['valuta'] > $now) {
-                $this->generateFlashMessage('Valuta cannot be in the future!', 'Error', AbstractMessage::ERROR);
+                $this->generateFlashMessage('Valuta cannot be in the future!', 'Error', ContextualFeedbackSeverity::ERROR);
             }
         }
         if (in_array($table, TranslatedUuidService::UUID_TABLES, true)) {
@@ -129,7 +128,7 @@ class DataHandlerHook
         string $id,
         array $fieldArray,
         DataHandler $dataHandler
-    ) {
+    ): void {
         $realId = $status === 'new' ? (int)$dataHandler->substNEWwithIDs[$id] : (int)$id;
 
         if (in_array($table, TranslatedUuidService::UUID_TABLES, true)) {
@@ -172,7 +171,7 @@ class DataHandlerHook
                 ->where(
                     $qb->expr()->eq('credit_pack', $qb->createNamedParameter($id, Connection::PARAM_INT)),
                 )
-                ->execute()->fetchOne();
+                ->executeQuery()->fetchOne();
             if (!$usages) {
                 $this->balanceOpenVerifications($row);
             }
@@ -203,7 +202,7 @@ class DataHandlerHook
         }
     }
 
-    public function processCmdmap_deleteAction(string $table, $id)
+    public function processCmdmap_deleteAction(string $table, $id): void
     {
         switch ($table) {
             case 'tx_skills_domain_model_skill':
@@ -220,10 +219,6 @@ class DataHandlerHook
         }
     }
 
-    /**
-     * @param int $skillId
-     * @return int[]
-     */
     private function fetchBrandIdsOfSkill(int $skillId): array
     {
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)
@@ -300,7 +295,7 @@ class DataHandlerHook
         $qb->delete('tx_skills_skillset_brand_mm')
            ->where(
                $qb->expr()->eq('uid_local', $skillSetId),
-               $qb->expr()->in('uid_foreign', $qb->createNamedParameter($brandIds, ConnectionAlias::PARAM_INT_ARRAY))
+               $qb->expr()->in('uid_foreign', $qb->createNamedParameter($brandIds, ArrayParameterType::INTEGER))
            )
            ->executeStatement();
     }
@@ -346,7 +341,7 @@ class DataHandlerHook
         return count($result) > 0;
     }
 
-    private function balanceOpenVerifications(array $pack)
+    private function balanceOpenVerifications(array $pack): void
     {
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)
                             ->getQueryBuilderForTable('tx_skills_domain_model_certification');
@@ -396,7 +391,7 @@ class DataHandlerHook
         return [];
     }
 
-    public function clearProgressCache(array $params)
+    public function clearProgressCache(array $params): void
     {
         if ($params['table'] === 'tx_skills_domain_model_skillpath') {
             /** @var CacheManager $cacheManager */

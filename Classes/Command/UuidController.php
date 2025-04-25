@@ -16,19 +16,21 @@ class UuidController extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this->setDescription('Checks that all records have a UUID and that translations have the same UUID with isocode suffix.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName(ConnectionPool::DEFAULT_CONNECTION_NAME);
         $iso = [];
 
         foreach (TranslatedUuidService::UUID_TABLES as $table) {
             $qb = $connection->createQueryBuilder();
-            $hasLanguageField = (bool)$GLOBALS['TCA'][$table]['ctrl']['languageField'] ?? false;
+            $hasLanguageField = (bool)($GLOBALS['TCA'][$table]['ctrl']['languageField'] ?? false);
             // create uuid for all default language records
             $conditions = [
                 'uuid = \'\' or uuid is null',

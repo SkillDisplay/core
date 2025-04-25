@@ -1,0 +1,5 @@
+tx_skills_domain_model_brand
+,uid,pid,name,description,logo,url,members
+,1,3,Skilldisplay,lorem ipsum,1,https://www.skilldisplay.eu,5
+,2,3,Erasmus+,lorem ipsum,1,https://www.skilldisplay.eu,2
+,3,3,TYPO3,lorem ipsum,1,https://www.skilldisplay.eu,5

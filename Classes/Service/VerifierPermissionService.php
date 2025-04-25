@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service;
 
+use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Repository\SkillPathRepository;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\Exception;
 
 class VerifierPermissionService
 {
-    private const PERMISSIONS_TABLE = 'tx_skills_domain_model_certifierpermission';
+    private const string PERMISSIONS_TABLE = 'tx_skills_domain_model_certifierpermission';
 
     /**
      * @param int[] $verifiers
      * @param int[] $skillSets
      * @param array $permissions
-     * @return int
-     * @throws Exception
      */
     public static function grantPermissions(array $verifiers, array $skillSets, array $permissions): int
     {
@@ -41,9 +39,6 @@ class VerifierPermissionService
     /**
      * @param int[] $verifiers
      * @param int[] $skillSets
-     * @param array $permissions
-     * @return int
-     * @throws Exception
      */
     public static function revokePermissions(array $verifiers, array $skillSets, array $permissions): int
     {
@@ -79,14 +74,15 @@ class VerifierPermissionService
     /**
      * @param int[] $skillSets
      * @return int[]
-     * @throws Exception
      */
     private static function loadSkills(array $skillSets): array
     {
+        /** @var SkillPathRepository $skillPathRepository */
         $skillPathRepository = GeneralUtility::makeInstance(SkillPathRepository::class);
         $skills = [];
         foreach ($skillSets as $skillSetId) {
-            $skillSet = $skillPathRepository->findByUid((int)$skillSetId);
+            /** @var ?SkillPath $skillSet */
+            $skillSet = $skillPathRepository->findByUid($skillSetId);
             array_push($skills, ...$skillSet->getSkillIds());
         }
         return array_unique($skills);
@@ -151,7 +147,6 @@ class VerifierPermissionService
         $data['pid'] = self::fetchPidFromVerifier($verifierId);
         $data['tstamp'] = $now;
         $data['crdate'] = $now;
-        $data['cruser_id'] = 1;
         $qb
             ->insert(self::PERMISSIONS_TABLE)
             ->values($data)

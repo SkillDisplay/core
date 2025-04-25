@@ -15,6 +15,7 @@ namespace SkillDisplay\Skills\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use SkillDisplay\Skills\AuthenticationException;
+use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -56,6 +57,7 @@ class VerifierController extends AbstractController
                 $certs = [$this->certificationRepository->findByUid($request['uid'])];
             }
             $neededPoints = $this->verificationService->calculatePointsNeeded($certs);
+            /** @var Brand $organisation */
             $organisation = $this->brandRepository->findByUid((int)$request['brandId']);
             $request['canBeAccepted'] = $certs[0]->isPending() && ($organisation->getCreditOverdraw() ||
                           $this->verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));
@@ -102,9 +104,7 @@ class VerifierController extends AbstractController
         }
 
         $userSelectedVerifiers = array_map(
-            function (Certifier $fav) {
-                return $fav->getUid();
-            },
+            fn(Certifier $fav) => $fav->getUid(),
             $user->getFavouriteCertifiers()->getArray()
         );
 
@@ -142,7 +142,7 @@ class VerifierController extends AbstractController
     {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 7742607010);
         }
         $verifiers = $this->certifierRepository->findByUser($user);
 
@@ -161,6 +161,7 @@ class VerifierController extends AbstractController
                         $certs = [$this->certificationRepository->findByUid($request['uid'])];
                     }
                     $neededPoints = $this->verificationService->calculatePointsNeeded($certs);
+                    /** @var Brand $organisation */
                     $organisation = $this->brandRepository->findByUid((int)$request['brandId']);
                     $request['canBeAccepted'] = $certs[0]->isPending() && ($organisation->getCreditOverdraw() ||
                                                 $this->verificationService->organisationHasEnoughCredit($organisation->getUid(), $neededPoints));

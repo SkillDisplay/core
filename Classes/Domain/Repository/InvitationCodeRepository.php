@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Domain\Repository;
 
 use SkillDisplay\Skills\Domain\Model\InvitationCode;
-use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 class InvitationCodeRepository extends BaseRepository
 {
@@ -23,14 +22,8 @@ class InvitationCodeRepository extends BaseRepository
         $query = $this->createQuery();
 
         $result = $query->matching($query->equals('code', $code))->setLimit(1)->execute();
-        if ($result instanceof QueryResultInterface) {
-            /** @var InvitationCode $first */
-            $first = $result->getFirst();
-            return $first;
-        }
-        if (is_array($result)) {
-            return $result[0] ?? null;
-        }
-        return null;
+        /** @var ?InvitationCode $first */
+        $first = $result->getFirst();
+        return $first;
     }
 }

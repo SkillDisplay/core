@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
-use Doctrine\DBAL\Driver\Exception;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -26,9 +25,11 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * The repository for brands
+ * @extends BaseRepository<Brand>
  */
 class BrandRepository extends BaseRepository
 {
+    #[\Override]
     public function findAll(): QueryResultInterface
     {
         $q = $this->createQuery();
@@ -38,12 +39,7 @@ class BrandRepository extends BaseRepository
         return $q->execute();
     }
 
-    /**
-     * @param int $categoryId
-     * @return Brand[]|QueryResultInterface
-     * @throws InvalidQueryException
-     */
-    public function findAllByCategory(int $categoryId): array|QueryResultInterface
+    public function findAllByCategory(int $categoryId): QueryResultInterface
     {
         $q = $this->createQuery();
         $q->matching($q->contains('categories', $categoryId));
@@ -55,9 +51,7 @@ class BrandRepository extends BaseRepository
     }
 
     /**
-     * @param Brand $brand
-     * @return Brand[]
-     * @throws Exception
+     * @phpstan-return list<Brand>
      */
     public function findPatronsForBrand(Brand $brand): array
     {
@@ -76,16 +70,11 @@ class BrandRepository extends BaseRepository
     }
 
     /**
-     * @param SkillPath $path
-     * @param int $level
-     * @return Brand[]
-     * @throws Exception
+     * @phpstan-return list<Brand>
      */
     public function findVerifierBrandsForPath(SkillPath $path, int $level): array
     {
-        $skillIds = array_map(function (Skill $skill) {
-            return $skill->getUid();
-        }, $path->getSkills()->toArray());
+        $skillIds = array_map(fn(Skill $skill) => $skill->getUid(), $path->getSkills()->toArray());
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(
             'tx_skills_domain_model_brand'
         );
@@ -105,8 +94,7 @@ class BrandRepository extends BaseRepository
     }
 
     /**
-     * @return Brand[]
-     * @throws Exception
+     * @phpstan-return list<Brand>
      */
     public function findAllWithSkills(): array
     {
@@ -125,10 +113,6 @@ class BrandRepository extends BaseRepository
         return $this->mapRows($qb->executeQuery()->fetchAllAssociative());
     }
 
-    /**
-     * @return QueryResultInterface
-     * @throws InvalidQueryException
-     */
     public function findAllWithMembers(): QueryResultInterface
     {
         $q = $this->createQuery();
@@ -139,11 +123,6 @@ class BrandRepository extends BaseRepository
         return $q->execute();
     }
 
-    /**
-     * @param int $brandId
-     * @return int
-     * @throws Exception
-     */
     public function getSkillCountForBrand(int $brandId): int
     {
         $qb = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable(

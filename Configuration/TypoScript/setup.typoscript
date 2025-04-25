@@ -54,26 +54,6 @@ plugin.tx_skills {
 
 module.tx_skills < plugin.tx_skills
 
-lib.organisationNews = USER
-lib.organisationNews {
-  userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
-  extensionName = News
-  pluginName = Pi1
-  vendorName = GeorgRinger
-
-  switchableControllerActions {
-    News {
-      1 = list
-    }
-  }
-
-  settings < plugin.tx_news.settings
-  settings {
-    limit = 3
-    overrideFlexformSettingsIfEmpty := addToList(detailPid)
-  }
-}
-
 skills_api = PAGE
 skills_api {
   typeNum = {$pageTypes.api}
@@ -88,6 +68,6 @@ skills_api {
     }
   }
 
-  10 < tt_content.list.20.skills_api
+  10 < tt_content.skills_api.20
   10.format = json
 }

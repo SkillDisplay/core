@@ -1,0 +1,43 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Offset 0 does not exist on TYPO3\\CMS\\Extbase\\Persistence\\ObjectStorage\<SkillDisplay\\Skills\\Domain\\Model\\Brand\>\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: Classes/Controller/BackendController.php
+
+		-
+			message: '#^Variable \$campaign might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: Classes/Controller/CertificationController.php
+
+		-
+			message: '#^Variable \$cert might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: Classes/Controller/CertificationController.php
+
+		-
+			message: '#^Variable \$user might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: Classes/Controller/CertificationController.php
+
+		-
+			message: '#^Variable \$verifier might not be defined\.$#'
+			identifier: variable.undefined
+			count: 4
+			path: Classes/Controller/CertificationController.php
+
+		-
+			message: '#^Access to property \$billingPortal on an unknown class Stripe\\StripeClient\.$#'
+			identifier: class.notFound
+			count: 1
+			path: Classes/Controller/PaymentController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: Classes/Domain/Repository/RecommendedSkillSetRepository.php

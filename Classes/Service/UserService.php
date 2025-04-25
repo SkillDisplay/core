@@ -12,16 +12,16 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service;
 
+use SkillDisplay\Skills\Domain\Model\FrontendUserGroup;
 use SkillDisplay\Skills\Domain\Model\Password;
 use SkillDisplay\Skills\Domain\Model\User;
+use SkillDisplay\Skills\Domain\Repository\FrontendUserGroupRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\PasswordHashFactory;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Domain\Model\FrontendUserGroup;
-use TYPO3\CMS\Extbase\Domain\Repository\FrontendUserGroupRepository;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class UserService
@@ -69,6 +69,7 @@ class UserService
         $user->setPassword($this->encryptPassword($user->getPassword()));
         $this->userRepository->add($user);
 
+        /** @var PersistenceManager $persistenceManager */
         $persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
         $persistenceManager->persistAll();
     }
@@ -98,6 +99,13 @@ class UserService
         $this->userRepository->update($user);
     }
 
+    public function delete(User $user): void
+    {
+        $user->setDisable(true);
+        // @todo maybe add anonymization here
+        $this->userRepository->update($user);
+    }
+
     protected function encryptPassword(string $password): string
     {
         $saltFactory = GeneralUtility::makeInstance(PasswordHashFactory::class);
@@ -108,7 +116,7 @@ class UserService
     public function validatePassword(Password $password): string
     {
         $feUserId = GeneralUtility::makeInstance(Context::class)->getAspect('frontend.user')->get('id');
-        /** @var User $user */
+        /** @var ?User $user */
         $user = $this->userRepository->findByUid($feUserId);
         if (!$user) {
             return 'No login user found.';

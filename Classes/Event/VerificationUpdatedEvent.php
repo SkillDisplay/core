@@ -6,9 +6,9 @@ namespace SkillDisplay\Skills\Event;
 
 use SkillDisplay\Skills\Domain\Model\Certification;
 
-class VerificationUpdatedEvent
+readonly class VerificationUpdatedEvent
 {
-    public function __construct(private readonly array $verifications) {}
+    public function __construct(private array $verifications) {}
 
     /**
      * @return Certification[]

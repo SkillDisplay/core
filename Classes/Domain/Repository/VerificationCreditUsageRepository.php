@@ -14,16 +14,11 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Domain\Repository;
 
 use SkillDisplay\Skills\Domain\Model\Certification;
-use SkillDisplay\Skills\Domain\Model\VerificationCreditUsage;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 class VerificationCreditUsageRepository extends BaseRepository
 {
-    /**
-     * @param Certification $certification
-     * @return VerificationCreditUsage[]|QueryResultInterface
-     */
-    public function findByVerification(Certification $certification): array|QueryResultInterface
+    public function findByVerification(Certification $certification): QueryResultInterface
     {
         $query = $this->createQuery();
         return $query->matching($query->equals('verification', $certification))->execute();

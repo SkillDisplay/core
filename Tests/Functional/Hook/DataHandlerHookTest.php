@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Hook;
 
-use Doctrine\DBAL\DBALException;
 use SkillDisplay\Skills\Domain\Repository\VerificationCreditUsageRepository;
 use SkillDisplay\Skills\Hook\DataHandlerHook;
 use SkillDisplay\Skills\Tests\Functional\AbstractFunctionalTestCaseBase;
@@ -18,7 +17,6 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
     protected VerificationCreditUsageRepository $verificationcreditUsageRepository;
 
     /**
-     * @throws DBALException
      * @throws Exception
      */
     protected function setUp(): void
@@ -27,14 +25,14 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
         $this->dataHandlerHook = GeneralUtility::makeInstance(DataHandlerHook::class);
         $this->verificationcreditUsageRepository = GeneralUtility::makeInstance(VerificationCreditUsageRepository::class);
 
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_verificationcreditpack.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certification.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_verificationcreditpack.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certification.csv');
     }
 
     /**
      * @test
      */
-    public function packagesHandleDebtsCorrectlyPackageWithPrice()
+    public function packagesHandleDebtsCorrectlyPackageWithPrice(): void
     {
         $this->dataHandlerHook->processDatamap_afterDatabaseOperations(
             '',
@@ -52,7 +50,7 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function packagesHandleDebtsCorrectlyPackageWithoutPrice()
+    public function packagesHandleDebtsCorrectlyPackageWithoutPrice(): void
     {
         $this->dataHandlerHook->processDatamap_afterDatabaseOperations(
             '',
@@ -70,7 +68,7 @@ class DataHandlerHookTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function packagesNoDebtHandlingForPackageWithPoints()
+    public function packagesNoDebtHandlingForPackageWithPoints(): void
     {
         $this->dataHandlerHook->processDatamap_afterDatabaseOperations(
             '',

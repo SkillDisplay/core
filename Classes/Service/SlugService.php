@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Service;
 
-use Doctrine\DBAL\Driver\Statement;
+use Doctrine\DBAL\Statement;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
@@ -38,7 +38,7 @@ class SlugService
                 ->count('uid')
                 ->from($table)
                 ->where(
-                    $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->or(
                         $queryBuilder->expr()->eq('path_segment', $queryBuilder->createNamedParameter('')),
                         $queryBuilder->expr()->isNull('path_segment')
                     )
@@ -62,7 +62,7 @@ class SlugService
                 ->select('*')
                 ->from($table)
                 ->where(
-                    $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->or(
                         $queryBuilder->expr()->eq('path_segment', $queryBuilder->createNamedParameter('')),
                         $queryBuilder->expr()->isNull('path_segment')
                     )
@@ -87,21 +87,15 @@ class SlugService
     protected function getUniqueValue(string $table, int $uid, string $slug): string
     {
         $statement = $this->getUniqueCountStatement($table, $uid, $slug);
-        if ($statement->fetchOne()) {
-            for ($counter = 1; $counter <= 100; $counter++) {
-                $newSlug = $slug . '-' . $counter;
-                $statement->bindValue(1, $newSlug);
-                $statement->execute();
-                if (!$statement->fetchOne()) {
-                    break;
-                }
-            }
+        for ($counter = 1; $counter <= 100 && $statement->executeQuery()->fetchOne(); $counter++) {
+            $newSlug = $slug . '-' . $counter;
+            $statement->bindValue(1, $newSlug);
         }
 
         return $newSlug ?? $slug;
     }
 
-    protected function getUniqueCountStatement(string $table, int $uid, string $slug): Statement|int
+    protected function getUniqueCountStatement(string $table, int $uid, string $slug): Statement
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
         $deleteRestriction = GeneralUtility::makeInstance(DeletedRestriction::class);
@@ -116,6 +110,6 @@ class SlugService
                     $queryBuilder->createPositionalParameter($slug)
                 ),
                 $queryBuilder->expr()->neq('uid', $queryBuilder->createPositionalParameter($uid, Connection::PARAM_INT))
-            )->executeQuery();
+            )->prepare();
     }
 }

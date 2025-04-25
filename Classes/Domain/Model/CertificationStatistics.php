@@ -39,7 +39,7 @@ class CertificationStatistics
     public function addCertification(Certification $certification): void
     {
         if (!empty($this->statistics)) {
-            throw new RuntimeException('Invalid access, must NOT be seal()d yet.');
+            throw new RuntimeException('Invalid access, must NOT be seal()d yet.', 4636078893);
         }
         if ($certification->getRevokeDate()) {
             $this->verifications['revoked'][$certification->getLevel()][] = $certification;

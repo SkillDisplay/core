@@ -18,7 +18,8 @@ class ImportController extends Command
     /**
      * Configure the command by defining the name, options and arguments
      */
-    protected function configure()
+    #[\Override]
+    protected function configure(): void
     {
         $this
             ->setDescription('Import data from json export file')
@@ -37,9 +38,9 @@ class ImportController extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Specify the mode for detected changes.'
-                . LF . ' - "ask": Ask whether to import the record'
-                . LF . ' - "ignore": Ignore all data from the import file which exist already'
-                . LF . ' - "force": Overwrite all local data with the values from the import file',
+                . "\n" . ' - "ask": Ask whether to import the record'
+                . "\n" . ' - "ignore": Ignore all data from the import file which exist already'
+                . "\n" . ' - "force": Overwrite all local data with the values from the import file',
                 'ignore'
             )
             ->addOption(
@@ -53,12 +54,9 @@ class ImportController extends Command
 
     /**
      * Executes the command for adding the lock file
-     *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int 0 if everything went fine, or an exit code
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    #[\Override]
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $sourceFile = $input->getArgument('sourceFile');
         $pid = (int)$input->getArgument('pid');

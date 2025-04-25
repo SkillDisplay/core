@@ -1,14 +1,12 @@
+<?xml version="1.0"?>
 <T3DataStructure>
     <meta>
         <langDisable>1</langDisable>
     </meta>
-
     <sheets>
         <sDEF>
             <ROOT>
-                <TCEforms>
-                    <sheetTitle>LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms_tab.settings</sheetTitle>
-                </TCEforms>
+                <sheetTitle>LLL:EXT:skills/Resources/Private/Language/locallang_be.xlf:flexforms_tab.settings</sheetTitle>
                 <type>array</type>
                 <el>
                     <settings.category>
@@ -25,8 +23,7 @@
                                     <showHeader>TRUE</showHeader>
                                 </appearance>
                             </treeConfig>
-                            <size>5</size>
-                            <autoSizeMax>10</autoSizeMax>
+                            <size>15</size>
                             <minitems>1</minitems>
                             <maxitems>1</maxitems>
                         </config>

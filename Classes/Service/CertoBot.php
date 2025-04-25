@@ -24,9 +24,6 @@ use SkillDisplay\Skills\Event\VerificationAddedEvent;
 use SkillDisplay\Skills\Event\VerificationUpdatedEvent;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 class CertoBot implements LoggerAwareInterface
 {
@@ -41,11 +38,6 @@ class CertoBot implements LoggerAwareInterface
 
     /**
      * Auto-grant Self-Skillups
-     *
-     * @param VerificationAddedEvent $event
-     * @throws InvalidQueryException
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
      */
     public function selfVerificationHandler(VerificationAddedEvent $event): void
     {
@@ -55,9 +47,6 @@ class CertoBot implements LoggerAwareInterface
         }
     }
 
-    /**
-     * @throws IllegalObjectTypeException
-     */
     public function addVerifierNotification(VerificationAddedEvent $event): void
     {
         $certification = $event->getVerifications()[0];
@@ -75,9 +64,6 @@ class CertoBot implements LoggerAwareInterface
         );
     }
 
-    /**
-     * @throws IllegalObjectTypeException
-     */
     public function addUserVerificationNotification(VerificationUpdatedEvent $event): void
     {
         $certification = $event->getVerifications()[0];

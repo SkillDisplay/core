@@ -23,9 +23,7 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
         $this->routePrefix = $this->configuration['routePrefix'];
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function enhanceForGeneration(RouteCollection $collection, array $originalParameters): void
     {
         if (!is_array($originalParameters[$this->namespace] ?? null)) {
@@ -55,6 +53,7 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
             unset($parameters[$this->namespace]['action']);
             unset($parameters[$this->namespace]['controller']);
             $compiledRoute = $variant->compile();
+            // -- custom code begin
             $deflatedQueryParams = [];
             foreach ($variant->getOptions()['_queryMapping'] as $queryParam => $actionParamName) {
                 // store all found possible query parameters to remove them during inflation from the parameters to avoid
@@ -63,6 +62,7 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
                 $deflatedQueryParams[$queryParam] = $parameters[$this->namespace][$actionParamName] ?? '';
                 unset($parameters[$this->namespace][$actionParamName]);
             }
+            // -- custom code end
             // contains all given parameters, even if not used as variables in route
             $deflatedParameters = $this->deflateParameters($variant, $parameters) + $deflatedQueryParams;
             $variables = array_flip($compiledRoute->getPathVariables());
@@ -78,14 +78,13 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     protected function getVariant(Route $defaultPageRoute, array $configuration): Route
     {
         $arguments = $configuration['_arguments'] ?? [];
+        unset($configuration['_arguments']);
         $queryMapping = $configuration['_queryMapping'] ?? [];
-        unset($configuration['_arguments'], $configuration['_queryMapping']);
+        unset($configuration['_queryMapping']);
 
         $variableProcessor = $this->getVariableProcessor();
         $routePath = $this->routePrefix . $this->modifyRoutePath($configuration['routePath']);
@@ -109,21 +108,20 @@ class RestApiEnhancer extends ExtbasePluginEnhancer
             array_intersect_key($configuration, ['_controller' => true])
         );
         $route->setDefaults($defaults);
-        $this->applyRouteAspects($route, $this->aspects ?? [], $this->namespace);
+        $this->applyRouteAspects($route, $this->aspects, $this->namespace);
         $this->applyRequirements($route, $this->configuration['requirements'] ?? [], $this->namespace);
         return $route;
     }
 
+    #[\Override]
     public function inflateParameters(array $parameters, array $internals = []): array
     {
         // remove expected query parameters
-        $parameters = array_filter($parameters, function (string $queryParamName) { return !isset($this->queryMapping[$queryParamName]); }, ARRAY_FILTER_USE_KEY);
+        $parameters = array_filter($parameters, fn(string $queryParamName) => !isset($this->queryMapping[$queryParamName]), ARRAY_FILTER_USE_KEY);
         return parent::inflateParameters($parameters, $internals);
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    #[\Override]
     public function buildResult(Route $route, array $results, array $remainingQueryParameters = []): PageArguments
     {
         $variableProcessor = $this->getVariableProcessor();

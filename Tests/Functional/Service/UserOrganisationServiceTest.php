@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Service;
 
-use Doctrine\DBAL\DBALException;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
@@ -16,7 +15,6 @@ use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Service\UserOrganisationsService;
 use SkillDisplay\Skills\Tests\Functional\AbstractFunctionalTestCaseBase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\TestingFramework\Core\Exception;
 
 class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
 {
@@ -25,10 +23,6 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     protected UserRepository $userRepository;
     protected BrandRepository $brandRepository;
 
-    /**
-     * @throws DBALException
-     * @throws Exception
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -36,13 +30,13 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
         $this->skillRepository = GeneralUtility::makeInstance(SkillRepository::class);
         $this->userRepository = GeneralUtility::makeInstance(UserRepository::class);
         $this->brandRepository = GeneralUtility::makeInstance(BrandRepository::class);
-        $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/user_access_test.csv');
     }
 
     /**
      * @test
      */
-    public function publicSkillSetVisibleForNonMember()
+    public function publicSkillSetVisibleForNonMember(): void
     {
         /** @var SkillPath $skillSet */
         $skillSet = $this->skillSetRepository->findByUid(2);
@@ -54,7 +48,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function internalSkillSetVisibleForMember()
+    public function internalSkillSetVisibleForMember(): void
     {
         /** @var SkillPath $skillSet */
         $skillSet = $this->skillSetRepository->findByUid(1);
@@ -66,7 +60,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function internalSkillSetNoVisibleForNotMember()
+    public function internalSkillSetNoVisibleForNotMember(): void
     {
         /** @var SkillPath $skillSet */
         $skillSet = $this->skillSetRepository->findByUid(1);
@@ -78,7 +72,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function returnsFalseForNotMember()
+    public function returnsFalseForNotMember(): void
     {
         /** @var Brand $brand */
         $brand = $this->brandRepository->findByUid(1);
@@ -90,7 +84,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function returnsTrueForMember()
+    public function returnsTrueForMember(): void
     {
         /** @var Brand $brand */
         $brand = $this->brandRepository->findByUid(1);
@@ -102,7 +96,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function publicSkillVisibleForNonMember()
+    public function publicSkillVisibleForNonMember(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(2);
@@ -114,7 +108,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function publicSkillVisibleForGuest()
+    public function publicSkillVisibleForGuest(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(2);
@@ -124,7 +118,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function internalSkillVisibleForMember()
+    public function internalSkillVisibleForMember(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);
@@ -136,7 +130,7 @@ class UserOrganisationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function internalSkillNoVisibleForNotMember()
+    public function internalSkillNoVisibleForNotMember(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);

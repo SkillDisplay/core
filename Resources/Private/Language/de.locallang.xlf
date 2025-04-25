@@ -63,10 +63,6 @@
 				<source>Back to partner listing</source>
 				<target>Zurück zur Partnerliste</target>
 			</trans-unit>
-			<trans-unit id="brand.show.news" resname="brand.show.news">
-				<source>News</source>
-				<target>Neuigkeiten</target>
-			</trans-unit>
 			<trans-unit id="brand.show.number_of_verifications" resname="brand.show.number_of_verifications">
 				<source>Number of verifications issued:</source>
 				<target>Anzahl der Verifizierungen:</target>

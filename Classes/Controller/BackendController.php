@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Controller;
 
 use DateTime;
-use Doctrine\DBAL\DBALException;
-use JetBrains\PhpStorm\NoReturn;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use SkillDisplay\Skills\Domain\Model\Brand;
@@ -37,7 +35,6 @@ use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Hook\DataHandlerHook;
 use SkillDisplay\Skills\Service\BackendPageAccessCheckService;
 use SkillDisplay\Skills\Service\CsvService;
-use SkillDisplay\Skills\Service\TestSystemProviderService;
 use SkillDisplay\Skills\Service\VerificationService;
 use SkillDisplay\Skills\Service\VerifierPermissionService;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
@@ -48,20 +45,13 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\RedirectResponse;
 use TYPO3\CMS\Core\Http\Response;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
-use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManager;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
-use TYPO3\CMS\Extbase\Object\Exception;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidNumberOfConstraintsException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
@@ -119,6 +109,7 @@ class BackendController extends ActionController
         if (isset($userTsConfig['defaultSkillStoragePid'])) {
             $this->storagePid = (int)$userTsConfig['defaultSkillStoragePid'];
         } else {
+            /** @var ConfigurationManager $configurationManager */
             $configurationManager = GeneralUtility::makeInstance(ConfigurationManager::class);
             $settings = $configurationManager->getConfiguration(
                 ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT
@@ -165,7 +156,6 @@ class BackendController extends ActionController
      * @param Skill $source
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\SkillDisplay\Skills\Domain\Model\Skill> $targets
      * @return ResponseInterface
-     * @throws IllegalObjectTypeException
      */
     public function moveCertificationsAction(Skill $source, $targets): ResponseInterface
     {
@@ -178,9 +168,6 @@ class BackendController extends ActionController
         return new RedirectResponse($this->addBaseUriIfNecessary($uri), 303);
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     public function reportingAction(): ResponseInterface
     {
         $this->pageRenderer->loadRequireJsModule('TYPO3/CMS/Skills/ReportingBackend');
@@ -190,16 +177,6 @@ class BackendController extends ActionController
         return $this->generateOutput();
     }
 
-    /**
-     * @param array $brands
-     * @param array $skillSets
-     * @param string $dateFrom
-     * @param string $dateTo
-     * @throws InvalidNumberOfConstraintsException
-     * @throws UnexpectedTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
-     */
-    #[NoReturn]
     public function generateReportAction(array $brands, array $skillSets, string $dateFrom, string $dateTo): void
     {
         $lines = [];
@@ -212,8 +189,11 @@ class BackendController extends ActionController
         /** @var Certification $certification */
         foreach ($certifications as $certification) {
             $skill = $certification->getSkill();
-            /** @var Brand $brand */
-            $brand = $skill && $skill->getBrands()->count() ? $skill->getBrands()[0] : null;
+            $brand = null;
+            if ($skill && $skill->getBrands()->count()) {
+                /** @var Brand $brand */
+                $brand = $skill->getBrands()[0];
+            }
             $lines[] = [
                 date('Y-m-d H:i', $certification->getCrdate()),
                 $certification->getGrantDate()->format('Y-m-d H:i'),
@@ -267,14 +247,6 @@ class BackendController extends ActionController
         return $date === false ? null : $date;
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws DBALException
-     * @throws InvalidQueryException
-     * @throws RouteNotFoundException
-     * @throws \Doctrine\DBAL\Driver\Exception
-     */
     public function ajaxTreeData(ServerRequestInterface $request): ResponseInterface
     {
         $sourceId = $request->getQueryParams()['sourceId'] ?? '0';
@@ -295,12 +267,6 @@ class BackendController extends ActionController
         return new JsonResponse($result);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws RouteNotFoundException
-     */
     public function ajaxAddSkill(ServerRequestInterface $request): ResponseInterface
     {
         $this->initializeSettings();
@@ -326,7 +292,7 @@ class BackendController extends ActionController
 
             if ($this->defaultBrands !== []) {
                 foreach ($this->defaultBrands as $defaultBrand) {
-                    /** @var Brand $brand */
+                    /** @var ?Brand $brand */
                     $brand = $this->brandRepository->findByUid($defaultBrand);
                     if ($brand) {
                         $skill->addBrand($brand);
@@ -360,12 +326,6 @@ class BackendController extends ActionController
         return new JsonResponse($result);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
     public function ajaxAddLink(ServerRequestInterface $request): ResponseInterface
     {
         $this->initializeSettings();
@@ -378,9 +338,9 @@ class BackendController extends ActionController
         $sourceId = (int)($request->getQueryParams()['sourceId'] ?? 0);
         $targetId = (int)($request->getQueryParams()['targetId'] ?? 0);
         if ($sourceId && $targetId) {
-            /** @var Skill $targetSkill */
+            /** @var ?Skill $targetSkill */
             $targetSkill = $this->skillRepo->findByUid($targetId);
-            /** @var Skill $sourceSkill */
+            /** @var ?Skill $sourceSkill */
             $sourceSkill = $this->skillRepo->findByUid($sourceId);
             $valid = true;
             // Check if both skills exists
@@ -457,34 +417,16 @@ class BackendController extends ActionController
         return new JsonResponse($result);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
     public function ajaxSetSkillDormant(ServerRequestInterface $request): ResponseInterface
     {
         return $this->deleteOrDormant('dormant', $request);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
     public function ajaxDeleteSkill(ServerRequestInterface $request): ResponseInterface
     {
         return $this->deleteOrDormant('delete', $request);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
     public function ajaxRemoveSkillFromReward(ServerRequestInterface $request): ResponseInterface
     {
         $result = [
@@ -528,13 +470,6 @@ class BackendController extends ActionController
         return new JsonResponse($result);
     }
 
-    /**
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws InvalidQueryException
-     * @throws UnknownObjectException
-     */
     public function ajaxRemoveRequirement(ServerRequestInterface $request): ResponseInterface
     {
         $result = [
@@ -580,114 +515,112 @@ class BackendController extends ActionController
         return new JsonResponse($result);
     }
 
-    /**
-     * @param SkillPath $skillSet
-     * @throws FileDoesNotExistException
-     */
-    #[NoReturn]
-    public function syllabusForSetAction(SkillPath $skillSet): void
+    public function syllabusForSetAction(SkillPath $skillSet): never
     {
-        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
-        $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/SyllabusForSet.html');
         $skills = $this->skillPathRepository->getSkillsForSyllabusDownload($skillSet);
+        $templateFilePath = '';
         if ($skillSet->getSyllabusLayoutFile()) {
-            $templateFile = GeneralUtility::makeInstance(ResourceFactory::class)
-                ->getFileObject($skillSet->getSyllabusLayoutFile());
-            $pdfView->assign('pdfTemplate', $templateFile->getForLocalProcessing(false));
+            /** @var ResourceFactory $resourceFactory */
+            $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+            $templateFile = $resourceFactory->getFileObject($skillSet->getSyllabusLayoutFile());
+            $templateFilePath = $templateFile->getForLocalProcessing(false);
         }
+        $templatePathAndFilename = 'EXT:skills/Resources/Private/PdfTemplates/SyllabusForSet.html';
+
+        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
+        $pdfView->setTemplatePathAndFilename($templatePathAndFilename);
+        $pdfView->assign('pdfTemplate', $templateFilePath);
         $pdfView->assign('skills', $skills);
         $pdfView->assign('set', $skillSet);
         $pdfView->render();
+        exit();
     }
 
-    /**
-     * @param Reward $reward
-     * @throws FileDoesNotExistException
-     */
-    #[NoReturn]
-    public function syllabusAction(Reward $reward): void
+    public function syllabusAction(Reward $reward): never
     {
-        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
-        $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/Syllabus.html');
         $skills = [];
         foreach ($reward->getPrerequisites() as $pre) {
             $skill = $pre->getSkill();
             $skills[$skill->getDomainTag() ? $skill->getDomainTag()->getTitle() : '-'][] = $skill;
         }
-        if ($skills['-']) {
+        if ($skills['-'] ?? false) {
             $noDomainSkills = $skills['-'];
             unset($skills['-']);
             $skills['-'] = $noDomainSkills;
         }
 
+        $templateFilePath = '';
         if ($reward->getSyllabusLayoutFile()) {
-            $templateFile = GeneralUtility::makeInstance(ResourceFactory::class)
-                ->getFileObject($reward->getSyllabusLayoutFile());
-            $pdfView->assign('pdfTemplate', $templateFile->getForLocalProcessing(false));
+            /** @var ResourceFactory $resourceFactory */
+            $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+            $templateFile = $resourceFactory->getFileObject($reward->getSyllabusLayoutFile());
+            $templateFilePath = $templateFile->getForLocalProcessing(false);
         }
+        $templatePathAndFilename = 'EXT:skills/Resources/Private/PdfTemplates/Syllabus.html';
+
+        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
+        $pdfView->setTemplatePathAndFilename($templatePathAndFilename);
+        $pdfView->assign('pdfTemplate', $templateFilePath);
         $pdfView->assign('skills', $skills);
         $pdfView->assign('reward', $reward);
         $pdfView->render();
+        exit();
     }
 
-    /**
-     * @param Reward $reward
-     * @throws FileDoesNotExistException
-     */
-    #[NoReturn]
-    public function completeDownloadAction(Reward $reward): void
+    public function completeDownloadAction(Reward $reward): never
     {
-        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
-        $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/FullDownload.html');
         $skills = [];
         foreach ($reward->getPrerequisites() as $pre) {
             $skill = $pre->getSkill();
             $skills[] = $skill;
         }
-        usort($skills, function (Skill $a, Skill $b) {
-            return $a->getTitle() <=> $b->getTitle();
-        });
+        usort($skills, fn(Skill $a, Skill $b) => $a->getTitle() <=> $b->getTitle());
+
+        $templateFilePath = '';
         if ($reward->getSyllabusLayoutFile()) {
-            $templateFile = GeneralUtility::makeInstance(ResourceFactory::class)
-                ->getFileObject($reward->getSyllabusLayoutFile());
-            $pdfView->assign('pdfTemplate', $templateFile->getForLocalProcessing(false));
+            /** @var ResourceFactory $resourceFactory */
+            $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+            $templateFile = $resourceFactory->getFileObject($reward->getSyllabusLayoutFile());
+            $templateFilePath = $templateFile->getForLocalProcessing(false);
         }
+        $templatePathAndFilename = 'EXT:skills/Resources/Private/PdfTemplates/FullDownload.html';
+
+        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
+        $pdfView->setTemplatePathAndFilename($templatePathAndFilename);
+        $pdfView->assign('pdfTemplate', $templateFilePath);
         $pdfView->assign('skills', $skills);
         $pdfView->assign('reward', $reward);
         $pdfView->render();
+        exit();
     }
 
-    /**
-     * @param SkillPath $skillSet
-     * @throws FileDoesNotExistException
-     */
-    #[NoReturn]
-    public function completeDownloadForSetAction(SkillPath $skillSet): void
+    public function completeDownloadForSetAction(SkillPath $skillSet): never
     {
-        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
-        $pdfView->setTemplatePathAndFilename('EXT:skills/Resources/Private/PdfTemplates/FullDownloadSkillSet.html');
         $skills = $this->skillPathRepository->getSkillsForCompleteDownload($skillSet);
+        $templateFilePath = '';
         if ($skillSet->getSyllabusLayoutFile()) {
-            $templateFile = GeneralUtility::makeInstance(ResourceFactory::class)
-                ->getFileObject($skillSet->getSyllabusLayoutFile());
-            $pdfView->assign('pdfTemplate', $templateFile->getForLocalProcessing(false));
+            /** @var ResourceFactory $resourceFactory */
+            $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+            $templateFile = $resourceFactory->getFileObject($skillSet->getSyllabusLayoutFile());
+            $templateFilePath = $templateFile->getForLocalProcessing(false);
         }
+        $templatePathAndFilename = 'EXT:skills/Resources/Private/PdfTemplates/FullDownloadSkillSet.html';
+
+        $pdfView = GeneralUtility::makeInstance(StandaloneView::class);
+        $pdfView->setTemplatePathAndFilename($templatePathAndFilename);
+        $pdfView->assign('pdfTemplate', $templateFilePath);
         $pdfView->assign('skills', $skills);
         $pdfView->assign('set', $skillSet);
         $pdfView->render();
+        exit();
     }
 
     public function verifierPermissionsAction(): ResponseInterface
     {
         $verifierList = [];
+        /** @var Certifier $certifier */
         foreach ($this->certifierRepository->findAll()->toArray() as $certifier) {
-            /** @var Certifier $certifier */
-            $verifierList[$certifier->getUid()] = $certifier->getBrand()->getName() .
-            ' / ' .
-            $certifier->getUser() ? $certifier->getUser()->getUsername() :
-                GeneralUtility::makeInstance(TestSystemProviderService::class)
-                    ->getProviderById($certifier->getTestSystem())
-                    ->getLabel();
+            $verifierList[$certifier->getUid()] = $certifier->getListLabel();
         }
         asort($verifierList);
         $this->view->assign('skillSets', $this->skillPathRepository->findAll()->toArray());
@@ -695,16 +628,6 @@ class BackendController extends ActionController
         return $this->generateOutput();
     }
 
-    /**
-     * @param array $verifiers
-     * @param array $skillSets
-     * @param string $submitType
-     * @param string $tier1
-     * @param string $tier2
-     * @param string $tier4
-     * @return ResponseInterface
-     * @throws Exception
-     */
     public function modifyPermissionsAction(
         array $verifiers,
         array $skillSets,
@@ -725,7 +648,7 @@ class BackendController extends ActionController
         }
 
         if (count($verifiers) === 0 || count($skillSets) === 0 || $permissions === []) {
-            $this->addFlashMessage('Invalid selection', 'Error', AbstractMessage::ERROR);
+            $this->addFlashMessage('Invalid selection', 'Error', ContextualFeedbackSeverity::ERROR);
         } elseif ($submitType === 'grant') {
             $count = VerifierPermissionService::grantPermissions(array_map('intval', $verifiers), array_map('intval', $skillSets), $permissions);
             $this->addFlashMessage('Granted permissions to ' . $count . ' skill/verifier combinations.');
@@ -758,9 +681,6 @@ class BackendController extends ActionController
         return array_unique($skillIds);
     }
 
-    /**
-     * @throws InvalidQueryException
-     */
     private function getSkillsOfBrand(int $brandId): array
     {
         $skillIds = [];
@@ -774,11 +694,6 @@ class BackendController extends ActionController
         return array_unique($skillIds);
     }
 
-    /**
-     * @param int $tagId
-     * @return array
-     * @throws InvalidQueryException
-     */
     private function getSkillsByTag(int $tagId): array
     {
         $skillIds = [];
@@ -810,11 +725,6 @@ class BackendController extends ActionController
         return array_unique($skillIds);
     }
 
-    /**
-     * @param string $combinedId
-     * @return array
-     * @throws InvalidQueryException
-     */
     private function getSkillIdsByCombinedSource(string $combinedId): array
     {
         $id = (int)substr($combinedId, 1);
@@ -829,12 +739,7 @@ class BackendController extends ActionController
     }
 
     /**
-     * @param int $skillId
-     * @param array $highlightIds
-     * @param array $treeData
      * @throws RouteNotFoundException
-     * @throws DBALException
-     * @throws \Doctrine\DBAL\Driver\Exception
      */
     private function getTreeDataForSkill(int $skillId, array $highlightIds, array &$treeData): void
     {
@@ -842,14 +747,12 @@ class BackendController extends ActionController
             return;
         }
 
-        $filteredNodes = array_filter($treeData['nodes'], function (array $element) use ($skillId) {
-            return $element['id'] === $skillId;
-        });
+        $filteredNodes = array_filter($treeData['nodes'], fn(array $element) => $element['id'] === $skillId);
         if (!empty($filteredNodes)) {
             return;
         }
 
-        /** @var Skill $skill */
+        /** @var ?Skill $skill */
         $skill = $this->skillRepo->findByUid($skillId);
 
         if (!$skill || !$this->accessCheck->readAccess($skill->getPid())) {
@@ -957,6 +860,7 @@ class BackendController extends ActionController
      */
     protected function getHref(string $controller, string $action, array $parameters = []): string
     {
+        /** @var \TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder $uriBuilder */
         $uriBuilder = GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder::class);
         $uriBuilder->setRequest($this->request);
         return $uriBuilder->reset()->uriFor($action, $parameters, $controller);
@@ -967,13 +871,6 @@ class BackendController extends ActionController
         return LocalizationUtility::translate($label, 'skills');
     }
 
-    /**
-     * @param string $type
-     * @param ServerRequestInterface $request
-     * @return ResponseInterface
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
-     */
     private function deleteOrDormant(string $type, ServerRequestInterface $request): ResponseInterface
     {
         $result = [
@@ -997,7 +894,9 @@ class BackendController extends ActionController
         }
 
         if ($valid) {
-            $skill->setRequirements(new ObjectStorage());
+            /** @var ObjectStorage<Requirement> $emptyRequirements */
+            $emptyRequirements = new ObjectStorage();
+            $skill->setRequirements($emptyRequirements);
 
             if ($type === 'dormant') {
                 $skill->setDormant(new DateTime());
@@ -1006,8 +905,8 @@ class BackendController extends ActionController
                 $this->skillRepo->remove($skill);
             }
 
-            /** @var Skill $parentSkill */
             $parentSkills = $this->skillRepo->findParents($skill);
+            /** @var Skill $parentSkill */
             foreach ($parentSkills as $parentSkill) {
                 /** @var Requirement[] $parentRequirements */
                 $parentRequirements = $parentSkill->getRequirements();
@@ -1042,7 +941,9 @@ class BackendController extends ActionController
 
     protected function persistAll(): void
     {
-        GeneralUtility::makeInstance(PersistenceManager::class)->persistAll();
+        /** @var PersistenceManager $pm */
+        $pm = GeneralUtility::makeInstance(PersistenceManager::class);
+        $pm->persistAll();
     }
 
     protected function generateOutput(): ResponseInterface

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
+use DateTime;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\User;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
@@ -67,12 +68,7 @@ class UserRepository extends BaseRepository
         return $q->execute(true);
     }
 
-    /**
-     * @param Brand $brand
-     * @return User[]|QueryResultInterface
-     * @throws InvalidQueryException
-     */
-    public function findManagers(Brand $brand): array|QueryResultInterface
+    public function findManagers(Brand $brand): QueryResultInterface
     {
         $q = $this->createQuery();
         $q->getQuerySettings()->setRespectSysLanguage(false);
@@ -100,6 +96,13 @@ class UserRepository extends BaseRepository
     {
         $q = $this->createQuery();
         $q->matching($q->contains('organisations', $brandId));
+        return $q->execute();
+    }
+
+    public function findAllRecentlyLoggedIn(int $hoursSinceLastLogin): QueryResultInterface
+    {
+        $q = $this->createQuery();
+        $q->matching($q->greaterThanOrEqual('lastlogin', new DateTime("-$hoursSinceLastLogin hours")));
         return $q->execute();
     }
 }

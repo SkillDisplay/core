@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Domain\Repository;
 
 use DateTime;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Driver\Exception;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Campaign;
 use SkillDisplay\Skills\Domain\Model\Certification;
@@ -28,25 +26,18 @@ use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Exception\InvalidNumberOfConstraintsException;
-use TYPO3\CMS\Extbase\Persistence\Generic\Exception\UnexpectedTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Query;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * The repository for Certifications
+ * @extends BaseRepository<Certification>
  */
 class CertificationRepository extends BaseRepository
 {
     /**
      * @param Skill[] $skills
-     * @param User $user
-     * @param bool $includePending
-     * @return QueryResultInterface
-     * @throws InvalidQueryException
      */
     public function findBySkillsAndUser(array $skills, User $user, bool $includePending = true): QueryResultInterface
     {
@@ -54,9 +45,7 @@ class CertificationRepository extends BaseRepository
 
         // this is a workaround for Extbase which uses the localizedUid of the skill
         // see Typo3DbQueryParser::createTypedNamedParameter
-        $skillIds = array_map(function (Skill $s) {
-            return $s->getUid();
-        }, $skills);
+        $skillIds = array_map(fn(Skill $s) => $s->getUid(), $skills);
 
         $constraints = [
             $q->in('skill', $skillIds),
@@ -75,13 +64,13 @@ class CertificationRepository extends BaseRepository
     }
 
     /**
-     * @param Certification[]|QueryResultInterface $certifications
-     * @return array
+     * @param QueryResultInterface<int, Certification> $certifications
      */
-    protected function splitCertificationInGroups(QueryResultInterface|array $certifications): array
+    protected function splitCertificationInGroups(QueryResultInterface $certifications): array
     {
         $list = [];
         $group = null;
+        /** @var Certification $cert */
         foreach ($certifications as $cert) {
             if (!$group || !$group['id'] || $group['id'] !== $cert->getRequestGroup()) {
                 if ($group) {
@@ -166,10 +155,9 @@ class CertificationRepository extends BaseRepository
     }
 
     /**
-     * @param User $user
-     * @return Certification[]|QueryResultInterface
+     * @return QueryResultInterface<int, Certification>
      */
-    public function findAcceptedForUser(User $user): array|QueryResultInterface
+    public function findAcceptedForUser(User $user): QueryResultInterface
     {
         $q = $this->getQuery();
         $q->setOrderings([
@@ -228,15 +216,14 @@ class CertificationRepository extends BaseRepository
      * @param Campaign|null $campaign
      * @param string $group
      * @return Certification
-     * @throws IllegalObjectTypeException
      */
     public function addTier(
         Skill $skill,
         User $user,
         int $tier,
         string $comment,
-        Certifier $certifier = null,
-        Campaign $campaign = null,
+        ?Certifier $certifier = null,
+        ?Campaign $campaign = null,
         string $group = ''
     ): Certification {
         /** @var Certification $verification */
@@ -295,7 +282,6 @@ class CertificationRepository extends BaseRepository
      * @param RewardPrerequisite $prerequisite
      * @param User $user
      * @return QueryResultInterface
-     * @throws InvalidQueryException
      */
     public function findByPrerequisiteAndUser(RewardPrerequisite $prerequisite, User $user): QueryResultInterface
     {
@@ -325,18 +311,16 @@ class CertificationRepository extends BaseRepository
      * @param DateTime|null $to
      * @param Brand[]|int[] $brands
      * @param SkillPath[]|int[] $skillSets
-     * @param User|null $user
+     * @param int $userId
      * @param int $level
      * @return QueryResultInterface
-     * @throws InvalidNumberOfConstraintsException
-     * @throws UnexpectedTypeException
      */
     public function findByGrantDateAndBrandsAndSkillSets(
         ?DateTime $from,
         ?DateTime $to,
         array $brands = [],
         array $skillSets = [],
-        ?User $user = null,
+        int $userId = 0,
         int $level = 0
     ): QueryResultInterface {
         /** @var Query $q */
@@ -368,24 +352,24 @@ class CertificationRepository extends BaseRepository
             $constraints[] = $q->in('brand', $brandIds);
         }
         if ($skillSets) {
+            /** @var SkillPathRepository $skillSetRepo */
             $skillSetRepo = GeneralUtility::makeInstance(SkillPathRepository::class);
             $skillIds = [];
             foreach ($skillSets as $setId) {
                 if ($setId instanceof SkillPath) {
                     $set = $setId;
                 } else {
+                    /** @var SkillPath $set */
                     $set = $skillSetRepo->findByUid((int)$setId);
                 }
-                $setSkillsIds = array_map(function (Skill $skill) {
-                    return $skill->getUid();
-                }, $set->getSkills()->toArray());
+                $setSkillsIds = array_map(fn(Skill $skill) => $skill->getUid(), $set->getSkills()->toArray());
                 $skillIds = array_merge($skillIds, $setSkillsIds);
             }
             $skillIds = array_unique($skillIds, SORT_NUMERIC);
             $constraints[] = $q->in('skill', $skillIds);
         }
-        if ($user) {
-            $constraints[] = $q->equals('user', $user);
+        if ($userId) {
+            $constraints[] = $q->equals('user.uid', $userId);
         }
         if ($level) {
             $constraints[] = $q->equals('tier' . $level, 1);
@@ -441,12 +425,6 @@ class CertificationRepository extends BaseRepository
         return $this->splitCertificationInGroups($q->matching($q->equals('user', $user))->execute());
     }
 
-    /**
-     * @param string $searchWord
-     * @param User $user
-     * @return array
-     * @throws InvalidQueryException
-     */
     public function findBySearchWord(string $searchWord, User $user): array
     {
         $q = $this->getQuery();
@@ -458,10 +436,10 @@ class CertificationRepository extends BaseRepository
             $q->equals('user', $user),
         ];
 
-        $skillSets = GeneralUtility::makeInstance(SkillPathRepository::class)->findBySearchWord($searchWord, []);
-        $likeParts = array_map(function (SkillPath $s) {
-            return 'skillpath-' . $s->getUid() . '%';
-        }, $skillSets);
+        /** @var SkillPathRepository $skillSetRepo */
+        $skillSetRepo = GeneralUtility::makeInstance(SkillPathRepository::class);
+        $skillSets = $skillSetRepo->findBySearchWord($searchWord, []);
+        $likeParts = array_map(fn(SkillPath $s) => 'skillpath-' . $s->getUid() . '%', $skillSets);
 
         $requestGroupLike = [];
         foreach ($likeParts as $likePart) {
@@ -501,7 +479,6 @@ class CertificationRepository extends BaseRepository
     }
 
     /**
-     * @param Certifier $verifier
      * @return Certification[]
      */
     public function findAcceptedByCertifier(Certifier $verifier): array
@@ -511,12 +488,14 @@ class CertificationRepository extends BaseRepository
             'crdate' => QueryInterface::ORDER_DESCENDING,
             'requestGroup' => QueryInterface::ORDER_ASCENDING,
         ]);
-        return $q->matching(
+        /** @var Certification[] $res */
+        $res = $q->matching(
             $q->logicalAnd(
                 $q->equals('certifier', $verifier),
                 $q->logicalNot($q->equals('grant_date', null)),
             )
         )->execute()->toArray();
+        return $res;
     }
 
     public function findAcceptedOrDeniedByUser(?User $user, ?Certifier $verifier): array
@@ -541,10 +520,7 @@ class CertificationRepository extends BaseRepository
     }
 
     /**
-     * @param Brand $organisation
-     * @return Certification[]
-     * @throws DBALException
-     * @throws Exception
+     * @phpstan-return list<Certification>
      */
     public function findUnbalanced(Brand $organisation): array
     {
@@ -564,13 +540,6 @@ class CertificationRepository extends BaseRepository
         return $this->mapRows($rows);
     }
 
-    /**
-     * @param Brand $organisation
-     * @param DateTime $from
-     * @param DateTime $to
-     * @return array
-     * @throws InvalidQueryException
-     */
     public function findAcceptedByOrganisation(Brand $organisation, DateTime $from, DateTime $to): array
     {
 
@@ -604,11 +573,7 @@ class CertificationRepository extends BaseRepository
         return $query->matching($query->equals('brand', $brand))->execute()->count();
     }
 
-    /**
-    * @param Skill $skill
-    * @return Certification[]|QueryResultInterface
-    */
-    public function findBySkill(Skill $skill): array|QueryResultInterface
+    public function findBySkill(Skill $skill): QueryResultInterface
     {
         $query = $this->createQuery();
         return $query->matching($query->equals('skill', $skill))->execute();

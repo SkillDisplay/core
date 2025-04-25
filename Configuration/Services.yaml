@@ -7,6 +7,22 @@ services:
   SkillDisplay\Skills\:
     resource: '../Classes/*'
 
+  TYPO3\CMS\Extbase\Domain\Model\FileReference: '@SkillDisplay\Skills\Domain\Model\FileReference'
+
+  SkillDisplay\Skills\TypeConverter\UploadedFileReferenceConverter:
+    tags:
+      - name: extbase.type_converter
+        priority: 20
+        target: \TYPO3\CMS\Extbase\Domain\Model\FileReference
+        sources: array
+
+  SkillDisplay\Skills\TypeConverter\ObjectStorageConverter:
+    tags:
+      - name: extbase.type_converter
+        priority: 2
+        target: boolean
+        sources: boolean,string
+
   SkillDisplay\Skills\Service\CertoBot:
     tags:
       - name: event.listener
@@ -38,6 +54,9 @@ services:
     public: true
 
   SkillDisplay\Skills\Service\StatisticsService:
+    public: true
+
+  SkillDisplay\Skills\Mvc\View\JsonView:
     public: true
 
   SkillDisplay\Skills\Service\RewardService:

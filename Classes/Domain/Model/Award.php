@@ -17,25 +17,25 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Award extends AbstractEntity
 {
-    public const RANK_STRINGS = [
+    public const array RANK_STRINGS = [
         3 => 'Platinum',
         2 => 'Gold',
         1 => 'Silver',
         0 => 'Bronze',
     ];
 
-    public const TYPE_VERIFICATIONS = 0;
-    public const TYPE_MEMBER = 1;
-    public const TYPE_COACH = 2;
-    public const TYPE_MENTOR = 3;
+    public const int TYPE_VERIFICATIONS = 0;
+    public const int TYPE_MEMBER = 1;
+    public const int TYPE_COACH = 2;
+    public const int TYPE_MENTOR = 3;
 
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid', 'brand', 'user', 'type', 'level', 'rank',
         ],
     ];
 
-    public const ApiJsonViewConfiguration = [
+    public const array ApiJsonViewConfiguration = [
         '_only' => [
             'uid', 'title', 'brand', 'rank', 'level',
         ],

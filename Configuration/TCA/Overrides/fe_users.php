@@ -20,7 +20,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -31,7 +31,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -39,35 +39,33 @@ $tmp_skills_columns = [
     'avatar' => [
         'exclude' => true,
         'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_user.avatar',
-        'config' => ExtensionManagementUtility::getFileFieldTCAConfig(
-            'avatar',
-            [
-                'appearance' => [
-                    'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
-                ],
-                'foreign_match_fields' => [
-                    'fieldname' => 'avatar',
-                    'tablenames' => 'fe_users',
-                    'table_local' => 'sys_file',
-                ],
-                'overrideChildTca' => [
-                    'types' => [
-                        0 => [
-                            'showitem' => '
+        'config' => [
+            //## !!! Watch out for fieldName different from columnName
+            'type' => 'file',
+            'allowed' => $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext'],
+            'appearance' => [
+                'createNewRelationLinkTitle' => 'LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:images.addFileReference',
+            ],
+            'foreign_match_fields' => [
+                'fieldname' => 'avatar',
+                'tablenames' => 'fe_users',
+            ],
+            'overrideChildTca' => [
+                'types' => [
+                    0 => [
+                        'showitem' => '
                         --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                         --palette--;;filePalette',
-                        ],
-                        File::FILETYPE_IMAGE => [
-                            'showitem' => '
+                    ],
+                    File::FILETYPE_IMAGE => [
+                        'showitem' => '
                         --palette--;LLL:EXT:core/Resources/Private/Language/locallang_tca.xlf:sys_file_reference.imageoverlayPalette;imageoverlayPalette,
                         --palette--;;filePalette',
-                        ],
                     ],
                 ],
-                'maxitems' => 1,
             ],
-            $GLOBALS['TYPO3_CONF_VARS']['GFX']['imagefile_ext']
-        ),
+            'maxitems' => 1,
+        ],
     ],
     'favourite_certifiers' => [
         'exclude' => true,
@@ -121,7 +119,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 1,
         ],
@@ -133,8 +131,8 @@ $tmp_skills_columns = [
             'type' => 'select',
             'renderType' => 'selectSingle',
             'items' => [
-                ['en', 'en'],
-                ['de', 'de'],
+                ['label' => 'en', 'value' => 'en'],
+                ['label' => 'de', 'value' => 'de'],
             ],
             'default' => 'en',
         ],
@@ -145,7 +143,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -204,24 +202,15 @@ $tmp_skills_columns = [
         'exclude' => true,
         'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_user.profile_link',
         'config' => [
-            'type' => 'input',
-            'renderType' => 'inputLink',
+            'type' => 'link',
             'size' => 30,
-            'max' => 100,
-            'eval' => 'trim',
-            'softref' => 'typolink',
-            'fieldControl' => [
-                'linkPopup' => [],
-            ],
         ],
     ],
     'terms_accepted' => [
         'exclude' => true,
         'label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_user.terms_accepted',
         'config' => [
-            'type' => 'input',
-            'renderType' => 'inputDateTime',
-            'eval' => 'datetime',
+            'type' => 'datetime',
             'default' => 0,
             'readOnly' => true,
         ],
@@ -256,7 +245,7 @@ $tmp_skills_columns = [
         'config' => [
             'type' => 'check',
             'items' => [
-                ['LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
+                ['label' => 'LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:labels.enabled'],
             ],
             'default' => 0,
         ],
@@ -295,9 +284,7 @@ $tmp_skills_columns = [
         'exclude' => true,
         'label' => 'Data sync',
         'config' => [
-            'type' => 'input',
-            'renderType' => 'inputDateTime',
-            'eval' => 'datetime',
+            'type' => 'datetime',
             'default' => 0,
             'readOnly' => true,
         ],
@@ -320,5 +307,5 @@ if (isset($GLOBALS['TCA']['fe_users']['types'][0]['showitem'])) {
 $GLOBALS['TCA']['fe_users']['types']['Tx_Skills_User']['showitem'] .= ',--div--;LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:tx_skills_domain_model_user,';
 $GLOBALS['TCA']['fe_users']['types']['Tx_Skills_User']['showitem'] .= 'publish_skills, avatar, favourite_certifiers, organisations, managed_brands, mail_push, mail_language, newsletter, terms_accepted, twitter, xing, linkedin, github, pending_email, profile_link, locked, anonymous, verifiers, api_key, foreign_username';
 
-$GLOBALS['TCA']['fe_users']['columns'][$GLOBALS['TCA']['fe_users']['ctrl']['type']]['config']['items'][] = ['LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:fe_users.tx_extbase_type.Tx_Skills_User', 'Tx_Skills_User'];
+$GLOBALS['TCA']['fe_users']['columns'][$GLOBALS['TCA']['fe_users']['ctrl']['type']]['config']['items'][] = ['label' => 'LLL:EXT:skills/Resources/Private/Language/locallang_db.xlf:fe_users.tx_extbase_type.Tx_Skills_User', 'value' => 'Tx_Skills_User'];
 $GLOBALS['TCA']['fe_users']['columns'][$GLOBALS['TCA']['fe_users']['ctrl']['type']]['config']['default'] = 'Tx_Skills_User';

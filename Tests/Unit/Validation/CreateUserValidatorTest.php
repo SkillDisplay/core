@@ -41,7 +41,7 @@ class CreateUserValidatorTest extends UnitTestCase
      * @test
      * @dataProvider isValidTestsPasswordsCorrectlyDataProvider
      */
-    public function isValidTestsPasswordsCorrectly(string $password, bool $valid)
+    public function isValidTestsPasswordsCorrectly(string $password, bool $valid): void
     {
         $user = new User();
         $user->setPassword($password);

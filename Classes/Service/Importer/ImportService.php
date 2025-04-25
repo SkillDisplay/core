@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Service\Importer;
 
 use Doctrine\DBAL\ConnectionException;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Logging\SQLLogger;
 use InvalidArgumentException;
 use RuntimeException;
 use SkillDisplay\Skills\Domain\Model\Brand;
@@ -29,17 +27,15 @@ use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Install\Service\ClearCacheService;
 
-class ImportService extends AbstractImportExportService implements SQLLogger
+class ImportService extends AbstractImportExportService
 {
-    public const RESOLVE_ASK = 0;
-    public const RESOLVE_FORCE = 1;
-    public const RESOLVE_IGNORE = 2;
+    public const int RESOLVE_ASK = 0;
+    public const int RESOLVE_FORCE = 1;
+    public const int RESOLVE_IGNORE = 2;
 
-    private const importLogFileName = 'import_%s.log';
+    private const string importLogFileName = 'import_%s.log';
 
-    private const logSqlActive = false;
-
-    private const tableMapping = [
+    private const array tableMapping = [
         Brand::class => 'tx_skills_domain_model_brand',
         Link::class => 'tx_skills_domain_model_link',
         Tag::class => 'tx_skills_domain_model_tag',
@@ -47,7 +43,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         SkillPath::class => 'tx_skills_domain_model_skillpath',
     ];
 
-    private const labelFieldMapping = [
+    private const array labelFieldMapping = [
         'tx_skills_domain_model_brand' => 'name',
         'tx_skills_domain_model_link' => 'title',
         'tx_skills_domain_model_tag' => 'title',
@@ -57,8 +53,6 @@ class ImportService extends AbstractImportExportService implements SQLLogger
 
     /** @var resource */
     private $logFile;
-
-    private StyleInterface $output;
 
     private int $pid = 0;
 
@@ -74,25 +68,14 @@ class ImportService extends AbstractImportExportService implements SQLLogger
 
     private int $refIndex = 0;
 
-    public function __construct(StyleInterface $output)
-    {
-        $this->output = $output;
-    }
+    public function __construct(private readonly StyleInterface $output) {}
 
     public function doImport(string $sourceFileName, int $targetStorageId, int $targetPid, int $resolveMode): void
     {
         $this->logFile = $this->openLog(self::importLogFileName, $sourceFileName);
 
-        try {
-            $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName('Default');
-        } catch (DBALException $exception) {
-            $this->log($exception->getMessage());
-            $connection = null;
-        }
-        if ($connection) {
-            $connection->getConfiguration()->setSQLLogger($this);
-            $connection->beginTransaction();
-        }
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionByName('Default');
+        $connection->beginTransaction();
 
         $this->pid = $targetPid;
         $this->importTimeStamp = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');
@@ -123,16 +106,13 @@ class ImportService extends AbstractImportExportService implements SQLLogger
             } catch (RuntimeException $runtimeException) {
                 $this->log('Error during import: ' . $runtimeException->getMessage());
 
-                if ($connection) {
-                    $this->log('Rollback of changes');
-                    $connection->rollBack();
-                }
+                $this->log('Rollback of changes');
+                $connection->rollBack();
+
                 return;
             }
 
-            if ($connection) {
-                $connection->commit();
-            }
+            $connection->commit();
         } catch (ConnectionException $connectionException) {
             $this->log($connectionException->getMessage());
         }
@@ -223,11 +203,11 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         }
         if ($count > 1) {
             $this->log($table . ' with uuid ' . $uuid . ' not unique (count: ' . $count . ', example: ' . $rows[0][self::labelFieldMapping[$table]] . ')');
-            throw new RuntimeException('Too many entities found');
+            throw new RuntimeException('Too many entities found', 4493134451);
         }
         if ($reportMissing) {
             $this->log($table . ' with uuid ' . $uuid . ' not found');
-            throw new RuntimeException('Entity not found');
+            throw new RuntimeException('Entity not found', 2869808886);
         }
         return [];
     }
@@ -389,7 +369,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
                 $this->log('File ' . $tmpFile . ' exception: ' . $ex->getMessage());
             }
             $this->cleanupFileReferences($table, $uid);
-            if ($file) {
+            if (isset($file)) {
                 return $file->getUid();
             }
         }
@@ -402,14 +382,12 @@ class ImportService extends AbstractImportExportService implements SQLLogger
      * Gives the correct folder at the specified path, creates folders if they do not exist
      *
      * @param array $path
-     * @return Folder|null
+     * @return Folder
      */
-    private function getFolder(array $path): ?Folder
+    private function getFolder(array $path): Folder
     {
-        $folder = null;
+        $folder = $this->storage->getRootLevelFolder();
         try {
-            $folder = $this->storage->getRootLevelFolder();
-
             foreach ($path as $item) {
                 if (!$folder->hasFolder($item)) {
                     $folder = $folder->createFolder($item);
@@ -648,7 +626,6 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         $tce->isImporting = true;
         $tce->enableLogging = false;
         $tce->dontProcessTransformations = true;
-        $tce->checkSimilar = false;
         $tce->start($data, $cmd);
 
         return $tce;
@@ -659,7 +636,7 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         $logFileName = sprintf($logFileNamePattern, $sourceFileName . '_' . date('Y-m-d_H_i_s'));
         $handle = @fopen($logFileName, 'w');
         if (!$handle) {
-            throw new RuntimeException('Cannot open log file for writing: ' . $logFileName);
+            throw new RuntimeException('Cannot open log file for writing: ' . $logFileName, 5660505178);
         }
         return $handle;
     }
@@ -716,22 +693,4 @@ class ImportService extends AbstractImportExportService implements SQLLogger
         }
         fwrite($this->logFile, PHP_EOL);
     }
-
-    public function startQuery($sql, array $params = null, array $types = null): void
-    {
-        if (!self::logSqlActive) {
-            return;
-        }
-
-        $paramsText = '';
-        if ($params) {
-            $paramsText = ' with ' . LF;
-            foreach ($params as $key => $value) {
-                $paramsText .= $key . '=' . $value . LF;
-            }
-        }
-        $this->log($sql . $paramsText);
-    }
-
-    public function stopQuery() {}
 }

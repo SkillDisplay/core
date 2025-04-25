@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
-use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\User;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -23,12 +22,7 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  */
 class CertifierRepository extends BaseRepository
 {
-    /**
-     * @param Skill $skill
-     * @param int $tier
-     * @return Certifier[]|QueryResultInterface
-     */
-    public function findBySkillAndTier(Skill $skill, int $tier): array|QueryResultInterface
+    public function findBySkillAndTier(Skill $skill, int $tier): QueryResultInterface
     {
         $q = $this->createQuery();
         $q->matching(
@@ -40,11 +34,7 @@ class CertifierRepository extends BaseRepository
         return $q->execute();
     }
 
-    /**
-     * @param int $brandId
-     * @return Certifier[]|QueryResultInterface
-     */
-    public function findByBrandId(int $brandId): array|QueryResultInterface
+    public function findByBrandId(int $brandId): QueryResultInterface
     {
         $q = $this->createQuery();
         $q->matching(
@@ -53,11 +43,7 @@ class CertifierRepository extends BaseRepository
         return $q->execute();
     }
 
-    /**
-     * @param User $user
-     * @return Certifier[]|QueryResultInterface
-     */
-    public function findByUser(User $user): array|QueryResultInterface
+    public function findByUser(User $user): QueryResultInterface
     {
         $query = $this->createQuery();
         return $query->matching($query->equals('User', $user))->execute();

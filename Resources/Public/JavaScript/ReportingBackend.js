@@ -1,44 +1,36 @@
-define(["require", "exports", "jquery", 'moment', 'TYPO3/CMS/Backend/Storage/Persistent', 'flatpickr/flatpickr.min'], function (require, exports, $, moment, PersistentStorage, flatpickr) {
-  "use strict";
-
-  class ReportingBackend {
-    constructor() {
-      $(() => this.domReady());
-    }
-
-    domReady() {
-      require(['flatpickr/locales'], () => {
-        let userLocale = PersistentStorage.get('lang');
-        if (userLocale === '') {
-          userLocale = 'default';
+define(["require", "exports", "jquery", "twbs/bootstrap-datetimepicker"], function (require, exports, $) {
+    "use strict";
+    class ReportingBackend {
+        constructor() {
+            $(() => this.domReady());
         }
-
-        // link upper and lower date limits together
-        let $lowerPicker = $('.js-datetimepicker-lower');
-        let $upperPicker = $('.js-datetimepicker-upper');
-        if ($lowerPicker.length > 0 && $upperPicker.length > 0) {
-          let startPicker = flatpickr($lowerPicker.first(), {
-            allowInput: true,
-            locale: userLocale,
-            onChange: function (selectedDates, dateStr, instance) {
-              endPicker.set('minDate', selectedDates[0]);
+        domReady() {
+            $('.js-datetimepicker').each(function () {
+                let format = $(this).data('format');
+                let icons = {
+                    time: 'fa fa-clock-o',
+                    date: 'fa fa-calendar',
+                    up: 'fa fa-angle-up',
+                    down: 'fa fa-angle-down',
+                    previous: 'fa fa-angle-left',
+                    next: 'fa fa-angle-right',
+                    today: 'fa fa-crosshairs',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                };
+                $(this).datetimepicker({ format: format, useCurrent: false, icons: icons });
+            });
+            let $lowerPicker = $('.js-datetimepicker-lower');
+            let $upperPicker = $('.js-datetimepicker-upper');
+            if ($lowerPicker.length > 0 && $upperPicker.length > 0) {
+                $upperPicker.on("dp.change", function (e) {
+                    $lowerPicker.data("DateTimePicker").maxDate(e.date);
+                });
+                $lowerPicker.on("dp.change", function (e) {
+                    $upperPicker.data("DateTimePicker").minDate(e.date);
+                });
             }
-          });
-          let endPicker = flatpickr($upperPicker.first(), {
-            allowInput: true,
-            locale: userLocale,
-            onChange: function (selectedDates, dateStr, instance) {
-              startPicker.set('maxDate', selectedDates[0]);
-            }
-          });
-
-          endPicker.set('minDate', startPicker.selectedDates[0]);
-        } else {
-          flatpickr($('.js-datetimepicker'), {allowInput: true, locale: userLocale});
         }
-      });
     }
-  }
-
-  return new ReportingBackend();
+    return new ReportingBackend();
 });

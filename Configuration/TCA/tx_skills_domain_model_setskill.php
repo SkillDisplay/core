@@ -7,7 +7,6 @@ return [
         'label' => 'skill',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'cruser_id' => 'cruser_id',
         'iconfile' => 'EXT:skills/Resources/Public/Icons/tx_skills_domain_model_setskill.png',
     ],
     'types' => [

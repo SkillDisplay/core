@@ -7,7 +7,6 @@ return [
         'label' => 'user',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
-        'cruser_id' => 'cruser_id',
     ],
     'types' => [
         1 => ['showitem' => 'user, type, reference, message'],
@@ -36,7 +35,8 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'max' => 50,
-                'eval' => 'trim,required',
+                'eval' => 'trim',
+                'required' => true,
             ],
         ],
         'reference' => [

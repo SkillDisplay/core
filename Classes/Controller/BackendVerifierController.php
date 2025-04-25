@@ -29,16 +29,14 @@ use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Hook\DataHandlerHook;
 use SkillDisplay\Skills\Service\BackendPageAccessCheckService;
-use SkillDisplay\Skills\Service\TestSystemProviderService;
 use SkillDisplay\Skills\Service\VerificationService;
 use SkillDisplay\Skills\Service\VerifierPermissionService;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Http\RedirectResponse;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
-use TYPO3\CMS\Extbase\Object\Exception;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 class BackendVerifierController extends BackendController
@@ -74,6 +72,7 @@ class BackendVerifierController extends BackendController
     /**
      * @throws InvalidQueryException
      */
+    #[\Override]
     public function verifierPermissionsAction(): ResponseInterface
     {
         $mainBrandId = DataHandlerHook::getDefaultBrandIdsOfBackendUser()[0] ?? 0;
@@ -81,27 +80,18 @@ class BackendVerifierController extends BackendController
             return $this->htmlResponse('Configuration error. No organisation assigned.');
         }
 
-        $verifierList = [];
-
-        /** @var Certifier[] $verifiersOfBrand */
         if ($mainBrandId) {
+            /** @var Certifier[] $verifiersOfBrand */
             $verifiersOfBrand = $this->certifierRepository->findByBrandId($mainBrandId)->toArray();
         } else {
             $verifiersOfBrand = $this->certifierRepository->findAll()->toArray();
         }
+
         $brand = null;
-        $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
+        $verifierList = [];
         foreach ($verifiersOfBrand as $verifier) {
             $brand = $verifier->getBrand();
-            if ($verifier->getUser()) {
-                $verifierList[$verifier->getUid()] = $verifier->getBrand()->getName() .
-                    ' / ' .
-                    $verifier->getUser()->getUsername();
-            } else {
-                $verifierList[$verifier->getUid()] = $verifier->getBrand()->getName() .
-                    ' / ' .
-                    $providerService->getProviderById($verifier->getTestSystem())->getLabel();
-            }
+            $verifierList[$verifier->getUid()] = $verifier->getListLabel();
         }
         asort($verifierList);
         $this->view->assign('verifiers', $verifierList);
@@ -109,9 +99,7 @@ class BackendVerifierController extends BackendController
         $users = [];
         if ($mainBrandId) {
             // load users of organisations not yet being a verifier for the organisation
-            $verifierUserIds = array_map(function (Certifier $certifier) {
-                return $certifier->getUser() ? $certifier->getUser()->getUid() : 0;
-            }, $verifiersOfBrand);
+            $verifierUserIds = array_map(fn(Certifier $certifier) => $certifier->getUser() ? $certifier->getUser()->getUid() : 0, $verifiersOfBrand);
 
             /** @var User $user */
             foreach ($this->userRepository->findByOrganisation($mainBrandId) as $user) {
@@ -158,8 +146,8 @@ class BackendVerifierController extends BackendController
      * @param string $tier2
      * @param string $tier4
      * @return ResponseInterface
-     * @throws Exception
      */
+    #[\Override]
     public function modifyPermissionsAction(
         array $verifiers,
         array $skillSets,
@@ -177,7 +165,7 @@ class BackendVerifierController extends BackendController
                 $verifier = $this->certifierRepository->findByUid($verifierId);
                 $brand = $verifier->getBrand();
                 if ($verifier->getBrand()->getUid() !== $mainBrandId) {
-                    throw new InvalidArgumentException('The passed verifier is not part of the organisation');
+                    throw new InvalidArgumentException('The passed verifier is not part of the organisation', 9139931576);
                 }
             }
             $allowedTiers = $brand ? $this->getAllowedTiers($brand) : [];
@@ -197,7 +185,7 @@ class BackendVerifierController extends BackendController
         }
 
         if (count($verifiers) === 0 || count($skillSets) === 0 || $permissions === []) {
-            $this->addFlashMessage('Invalid selection', 'Error', AbstractMessage::ERROR);
+            $this->addFlashMessage('Invalid selection', 'Error', ContextualFeedbackSeverity::ERROR);
         } elseif ($submitType === 'grant') {
             $count = VerifierPermissionService::grantPermissions(array_map('intval', $verifiers), array_map('intval', $skillSets), $permissions);
             $this->addFlashMessage('Granted permissions to ' . $count . ' skill/verifier combinations.');
@@ -216,6 +204,7 @@ class BackendVerifierController extends BackendController
         if ($mainBrandId) {
             foreach ($user->getOrganisations() as $organisation) {
                 if ($organisation->getUid() === $mainBrandId) {
+                    /** @var ?Brand $brand */
                     $brand = $this->brandRepository->findByUid($mainBrandId);
 
                     $verifier = new Certifier();

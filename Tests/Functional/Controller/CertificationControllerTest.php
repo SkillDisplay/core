@@ -26,11 +26,12 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
 {
     use SimulateLoginTrait;
 
-    protected CertificationController|MockObject|AccessibleObjectInterface $subject;
+    protected CertificationController&MockObject&AccessibleObjectInterface $subject;
 
     protected CertificationRepository $certificationRepository;
     protected CertifierRepository $certifierRepository;
 
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -67,17 +68,18 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @throws Exception
      */
+    #[\Override]
     protected function setUpDatabase(): void
     {
         $this->importCSVDataSet(__DIR__ . '/../Fixtures/be_users.csv');
         $this->setUpBackendUser(1);
-        $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/user_access_test.csv');
     }
 
     /**
      * @test
      */
-    public function showShowsCertificationForUser()
+    public function showShowsCertificationForUser(): void
     {
         $this->simulateLogin();
         /** @var Certification $certification */
@@ -92,7 +94,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function doesShowOnlyPublicInformationForForeignUser()
+    public function doesShowOnlyPublicInformationForForeignUser(): void
     {
         $this->simulateLogin();
         /** @var Certification $certification */
@@ -108,7 +110,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function modifyModifiesCertificationForCertifier()
+    public function modifyModifiesCertificationForCertifier(): void
     {
         $this->simulateLogin();
         $this->subject->modifyAction([4], true);
@@ -122,7 +124,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function modifyDoesNotModifyCertificationForGuest()
+    public function modifyDoesNotModifyCertificationForGuest(): void
     {
         $this->simulateLogin2();
         $this->subject->modifyAction([4], true);
@@ -136,7 +138,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function modifyDoesNotModifyCertificationForUser()
+    public function modifyDoesNotModifyCertificationForUser(): void
     {
         $this->simulateLogin2();
         $this->subject->modifyAction([4], true);
@@ -150,7 +152,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function cancelCertificationForUser()
+    public function cancelCertificationForUser(): void
     {
         $this->simulateLogin2();
         $this->subject->userCancelAction([4]);
@@ -162,7 +164,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function doNotCancelCertificationForForeignUser()
+    public function doNotCancelCertificationForForeignUser(): void
     {
         $this->simulateLogin();
         $this->subject->userCancelAction([4]);
@@ -174,7 +176,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function doNotCancelCertificationForGuest()
+    public function doNotCancelCertificationForGuest(): void
     {
         $this->simulateLogin();
         $this->subject->userCancelAction([4]);
@@ -186,7 +188,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function recentShowsNoDataForGuest()
+    public function recentShowsNoDataForGuest(): void
     {
         $this->subject->recentAction();
         $verifications = $this->view->_get('variables')['verifications'];
@@ -197,7 +199,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function recentShowsDataForUser()
+    public function recentShowsDataForUser(): void
     {
         $this->simulateLogin();
         $this->subject->recentAction();
@@ -209,7 +211,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function listForVerifierShowsNothingForWrongUser()
+    public function listForVerifierShowsNothingForWrongUser(): void
     {
         /** @var Certifier $verifier */
         $verifier = $this->certifierRepository->findByUid(1);
@@ -223,7 +225,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function listForVerifierShowsNothingForGuest()
+    public function listForVerifierShowsNothingForGuest(): void
     {
         $this->simulateLogin2();
         /** @var Certifier $verifier */
@@ -237,7 +239,7 @@ class CertificationControllerTest extends AbstractFunctionalControllerTestCaseBa
     /**
      * @test
      */
-    public function listForVerifierShowsDataForCorrectUser()
+    public function listForVerifierShowsDataForCorrectUser(): void
     {
         /** @var Certifier $verifier */
         $verifier = $this->certifierRepository->findByUid(1);

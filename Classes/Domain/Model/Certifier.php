@@ -24,7 +24,7 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 class Certifier extends AbstractEntity
 {
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_exclude' => ['sharedApiSecret'],
         '_descend' => [
             'brand' => [],
@@ -43,13 +43,17 @@ class Certifier extends AbstractEntity
     protected string $sharedApiSecret = '';
 
     /**
-     * @var ObjectStorage<CertifierPermission>
-     * @Cascade("remove")
-     * @Lazy
+     * @var ObjectStorage<CertifierPermission>|LazyObjectStorage
      */
+    #[Cascade(['value' => 'remove'])]
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $permissions;
 
     public function __construct()
+    {
+        $this->initializeObject();
+    }
+    public function initializeObject(): void
     {
         $this->permissions = new ObjectStorage();
     }
@@ -73,53 +77,44 @@ class Certifier extends AbstractEntity
 
                 if ($verification->getDenyDate() || $verification->getRevokeDate()) {
                     $stats['rejected']++;
-                } elseif ($verification->getGrantDate() && $verification->getRevokeDate() === null) {
+                } elseif ($verification->getGrantDate()) {
                     $stats['accepted']++;
                 } else {
                     $stats['pending']++;
                     $data = $verification->toJsonData();
-                    $data['crdate'] = $verification->getCrdate();
                     $data['skillCount'] = count($group['certs']);
                     $recentRequests[] = $data;
                 }
                 $stats['total']++;
             }
-            usort($recentRequests, function (array $a, array $b) {
-                return $b['crdate'] - $a['crdate'];
-            });
+            usort($recentRequests, fn(array $a, array $b) => $b['crdate'] - $a['crdate']);
             $recentRequests = array_slice($recentRequests, 0, $recentLimit);
         }
         $logoUrl = $this->brand
             ? ($this->brand->getLogoScaled() ? (string)$this->brand->getLogoScaled()->getPublicUrl() : '')
             : '';
-        if ($this->getUser() !== null) {
-            return [
-                'uid' => $this->uid,
-                'firstName' => $this->user ? $this->user->getFirstName() : '',
-                'lastName' => $this->user ? $this->user->getLastName() : '',
-                'imageUrl' => (string)$this->user?->getAvatarScaled()->getPublicUrl(),
-                'favourite' => false,
-                'brand' => [
-                    'name' => $this->brand ? $this->brand->getName() : '',
-                    'logoPublicUrl' => $logoUrl,
-                ],
-                'recentRequests' => $recentRequests,
-                'stats' => $stats,
-            ];
-        }
-        $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
-        return [
+        $result = [
             'uid' => $this->uid,
-            'testSystemId' => $this->getTestSystem(),
-            'testSystemLabel' => $providerService->getProviderById($this->getTestSystem())->getLabel(),
             'brand' => [
-                'name' => $this->brand ? $this->brand->getName() : '',
+                'uid' => (int)$this->brand?->getUid(),
+                'name' => (string)$this->brand?->getName(),
                 'logoPublicUrl' => $logoUrl,
             ],
             'recentRequests' => $recentRequests,
             'stats' => $stats,
         ];
-
+        if ($this->getTestSystem()) {
+            /** @var TestSystemProviderService $providerService */
+            $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
+            $result['testSystemId'] = $this->getTestSystem();
+            $result['testSystemLabel'] = $providerService->getProviderById($this->getTestSystem())->getLabel();
+        } else {
+            $result['firstName'] = $this->user ? $this->user->getFirstName() : '';
+            $result['lastName'] = $this->user ? $this->user->getLastName() : '';
+            $result['imageUrl'] = (string)$this->user?->getAvatarScaled()->getPublicUrl();
+            $result['favourite'] = false;
+        }
+        return $result;
     }
 
     public function getPendingCertifications(): array
@@ -132,6 +127,19 @@ class Certifier extends AbstractEntity
     {
         $certRepo = GeneralUtility::makeInstance(CertificationRepository::class);
         return $certRepo->findCompletedByCertifier($this);
+    }
+
+    public function getListLabel(): string
+    {
+        $certifierName = '';
+        if ($this->user) {
+            $certifierName = $this->user->getUsername();
+        } elseif ($this->testSystem) {
+            /** @var TestSystemProviderService $providerService */
+            $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
+            $certifierName = $providerService->getProviderById($this->testSystem)->getLabel();
+        }
+        return $this->brand?->getName() . ' / ' . $certifierName;
     }
 
     public function getUser(): ?User

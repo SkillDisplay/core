@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Service;
 
-use Doctrine\DBAL\DBALException;
 use LogicException;
 use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Certification;
 use SkillDisplay\Skills\Domain\Model\Certifier;
 use SkillDisplay\Skills\Domain\Model\Skill;
+use SkillDisplay\Skills\Domain\Model\SkillPath;
+use SkillDisplay\Skills\Domain\Model\User;
 use SkillDisplay\Skills\Domain\Model\VerificationCreditUsage;
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
 use SkillDisplay\Skills\Domain\Repository\CertificationRepository;
@@ -22,7 +23,6 @@ use SkillDisplay\Skills\Service\VerificationService;
 use SkillDisplay\Skills\Tests\Functional\AbstractFunctionalTestCaseBase;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
-use TYPO3\TestingFramework\Core\Exception;
 
 class VerificationServiceTest extends AbstractFunctionalTestCaseBase
 {
@@ -35,10 +35,6 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     protected BrandRepository $brandRepository;
     protected VerificationCreditUsageRepository $verificationCreditUsageRepository;
 
-    /**
-     * @throws DBALException
-     * @throws Exception
-     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -61,20 +57,22 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
             VerificationCreditUsageRepository::class
         );
 
-        $this->importDataSet(__DIR__ . '/../Fixtures/user_access_test.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/confirm_skillup_test.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/user_access_test.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/confirm_skillup_test.csv');
     }
 
     /**
      * @test
      */
-    public function skillUpWorksForVisibleSkills()
+    public function skillUpWorksForVisibleSkills(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);
         $skills = [$skill];
+        /** @var SkillPath $skillSet */
         $skillSet = $this->skillSetRepository->findByUid(1);
 
+        /** @var User $user */
         $user = $this->userRepository->findByUsername('muster');
         /** @var Certifier $verifier */
         $verifier = $this->certifierRepository->findByUid(1);
@@ -99,11 +97,12 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function skillUpChecksForVisibilityOfSkills()
+    public function skillUpChecksForVisibilityOfSkills(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);
         $skills = [$skill];
+        /** @var SkillPath $skillSet */
         $skillSet = $this->skillSetRepository->findByUid(1);
 
         $user = $this->userRepository->findByUsername('muster2');
@@ -130,7 +129,7 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function skillUpWorksForVisibleSkill()
+    public function skillUpWorksForVisibleSkill(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);
@@ -159,7 +158,7 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function skillUpChecksForVisibilityOfSkill()
+    public function skillUpChecksForVisibilityOfSkill(): void
     {
         /** @var Skill $skill */
         $skill = $this->skillRepository->findByUid(1);
@@ -188,9 +187,11 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function confirmSkillUpChecksForCorrectValuesOneVerification()
+    public function confirmSkillUpChecksForCorrectValuesOneVerification(): void
     {
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1000), true);
+        /** @var Certification $verification */
+        $verification = $this->verificationRepository->findByUid(1000);
+        $this->verificationService->confirmSkillUp($verification, true);
         $usages = $this->verificationCreditUsageRepository->findAll()->toArray();
         self::assertCount(1, $usages);
         /** @var VerificationCreditUsage $usage */
@@ -205,16 +206,20 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function confirmSkillUpChecksForCorrectValuesTwoVerifications()
+    public function confirmSkillUpChecksForCorrectValuesTwoVerifications(): void
     {
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1000), true);
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1001), true);
+        /** @var Certification $verification1 */
+        $verification1 = $this->verificationRepository->findByUid(1000);
+        /** @var Certification $verification2 */
+        $verification2 = $this->verificationRepository->findByUid(1001);
+        $this->verificationService->confirmSkillUp($verification1, true);
+        $this->verificationService->confirmSkillUp($verification2, true);
         $usages = $this->verificationCreditUsageRepository->findAll()->toArray();
         self::assertCount(2, $usages);
         /** @var VerificationCreditUsage $usage */
         $usage = $usages[0];
         self::assertSame(2, $usage->getCreditPack()->getCurrentPoints());
-        /** @var Certification $verification */
+        /** @var Certification $verification2 */
         $verification2 = $this->verificationRepository->findByUid(1001);
         self::assertSame(4, $verification2->getPoints());
         self::assertSame(0.45, $verification2->getPrice());
@@ -223,32 +228,43 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function confirmSkillUpThrowsExceptionWhenCreditsDoNotSuffice()
+    public function confirmSkillUpThrowsExceptionWhenCreditsDoNotSuffice(): void
     {
         $this->expectException(LogicException::class);
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1000), true);
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1001), true);
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1002), true);
+        /** @var Certification $verification1 */
+        $verification1 = $this->verificationRepository->findByUid(1000);
+        /** @var Certification $verification2 */
+        $verification2 = $this->verificationRepository->findByUid(1001);
+        /** @var Certification $verification3 */
+        $verification3 = $this->verificationRepository->findByUid(1002);
+        $this->verificationService->confirmSkillUp($verification1, true);
+        $this->verificationService->confirmSkillUp($verification2, true);
+        $this->verificationService->confirmSkillUp($verification3, true);
     }
 
     /**
      * @test
      */
-    public function confirmSkillUpThrowsExceptionWhenNoPacksAndOverdrawDisabled()
+    public function confirmSkillUpThrowsExceptionWhenNoPacksAndOverdrawDisabled(): void
     {
         $this->expectException(LogicException::class);
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1003), true);
+        /** @var Certification $verification4 */
+        $verification4 = $this->verificationRepository->findByUid(1003);
+        $this->verificationService->confirmSkillUp($verification4, true);
     }
 
     /**
      * @test
      */
-    public function confirmSkillUpNoPackAndOverdrawEnabledSetsCorrectVerificationValues()
+    public function confirmSkillUpNoPackAndOverdrawEnabledSetsCorrectVerificationValues(): void
     {
         /** @var Brand $brand */
         $brand = $this->brandRepository->findByUid(1001);
+        /** @var Certification $verification4 */
+        $verification4 = $this->verificationRepository->findByUid(1003);
+
         $brand->setCreditOverdraw(true);
-        $this->verificationService->confirmSkillUp($this->verificationRepository->findByUid(1003), true);
+        $this->verificationService->confirmSkillUp($verification4, true);
         $usages = $this->verificationCreditUsageRepository->findAll()->toArray();
         self::assertCount(0, $usages);
         /** @var Certification $verification */
@@ -264,8 +280,11 @@ class VerificationServiceTest extends AbstractFunctionalTestCaseBase
     {
         $this->importCSVDataSet(__DIR__ . '/../Fixtures/skillsplitting.csv');
 
+        /** @var Skill $source */
         $source = $this->skillRepository->findByUid(6);
+        /** @var Skill $target1 */
         $target1 = $this->skillRepository->findByUid(7);
+        /** @var Skill $target2 */
         $target2 = $this->skillRepository->findByUid(8);
 
         $this->verificationService->moveVerifications($source, [$target1, $target2]);

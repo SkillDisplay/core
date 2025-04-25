@@ -32,8 +32,8 @@ use SkillDisplay\Skills\Domain\Repository\VerificationCreditUsageRepository;
 use SkillDisplay\Skills\Service\CsvService;
 use SkillDisplay\Skills\Service\VerificationService;
 use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 
@@ -134,7 +134,6 @@ class BackendVerificationManagerController extends BackendController
     {
         $groups = $this->certificationRepository->findAcceptedByOrganisation($organization, new DateTime('@0'), new DateTime());
         $usages = [];
-        /** @var Certification $verification */
         foreach ($groups as $group) {
             $points = 0;
             $price = 0;
@@ -143,34 +142,30 @@ class BackendVerificationManagerController extends BackendController
                 $points += $cert->getPoints();
                 $price += $cert->getPrice();
             }
-            $jsonData = $cert->toJsonData(true);
-            $jsonData['credits'] = $points;
-            $jsonData['price'] = $price;
-            $usages[] = $jsonData;
+            if (isset($cert)) {
+                $jsonData = $cert->toJsonData(true);
+                $jsonData['credits'] = $points;
+                $jsonData['price'] = $price;
+                $usages[] = $jsonData;
+            }
         }
         // sort usages newest first
         usort($usages, fn($a, $b) => $b['grantDate']->getTimestamp() - $a['grantDate']->getTimestamp());
         return $usages;
     }
 
-    /**
-     * @param string $dateFrom
-     * @param string $dateTo
-     * @param array $organizations
-     * @throws InvalidQueryException
-     */
     public function generateCSVAction(string $dateFrom, string $dateTo, array $organizations): never
     {
         $fromDate = $this->convertDate($dateFrom . ' 00:00:00');
         if ($fromDate == null) {
-            $this->addFlashMessage('Please select a start date!', 'Error', AbstractMessage::ERROR);
+            $this->addFlashMessage('Please select a start date!', 'Error', ContextualFeedbackSeverity::ERROR);
         }
         $toDate = $this->convertDate($dateTo . ' 23:59:59');
         $lines = [];
         foreach ($organizations as $organizationId) {
-            /** @var Brand $organization */
+            /** @var ?Brand $organization */
             $organization = $this->brandRepository->findByUid($organizationId);
-            /** @var User $brandManager */
+            /** @var ?User $brandManager */
             $brandManager = $this->userRepository->findManagers($organization)[0] ?? null;
             $groups = $this->certificationRepository->findAcceptedByOrganisation($organization, $fromDate, $toDate ?: new DateTime());
             $creditsSpent = 0;

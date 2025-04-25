@@ -22,11 +22,16 @@ class Requirement extends AbstractEntity
 {
     /**
      * @var ObjectStorage<Set>
-     * @Cascade("remove")
      */
+    #[Cascade(['value' => 'remove'])]
     protected ObjectStorage $sets;
 
     public function __construct()
+    {
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
     {
         $this->sets = new ObjectStorage();
     }

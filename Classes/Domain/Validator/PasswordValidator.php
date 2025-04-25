@@ -6,6 +6,7 @@ namespace SkillDisplay\Skills\Domain\Validator;
 
 use SkillDisplay\Skills\Domain\Model\Password;
 use SkillDisplay\Skills\Domain\Model\User;
+use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Validation\AbstractUserValidator;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Crypto\PasswordHashing\InvalidPasswordHashException;
@@ -14,15 +15,17 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class PasswordValidator extends AbstractUserValidator
 {
-    public function isValid($password)
+    protected function isValid($password): void
     {
         if (!$password instanceof Password) {
             $this->addError('The given Object is not a Password.', 98145168);
             return;
         }
         $feUserId = GeneralUtility::makeInstance(Context::class)->getAspect('frontend.user')->get('id');
-        /** @var User $user */
-        $user = $this->userRepository->findByUid($feUserId);
+        /** @var UserRepository $userRepository */
+        $userRepository = GeneralUtility::makeInstance(UserRepository::class);
+        /** @var ?User $user */
+        $user = $userRepository->findByUid($feUserId);
         if (!$user) {
             $this->addError('No login user found.', 981451686);
             return;

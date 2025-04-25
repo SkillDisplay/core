@@ -36,23 +36,14 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 class VerificationService implements SingletonInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    public const SKILL_ACTION_NONE = 0;
-    public const SKILL_ACTION_DELETE = 1;
-
-    protected CertificationRepository $certificationRepository;
-    protected CertifierRepository $certifierRepository;
-    protected VerificationCreditPackRepository $creditPackRepository;
-    protected VerificationCreditUsageRepository $creditUsageRepository;
-    protected MembershipHistoryRepository $membershipHistoryRepository;
+    public const int SKILL_ACTION_NONE = 0;
+    public const int SKILL_ACTION_DELETE = 1;
 
     protected PersistenceManager $persistenceManager;
 
@@ -64,19 +55,15 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
     protected array $creditSettings = [];
 
     public function __construct(
-        CertificationRepository $certificationRepository,
+        protected CertificationRepository $certificationRepository,
         PersistenceManager $persistenceManager,
-        CertifierRepository $certifierRepository,
-        VerificationCreditPackRepository $creditPackRepository,
-        VerificationCreditUsageRepository $creditUsageRepository,
-        MembershipHistoryRepository $membershipHistoryRepository
+        protected CertifierRepository $certifierRepository,
+        protected VerificationCreditPackRepository $creditPackRepository,
+        protected VerificationCreditUsageRepository $creditUsageRepository,
+        protected MembershipHistoryRepository $membershipHistoryRepository,
+        protected CacheManager $cacheManager,
     ) {
-        $this->certificationRepository = $certificationRepository;
         $this->persistenceManager = $persistenceManager;
-        $this->certifierRepository = $certifierRepository;
-        $this->creditPackRepository = $creditPackRepository;
-        $this->creditUsageRepository = $creditUsageRepository;
-        $this->membershipHistoryRepository = $membershipHistoryRepository;
     }
 
     /**
@@ -178,9 +165,14 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
         }
         $redirectUrl = '';
         if ($certifier && $certifier->getUser() === null) {
-            /** @var TestSystemProviderService $providerService */
-            $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
-            $redirectUrl = $providerService->getProviderById($certifier->getTestSystem())->process($verifications);
+            if ($certifier->getTestSystem()) {
+                /** @var TestSystemProviderService $providerService */
+                $providerService = GeneralUtility::makeInstance(TestSystemProviderService::class);
+                $redirectUrl = $providerService->getProviderById($certifier->getTestSystem())->process($verifications);
+            } else {
+                $result['errorMessage'] = sprintf('Verifier (%d) has no user and no test system.', $certifier->getUid());
+                return $result;
+            }
         }
         $result['verifications'] = $verifications;
         $result['redirectUrl'] = $redirectUrl;
@@ -189,11 +181,6 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
 
     /**
      * @param Skill[] $skills
-     * @param User $user
-     * @param int $tier
-     * @param Certifier|null $certifier
-     * @return array
-     * @throws InvalidQueryException
      */
     private function validateSkillUp(array $skills, User $user, int $tier, ?Certifier $certifier): array
     {
@@ -307,7 +294,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
             $eventDispatcher = GeneralUtility::makeInstance(EventDispatcher::class);
             $eventDispatcher->dispatch(new VerificationAddedEvent($certifications));
         }
-        GeneralUtility::makeInstance(CacheManager::class)->flushCachesByTags($tags);
+        $this->cacheManager->flushCachesByTags($tags);
         return $certifications;
     }
 
@@ -319,8 +306,6 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
      * @param bool $decline
      * @param bool $revoke
      * @param string $reason
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
      */
     public function confirmSkillUp(
         Certification $verification,
@@ -363,7 +348,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
                         $pointsToBook -= $usedPoints;
                     }
                     if ($pointsToBook !== 0) {
-                        throw new LogicException('This may not happen. Credit packs modified in between?');
+                        throw new LogicException('This may not happen. Credit packs modified in between?', 7524629781);
                     }
                     $this->logger->info(
                         'Credit usage',
@@ -377,7 +362,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
                         ]
                     );
                 } elseif (!$cert->getCertifier()->getBrand()->getCreditOverdraw()) {
-                    throw new LogicException('Credit did not suffice. This should never happen.');
+                    throw new LogicException('Credit did not suffice. This should never happen.', 2048069282);
                 }
                 $cert->setPoints($pointsNeeded);
                 $cert->setPrice($price);
@@ -402,7 +387,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
             $tags[] = $cert->getSkill()->getCacheTag($cert->getUser()->getUid());
         }
         $this->persistenceManager->persistAll();
-        GeneralUtility::makeInstance(CacheManager::class)->flushCachesByTags($tags);
+        $this->cacheManager->flushCachesByTags($tags);
 
         if (!$this->disableCertoBot) {
             /** @var EventDispatcher $eventDispatcher */
@@ -422,7 +407,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
             $tags[] = $cert->getSkill()->getCacheTag($cert->getUser()->getUid());
         }
         $this->persistenceManager->persistAll();
-        GeneralUtility::makeInstance(CacheManager::class)->flushCachesByTags($tags);
+        $this->cacheManager->flushCachesByTags($tags);
     }
 
     /**
@@ -440,15 +425,9 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
         foreach ($skills as $skill) {
             /** @var Certifier[] $skillCertifiers */
             $skillCertifiers = $this->certifierRepository->findBySkillAndTier($skill, $tier)->toArray();
-            $personCertifiers = array_filter($skillCertifiers, function (Certifier $c) {
-                return $c->getUser() !== null;
-            });
-            $testCertifiers = array_filter($skillCertifiers, function (Certifier $c) {
-                return $c->getTestSystem() !== '';
-            });
-            usort($personCertifiers, function (Certifier $a, Certifier $b) {
-                return $a->getUser()->getLastName() <=> $b->getUser()->getLastName();
-            });
+            $personCertifiers = array_filter($skillCertifiers, fn(Certifier $c) => $c->getUser() !== null);
+            $testCertifiers = array_filter($skillCertifiers, fn(Certifier $c) => $c->getTestSystem() !== '');
+            usort($personCertifiers, fn(Certifier $a, Certifier $b) => $a->getUser()->getLastName() <=> $b->getUser()->getLastName());
             if ($certifiers === null) {
                 // only set this the first time we enter the loop
                 $certifiers = array_merge($personCertifiers, $testCertifiers);
@@ -489,7 +468,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
             if ($keysToRemove) {
                 array_filter(
                     $certifiers,
-                    function ($key) use ($keysToRemove) { return !isset($keysToRemove[$key]); },
+                    fn($key) => !isset($keysToRemove[$key]),
                     ARRAY_FILTER_USE_KEY
                 );
             }
@@ -519,9 +498,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
     public function getBalanceForOrganisation(Brand $organisation): array
     {
         $unbalancedVerifications = $this->certificationRepository->findUnbalanced($organisation);
-        $balance = array_reduce($unbalancedVerifications, function (float $sum, Certification $cert) {
-            return $sum + $cert->getPrice();
-        }, 0.0);
+        $balance = array_reduce($unbalancedVerifications, fn(float $sum, Certification $cert) => $sum + $cert->getPrice(), 0.0);
         return [
             'points' => $this->creditPackRepository->getAvailableCredit($organisation->getUid()),
             'balance' => $balance * -1,
@@ -531,15 +508,14 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
     /**
      * Move all verifications on $source skill to the successor skills $targets
      *
-     * @param Skill $source
      * @param Skill[] $targets
-     * @throws IllegalObjectTypeException
      */
     public function moveVerifications(Skill $source, array $targets): void
     {
         $setGroup = count($targets) > 1;
         $certs = $this->certificationRepository->findBySkill($source);
         $tags = [];
+        /** @var Certification $cert */
         foreach ($certs as $cert) {
             if (!$cert->getRequestGroup() && $setGroup) {
                 $cert->setRequestGroup('skillSplit-' . time());
@@ -555,7 +531,7 @@ class VerificationService implements SingletonInterface, LoggerAwareInterface
             }
         }
 
-        GeneralUtility::makeInstance(CacheManager::class)->flushCachesByTags($tags);
+        $this->cacheManager->flushCachesByTags($tags);
     }
 
     /**

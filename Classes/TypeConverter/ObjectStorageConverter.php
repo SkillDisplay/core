@@ -33,21 +33,10 @@ namespace SkillDisplay\Skills\TypeConverter;
 class ObjectStorageConverter extends \TYPO3\CMS\Extbase\Property\TypeConverter\ObjectStorageConverter
 {
     /**
-     * Take precedence over the available ObjectStorageConverter
-     *
-     * @var int
-     */
-    protected $priority = 2;
-
-    /**
      * Return the source, if it is an array, otherwise an empty array.
      * Filter out empty uploads
-     *
-     * @param mixed $source
-     * @return array
-     * @api
      */
-    public function getSourceChildPropertiesToBeConverted($source): array
+    public function getSourceChildPropertiesToBeConverted(mixed $source): array
     {
         $propertiesToConvert = [];
 
@@ -66,13 +55,9 @@ class ObjectStorageConverter extends \TYPO3\CMS\Extbase\Property\TypeConverter\O
 
     /**
      * Check if this is an upload type
-     *
-     * @param mixed $propertyValue
-     * @return bool
      */
     protected function isUploadType(mixed $propertyValue): bool
     {
         return is_array($propertyValue) && isset($propertyValue['tmp_name']) && isset($propertyValue['error']);
     }
-
 }

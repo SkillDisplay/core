@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Domain\Repository;
 
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Driver\Exception;
-use SkillDisplay\Skills\Domain\Model\Brand;
 use SkillDisplay\Skills\Domain\Model\Skill;
 use SkillDisplay\Skills\Domain\Model\SkillPath;
 use SkillDisplay\Skills\Domain\Model\User;
@@ -27,8 +27,8 @@ use TYPO3\CMS\Extbase\Persistence\Repository;
 
 class RecommendedSkillSetRepository extends Repository
 {
-    public const TYPE_MISSING = 0;
-    public const TYPE_ACHIEVED = 1;
+    public const int TYPE_MISSING = 0;
+    public const int TYPE_ACHIEVED = 1;
 
     public function deleteRecommendations(int $user, int $sourceSet, int $relatedSet): void
     {
@@ -61,9 +61,9 @@ class RecommendedSkillSetRepository extends Repository
 
     public function insertForSkillSet(
         int $type,
-        User $user,
-        SkillPath $skillSet,
-        SkillPath $recommendedSkillSet,
+        int $userId,
+        int $skillSetId,
+        int $recommendedSkillSetId,
         float $score,
         float $jaccard
     ): void {
@@ -74,9 +74,9 @@ class RecommendedSkillSetRepository extends Repository
             'tx_skills_domain_model_recommendedskillset',
             [
                 'type' => $type,
-                'user' => $user->getUid(),
-                'source_skillset' => $skillSet->getUid(),
-                'recommended_skillset' => $recommendedSkillSet->getUid(),
+                'user' => $userId,
+                'source_skillset' => $skillSetId,
+                'recommended_skillset' => $recommendedSkillSetId,
                 'jaccard' => $jaccard,
                 'score' => $score,
             ]
@@ -107,9 +107,6 @@ class RecommendedSkillSetRepository extends Repository
         );
     }
 
-    /**
-     * @throws Exception
-     */
     public function findBySkillSet(User $user, SkillPath $set): array
     {
         $dataMapper = GeneralUtility::makeInstance(DataMapper::class);
@@ -123,18 +120,18 @@ class RecommendedSkillSetRepository extends Repository
         foreach ([static::TYPE_MISSING, static::TYPE_ACHIEVED] as $type) {
             foreach ([1, 2, 3, 4] as $level) {
                 $qb = $con->createQueryBuilder();
-                $onRecom = (string)$qb->expr()->andX(
+                $onRecom = (string)$qb->expr()->and(
                     $qb->expr()->eq('r.user', $user->getUid()),
                     $qb->expr()->eq('r.type', $type),
                     $qb->expr()->eq('r.source_skillset', $set->getUid()),
                     $qb->expr()->eq('r.recommended_skillset', $qb->quoteIdentifier('s.uid')),
                 );
-                $onCatmm = (string)$qb->expr()->andX(
+                $onCatmm = (string)$qb->expr()->and(
                     $qb->expr()->eq('mm.tablenames', $qb->createNamedParameter('tx_skills_domain_model_skillpath')),
                     $qb->expr()->eq('mm.fieldname', $qb->createNamedParameter('categories')),
                     $qb->expr()->eq('mm.uid_foreign', $qb->quoteIdentifier('s.uid'))
                 );
-                $onCat = (string)$qb->expr()->andX(
+                $onCat = (string)$qb->expr()->and(
                     $qb->expr()->eq('c.description', $qb->createNamedParameter($level)),
                     $qb->expr()->eq('mm.uid_local', $qb->quoteIdentifier('c.uid'))
                 );
@@ -151,15 +148,12 @@ class RecommendedSkillSetRepository extends Repository
                 $visibilityConstraints[] = $qb->expr()->eq('s.visibility', $qb->createNamedParameter(SkillPath::VISIBILITY_PUBLIC, Connection::PARAM_INT));
                 if ($userBrands) {
                     // more or less a copy of SkillPathRepository::getVisibilityConditions
-                    $brandIds = array_map(function (Brand $b) {
-                        return $b->getUid();
-                    }, $userBrands);
-                    $visibilityConstraints[] = $qb->expr()->andX(
+                    $visibilityConstraints[] = $qb->expr()->and(
                         $qb->expr()->eq('s.visibility', $qb->createNamedParameter(SkillPath::VISIBILITY_ORGANISATION, Connection::PARAM_INT)),
-                        $qb->expr()->in('bmm.uid_foreign', $qb->createNamedParameter($brandIds, $con::PARAM_INT_ARRAY))
+                        $qb->expr()->in('bmm.uid_foreign', $qb->createNamedParameter($userBrands, ArrayParameterType::INTEGER))
                     );
                 }
-                $qb->where($qb->expr()->orX(...$visibilityConstraints));
+                $qb->where($qb->expr()->or(...$visibilityConstraints));
                 $rows = $qb->executeQuery()->fetchAllAssociative();
                 $sets = $dataMapper->map(SkillPath::class, $rows);
                 $recommendations[] = [
@@ -187,7 +181,7 @@ class RecommendedSkillSetRepository extends Repository
         foreach ([static::TYPE_MISSING, static::TYPE_ACHIEVED] as $type) {
             foreach ([1, 2, 3, 4] as $level) {
                 $qb = $con->createQueryBuilder();
-                $on = (string)$qb->expr()->andX(
+                $on = (string)$qb->expr()->and(
                     $qb->expr()->eq('r.user', $user->getUid()),
                     $qb->expr()->eq('r.type', $type),
                     $qb->expr()->eq('r.source_skill', $skill->getUid()),
@@ -221,9 +215,6 @@ class RecommendedSkillSetRepository extends Repository
         ]);
     }
 
-    /**
-     * @throws Exception
-     */
     public function findPopularity(SkillPath $skillSet): float
     {
         $con = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable(

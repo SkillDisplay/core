@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class TranslatedUuidService
 {
-    public const UUID_TABLES = [
+    public const array UUID_TABLES = [
         'tx_skills_domain_model_brand',
         'tx_skills_domain_model_link',
         'tx_skills_domain_model_skill',
@@ -42,7 +42,7 @@ class TranslatedUuidService
     public static function getTranslatedUuid(string $uuid, string $iso): string
     {
         if (empty($uuid) || empty($iso)) {
-            throw new RuntimeException('invalid arguments for translated uuid generator');
+            throw new RuntimeException('invalid arguments for translated uuid generator', 6743119699);
         }
         return $uuid . '_' . $iso;
     }

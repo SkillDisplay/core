@@ -33,6 +33,7 @@ use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Frontend\Controller\ErrorController;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
+use TYPO3Fluid\Fluid\View\ViewInterface;
 
 abstract class AbstractController extends ActionController implements LoggerAwareInterface
 {
@@ -45,10 +46,7 @@ abstract class AbstractController extends ActionController implements LoggerAwar
         protected readonly UserRepository $userRepository
     ) {}
 
-    /**
-     * {inherit}
-     */
-    protected function resolveView()
+    protected function resolveView(): ViewInterface
     {
         // if the action name contains "Ajax" we exchange the view
         $this->isAjax = strpos($this->actionMethodName, 'Ajax') || $this->request->getFormat() === 'json';
@@ -80,7 +78,7 @@ abstract class AbstractController extends ActionController implements LoggerAwar
      *
      * @return bool
      */
-    protected function getErrorFlashMessage()
+    protected function getErrorFlashMessage(): bool
     {
         return false;
     }
@@ -126,7 +124,7 @@ abstract class AbstractController extends ActionController implements LoggerAwar
                 $this->request,
                 'Resource not found',
             );
-            throw new PropagateResponseException($response);
+            throw new PropagateResponseException($response, 5117320870);
         }
     }
 

@@ -21,14 +21,12 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
 class Tag extends AbstractEntity
 {
-    public const TRANSLATE_FIELDS = [
+    public const array TRANSLATE_FIELDS = [
         'title',
         'description',
     ];
 
-    /**
-     * @Validate("NotEmpty")
-     */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $title = '';
     protected string $description = '';
     protected int $tstamp = 0;
@@ -55,7 +53,7 @@ class Tag extends AbstractEntity
     {
         $tag = [
             'uuid' => $this->uuid,
-            'type' => get_class($this),
+            'type' => static::class,
             'uid' => $this->getUid(),
             'data' => [
                 'tstamp' => $this->tstamp,

@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 abstract class AbstractImportExportService
 {
-    protected const VERSION = '5';
+    protected const string VERSION = '5';
 
     private static ?array $languageMapping = null;
 

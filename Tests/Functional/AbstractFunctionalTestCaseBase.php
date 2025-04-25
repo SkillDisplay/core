@@ -9,8 +9,12 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 abstract class AbstractFunctionalTestCaseBase extends FunctionalTestCase
 {
     protected array $testExtensionsToLoad = [
-        'typo3conf/ext/skills',
-        'typo3conf/ext/static_info_tables',
-        'typo3conf/ext/pdfviewhelpers',
+        'skills',
+        'static_info_tables',
+        'pdfviewhelpers',
+    ];
+
+    protected array $coreExtensionsToLoad = [
+        'extensionmanager',
     ];
 }

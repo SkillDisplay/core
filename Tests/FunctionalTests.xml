@@ -22,6 +22,7 @@
          colors="true"
          failOnWarning="true"
          failOnRisky="true"
+         failOnPhpunitDeprecation="true"
          displayDetailsOnTestsThatTriggerDeprecations="true"
          displayDetailsOnTestsThatTriggerErrors="true"
          displayDetailsOnTestsThatTriggerNotices="true"

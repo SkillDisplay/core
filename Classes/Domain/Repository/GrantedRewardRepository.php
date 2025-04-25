@@ -17,7 +17,6 @@ use SkillDisplay\Skills\Domain\Model\Reward;
 use SkillDisplay\Skills\Domain\Model\User;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\QueryInterface;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
@@ -47,11 +46,6 @@ class GrantedRewardRepository extends BaseRepository
         return $q->execute();
     }
 
-    /**
-     * @param User $user
-     * @return QueryResultInterface
-     * @throws InvalidQueryException
-     */
     public function getSelectedRewardsByUser(User $user): QueryResultInterface
     {
         $now = GeneralUtility::makeInstance(Context::class)->getPropertyFromAspect('date', 'timestamp');

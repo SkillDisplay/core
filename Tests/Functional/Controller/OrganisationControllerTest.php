@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional\Controller;
 
-use Doctrine\DBAL\DBALException;
 use PHPUnit\Framework\MockObject\MockObject;
 use SkillDisplay\Skills\Controller\OrganisationController;
 use SkillDisplay\Skills\Domain\Model\Brand;
@@ -24,13 +23,11 @@ class OrganisationControllerTest extends AbstractFunctionalControllerTestCaseBas
 {
     use SimulateLoginTrait;
 
-    protected OrganisationController|MockObject|AccessibleObjectInterface $subject;
+    protected OrganisationController&MockObject&AccessibleObjectInterface $subject;
 
     protected BrandRepository $brandRepository;
 
-    /**
-     * @throws DBALException
-     */
+    #[\Override]
     protected function setUp(): void
     {
         parent::setUp();
@@ -56,17 +53,18 @@ class OrganisationControllerTest extends AbstractFunctionalControllerTestCaseBas
     /**
      * @throws Exception
      */
+    #[\Override]
     protected function setUpDatabase(): void
     {
-        $this->importDataSet(__DIR__ . '/../Fixtures/fe_users.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/organisation_statistics.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_user_brand_mm.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/fe_users.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/organisation_statistics.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_user_brand_mm.csv');
     }
 
     /**
      * @test
      */
-    public function organisationStatisticsHidesNonOrganisationSets()
+    public function organisationStatisticsHidesNonOrganisationSets(): void
     {
         $this->simulateLogin();
         /** @var Brand $brand */

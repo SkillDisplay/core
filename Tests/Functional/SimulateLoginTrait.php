@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace SkillDisplay\Skills\Tests\Functional;
 
+use SkillDisplay\Skills\Domain\Model\User;
+
 trait SimulateLoginTrait
 {
     protected function simulateLogin(): void
     {
-        $this->subject?->expects($this->any())->method('getCurrentUser')->will($this->returnValue($this->currentUser));
+        $this->simulateLogin2($this->currentUser);
     }
 
-    protected function simulateLogin2(): void
+    protected function simulateLogin2(?User $user = null): void
     {
-        if ($this->subject) {
-            $user = $this->userRepository->findByUsername('muster2');
-            $this->subject->expects($this->any())
-                ->method('getCurrentUser')
-                ->will($this->returnValue($user));
-        }
+        $user = $user ?: $this->userRepository->findByUsername('muster2');
+        $this->subject->expects($this->any())
+            ->method('getCurrentUser')
+            ->willReturn($user);
     }
 }

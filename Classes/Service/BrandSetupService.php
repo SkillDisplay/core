@@ -16,18 +16,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class BrandSetupService
 {
-    public const DEFAULT_BE_GROUP = 'Skill Editor - PARTNERDEFAULT';
-    public const DEFAULT_BE_USER = 'backenduser-partnerdefault';
-    public const BRANDS_BASE_PATH = 'Brands/';
-    public const FAL_ID = 1;
-
-    protected string $brandName = '';
+    public const string DEFAULT_BE_GROUP = 'Skill Editor - PARTNERDEFAULT';
+    public const string DEFAULT_BE_USER = 'backenduser-partnerdefault';
+    public const string BRANDS_BASE_PATH = 'Brands/';
+    public const int FAL_ID = 1;
     protected string $sysFolderName = '';
-    protected string $brandDescription = '';
     protected string $categoryName = '';
-    protected string $url = '';
-    protected string $vatId = '';
-    protected string $foreignId = '';
     protected string $stripeSubscription = '';
 
     protected int $now = 0;
@@ -36,7 +30,6 @@ class BrandSetupService
     protected int $backendUserGroupUid = 0;
     protected int $fileMountUid = 0;
     protected int $brandUid = 0;
-    protected int $verificationLevel = 0;
     protected int $categoryUid = 0;
 
     protected ?Folder $brandFolder = null;
@@ -61,32 +54,25 @@ class BrandSetupService
      * @param string $foreignId
      */
     public function __construct(
-        string $brandName,
-        string $brandDescription,
+        protected string $brandName,
+        protected string $brandDescription,
         string $category,
-        int $verificationLevel,
-        string $url,
-        string $vatId,
-        string $foreignId
+        protected int $verificationLevel,
+        protected string $url,
+        protected string $vatId,
+        protected string $foreignId
     ) {
         $this->connectionPool = GeneralUtility::makeInstance(ConnectionPool::class);
-
-        $this->brandName = $brandName;
-        $this->brandDescription = $brandDescription;
         $this->categoryName = self::cleanupString($category);
-        $this->url = $url;
         $this->now = time();
-        $this->verificationLevel = $verificationLevel;
-        $this->vatId = $vatId;
-        $this->foreignId = $foreignId;
     }
 
-    public function createBrand()
+    public function createBrand(): void
     {
-        $this->parentFolder = static::fetchParentFileFolder($this->categoryName);
+        $this->parentFolder = self::fetchParentFileFolder($this->categoryName);
         $this->categoryUid = $this->fetchCategory($this->verificationLevel);
         $this->pid = $this->fetchPid($this->categoryName);
-        $this->sysFolderName = static::generateSysFolderName($this->brandName);
+        $this->sysFolderName = self::generateSysFolderName($this->brandName);
         $this->sysFolderUid = $this->generateSysFolder();
         $this->generateBrand();
 
@@ -227,7 +213,6 @@ class BrandSetupService
             'perms_group' => 0,
             'perms_everybody' => 0,
             'crdate' => $this->now,
-            'cruser_id' => 1,
             'is_siteroot' => 0,
         ];
 
@@ -247,14 +232,14 @@ class BrandSetupService
         return $storage->createFolder($this->sysFolderName, $this->parentFolder);
     }
 
-    private function generateBrand()
+    private function generateBrand(): void
     {
         $qb = $this->connectionPool->getQueryBuilderForTable('tx_skills_domain_model_brand');
         $qb = $qb->select('uid')
             ->from('tx_skills_domain_model_brand')
             ->where(
-                $qb->expr()->orX(
-                    $qb->expr()->andX(
+                $qb->expr()->or(
+                    $qb->expr()->and(
                         $qb->expr()->eq('pid', $qb->createNamedParameter($this->sysFolderUid, Connection::PARAM_INT)),
                         $qb->expr()->eq('name', $qb->createNamedParameter($this->brandName))
                     )
@@ -377,7 +362,7 @@ class BrandSetupService
         return (int)$connection->lastInsertId('sys_filemounts');
     }
 
-    private function generateBackendGroup()
+    private function generateBackendGroup(): void
     {
         $groupFields = $this->fetchDefaultBackendGroup();
         $groupTitle = substr(str_replace('PARTNERDEFAULT', $this->sysFolderName, $groupFields['title']), 0, 50);
@@ -407,7 +392,7 @@ class BrandSetupService
         $this->backendUserGroupUid = (int)$connection->lastInsertId('be_groups');
     }
 
-    private function setSysFolderPermissions()
+    private function setSysFolderPermissions(): void
     {
         $this->connectionPool->getConnectionForTable('pages')->update(
             'pages',
@@ -435,7 +420,7 @@ class BrandSetupService
             return $result[0];
         }
 
-        throw new RuntimeException('Could not fetch default BE user');
+        throw new RuntimeException('Could not fetch default BE user', 3206410881);
     }
 
     private function fetchDefaultBackendGroup(): array
@@ -455,7 +440,7 @@ class BrandSetupService
             return $result[0];
         }
 
-        throw new RuntimeException('Could not fetch default BE Group');
+        throw new RuntimeException('Could not fetch default BE Group', 5745291072);
     }
 
     private function fetchCategory(int $verificationLevel): int
@@ -473,7 +458,7 @@ class BrandSetupService
             return (int)$result[0]['uid'];
         }
 
-        throw new RuntimeException('Failed to get category for level' . $verificationLevel);
+        throw new RuntimeException('Failed to get category for level' . $verificationLevel, 9615426891);
     }
 
     private static function fetchParentFileFolder(string $categoryName): Folder
@@ -482,12 +467,7 @@ class BrandSetupService
         $storageRepository = GeneralUtility::makeInstance(StorageRepository::class);
         $storage = $storageRepository->findByUid(self::FAL_ID);
         $folder = $storage->getFolder(self::BRANDS_BASE_PATH . $categoryName);
-
-        if ($folder !== null) {
-            return $folder;
-        }
-
-        throw new RuntimeException('Failed to get folder for ' . self::BRANDS_BASE_PATH . $categoryName);
+        return $folder;
     }
 
     private function fetchFolder(string $title): int
@@ -514,7 +494,7 @@ class BrandSetupService
             return $pid;
         }
 
-        throw new RuntimeException('Parent folder for category ' . $categoryName . ' cannot be found');
+        throw new RuntimeException('Parent folder for category ' . $categoryName . ' cannot be found', 8283178074);
     }
 
     private static function generateSysFolderName(string $brandName): string

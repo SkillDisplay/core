@@ -1,0 +1,41 @@
+fe_users
+,uid,tx_extbase_type,pid,username,password,first_name,last_name,email,publish_skills,verifiers
+,1000,Tx_Skills_User,4,muster,Something,Max,Muster,max@muster.at,1,1
+,1001,Tx_Skills_User,4,alex,Something,Alex,Aber,max@muster.at,1,0
+
+tx_skills_domain_model_brand
+,uid,pid,name,description,logo,url,members,credit_overdraw
+,1000,3,Skilldisplay,lorem ipsum,1,https://www.skilldisplay.eu,1,1
+,1001,3,TYPO3,lorem ipsum,1,https://www.skilldisplay.eu,1,0
+
+tx_skills_user_organisation_mm
+,uid_local,uid_foreign
+,1000,1000
+,1001,1000
+,1000,1001
+,1001,1001
+
+tx_skills_domain_model_skill
+,uid,pid,title,goals,description,brands,visibility
+,1000,3,TestSkill1,lorem ipsuum,lorem ipsum,2,1
+
+tx_skills_skill_brand_mm
+,uid_local,uid_foreign,sorting
+,1000,1000,2
+,1000,1001,2
+
+tx_skills_domain_model_certification
+,uid,pid,tier1,tier2,tier3,tier4,grant_date,skill,user,certifier,brand
+,1000,3,1,0,0,0,2019-06-23 03:48:35,1000,1001,1000,1000
+,1001,3,0,1,0,0,2019-06-23 03:48:35,2,1001,1000,1000
+,1002,3,1,0,0,0,2019-06-23 03:48:35,1000,1001,1000,1000
+,1003,3,1,0,0,0,2019-06-23 03:48:35,1000,1001,1001,1001
+
+tx_skills_domain_model_certifier
+,uid,pid,user,brand,permissions
+,1000,3,1000,1000,1
+,1001,3,1000,1001,1
+
+tx_skills_domain_model_verificationcreditpack
+,uid,pid,tstamp,crdate,valuta,brand,title,brand_name,current_points,initial_points,price
+,1000,3,1616152295,1616152295,1616152295,1000,Pack 1,Skilldisplay,10,10,10

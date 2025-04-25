@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace SkillDisplay\Skills\Domain\Model;
 
 use SkillDisplay\Skills\Domain\Repository\BrandRepository;
+use SkillDisplay\Skills\Domain\Repository\CategoryRepository;
 use SkillDisplay\Skills\Service\CertoBot;
 use SkillDisplay\Skills\Service\Importer\ExportService;
 use TYPO3\CMS\Core\Resource\ProcessedFile;
@@ -23,7 +24,6 @@ use TYPO3\CMS\Extbase\Annotation\ORM\Lazy;
 use TYPO3\CMS\Extbase\Annotation\Validate;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Domain\Model\FileReference;
-use TYPO3\CMS\Extbase\Domain\Repository\CategoryRepository;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\Generic\LazyObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -31,7 +31,7 @@ use TYPO3\CMS\Extbase\Service\ImageService;
 
 class Brand extends AbstractEntity
 {
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid', 'name', 'logoPublicUrl', 'url', 'memberCount', 'members', 'firstCategoryTitle',
         ],
@@ -42,13 +42,13 @@ class Brand extends AbstractEntity
         ],
     ];
 
-    public const JsonViewMinimalConfiguration = [
+    public const array JsonViewMinimalConfiguration = [
         '_only' => [
             'uid', 'name', 'logoPublicUrl', 'url', 'memberCount', 'firstCategoryTitle',
         ],
     ];
 
-    public const TRANSLATE_FIELDS = [
+    public const array TRANSLATE_FIELDS = [
         'name',
         'description',
         'url',
@@ -58,8 +58,8 @@ class Brand extends AbstractEntity
      * name
      *
      * @var string
-     * @Validate("NotEmpty")
      */
+    #[Validate(['validator' => 'NotEmpty'])]
     protected string $name = '';
     protected string $description = '';
     /** @var ObjectStorage<FileReference> */
@@ -69,24 +69,24 @@ class Brand extends AbstractEntity
     protected string $url = '';
 
     /**
-     * @var ObjectStorage<Category>
-     * @Lazy
+     * @var ObjectStorage<Category>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $categories;
     protected int $partnerLevel = 0;
     protected int $patronageLevel = 0;
 
     /**
-     * @var ObjectStorage<Brand>
-     * @Lazy
+     * @var ObjectStorage<Brand>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $patronages;
     protected bool $showNumOfCertificates = false;
 
     /**
-     * @var ObjectStorage<User>
-     * @Lazy
+     * @var ObjectStorage<User>|LazyObjectStorage
      */
+    #[Lazy]
     protected ObjectStorage|LazyObjectStorage $members;
 
     protected int $tstamp = 0;
@@ -104,6 +104,11 @@ class Brand extends AbstractEntity
     public function __construct()
     {
         $this->uuid = CertoBot::uuid();
+        $this->initializeObject();
+    }
+
+    public function initializeObject(): void
+    {
         $this->logo = new ObjectStorage();
         $this->members = new ObjectStorage();
         $this->patronages = new ObjectStorage();
@@ -112,22 +117,23 @@ class Brand extends AbstractEntity
 
     public function getPatrons(): array
     {
+        /** @var BrandRepository $brandRepo */
         $brandRepo = GeneralUtility::makeInstance(BrandRepository::class);
         return $brandRepo->findPatronsForBrand($this);
     }
 
     public function getLogoPublicUrl(): string
     {
-        /** @var FileReference $file */
+        /** @var ?FileReference $file */
         $file = $this->logo->toArray()[0] ?? null;
-        return $file && $file->getOriginalResource() ? (string)$file->getOriginalResource()->getPublicUrl() : '';
+        return (string)$file?->getOriginalResource()->getPublicUrl();
     }
 
     public function getLogoForLocalProcessing(): string
     {
-        /** @var FileReference $file */
+        /** @var ?FileReference $file */
         $file = $this->logo->toArray()[0] ?? null;
-        return $file && $file->getOriginalResource() ? $file->getOriginalResource()->getForLocalProcessing(false) : '';
+        return (string)$file?->getOriginalResource()->getForLocalProcessing(false);
     }
 
     public function getBannerPublicUrl(): string
@@ -140,7 +146,7 @@ class Brand extends AbstractEntity
 
     public function getBannerScaled(): ?ProcessedFile
     {
-        if (!$this->banner || !$this->banner->getOriginalResource()) {
+        if (!$this->banner) {
             return null;
         }
         $imageService = GeneralUtility::makeInstance(ImageService::class);
@@ -154,7 +160,7 @@ class Brand extends AbstractEntity
     public function getLogoScaled(): ?ProcessedFile
     {
         $file = $this->logo->toArray()[0] ?? null;
-        if (!$file || !$file->getOriginalResource()) {
+        if (!$file) {
             return null;
         }
         $imageService = GeneralUtility::makeInstance(ImageService::class);
@@ -167,10 +173,7 @@ class Brand extends AbstractEntity
 
     public function getPixelLogoPublicUrl(): string
     {
-        if (!$this->pixelLogo || !$this->pixelLogo->getOriginalResource()) {
-            return '';
-        }
-        return (string)$this->pixelLogo->getOriginalResource()->getPublicUrl();
+        return (string)$this->pixelLogo?->getOriginalResource()->getPublicUrl();
     }
 
     public function getExportJson(): string
@@ -186,22 +189,22 @@ class Brand extends AbstractEntity
 
         $brand = [
             'uuid' => $this->uuid,
-            'type' => get_class($this),
+            'type' => static::class,
             'uid' => $this->getUid(),
             'data' => $data,
         ];
 
-        /** @var FileReference $file */
+        /** @var ?FileReference $file */
         $file = $this->logo->toArray()[0] ?? null;
-        if ($file && $file->getOriginalResource()) {
+        if ($file) {
             ExportService::encodeFileReference($file->getOriginalResource(), $brand, 'logo');
         }
 
-        if ($this->banner && $this->banner->getOriginalResource()) {
+        if ($this->banner) {
             ExportService::encodeFileReference($this->banner->getOriginalResource(), $brand, 'banner');
         }
 
-        if ($this->pixelLogo && $this->pixelLogo->getOriginalResource()) {
+        if ($this->pixelLogo) {
             ExportService::encodeFileReference($this->pixelLogo->getOriginalResource(), $brand, 'pixel_logo');
         }
 
@@ -295,6 +298,7 @@ class Brand extends AbstractEntity
         // use original language title only (ignore translation here)
         if ($this->getFirstCategory()->_getProperty('_localizedUid') > 0) {
             $categoryRepo = GeneralUtility::makeInstance(CategoryRepository::class);
+            /** @var Category $defaultCategory */
             $defaultCategory = $categoryRepo->findByUid($this->getFirstCategory()->getUid());
             $title = $defaultCategory->getTitle();
         }

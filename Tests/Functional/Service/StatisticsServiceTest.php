@@ -16,6 +16,8 @@ use SkillDisplay\Skills\Domain\Repository\SkillRepository;
 use SkillDisplay\Skills\Domain\Repository\UserRepository;
 use SkillDisplay\Skills\Service\StatisticsService;
 use SkillDisplay\Skills\Tests\Functional\AbstractFunctionalTestCaseBase;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\DateTimeAspect;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
@@ -33,19 +35,19 @@ class StatisticsServiceTest extends AbstractFunctionalTestCaseBase
         $this->organisationStatisticsRepository = GeneralUtility::makeInstance(OrganisationStatisticsRepository::class);
         $this->brandRepository = GeneralUtility::makeInstance(BrandRepository::class);
 
-        $this->importDataSet(__DIR__ . '/../Fixtures/fe_users.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_brand.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certifier.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_skill.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certifierpermission.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_skill_brand_mm.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_user_brand_mm.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_user_organisation_mm.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certification.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_skillpath.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_skillpath_skill_mm.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_skillset_brand_mm.xml');
-        $this->importDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_membershiphistory.xml');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/fe_users.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_brand.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certifier.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_skill.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certifierpermission.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_skill_brand_mm.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_user_brand_mm.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_user_organisation_mm.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_certification.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_skillpath.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_skillpath_skill_mm.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_skillset_brand_mm.csv');
+        $this->importCSVDataSet(__DIR__ . '/../Fixtures/tx_skills_domain_model_membershiphistory.csv');
 
         $this->statisticsService = $this->getAccessibleMock(StatisticsService::class, null, [
             GeneralUtility::makeInstance(BrandRepository::class),
@@ -62,7 +64,7 @@ class StatisticsServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function runReturnsExpectedAwardCounts()
+    public function runReturnsExpectedAwardCounts(): void
     {
         $this->statisticsService->run();
 
@@ -96,7 +98,7 @@ class StatisticsServiceTest extends AbstractFunctionalTestCaseBase
      * @param int $userId
      * @param int $expected
      */
-    public function runReturnsCorrectNumberOfAwardsForUser(int $userId, int $expected)
+    public function runReturnsCorrectNumberOfAwardsForUser(int $userId, int $expected): void
     {
         $this->statisticsService->run();
 
@@ -109,10 +111,12 @@ class StatisticsServiceTest extends AbstractFunctionalTestCaseBase
     /**
      * @test
      */
-    public function calculateOrganisationStatisticsReturnsNumberOfStatistics()
+    public function calculateOrganisationStatisticsReturnsNumberOfStatistics(): void
     {
         // set time to 1. 8. 2019
-        $GLOBALS['EXEC_TIME'] = 1564617600;
+        /** @var Context $context */
+        $context = GeneralUtility::makeInstance(Context::class);
+        $context->setAspect('date', new DateTimeAspect((new \DateTimeImmutable())->setTimestamp(1564617600)));
 
         $this->statisticsService->calculateOrganisationStatistics();
 

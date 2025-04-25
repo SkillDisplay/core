@@ -15,9 +15,9 @@ namespace SkillDisplay\Skills\Domain\Model;
 
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
-class Campaign extends AbstractEntity
+class Campaign extends AbstractEntity implements \Stringable
 {
-    public const JsonViewConfiguration = [
+    public const array JsonViewConfiguration = [
         '_only' => [
             'uid',
             'title',
@@ -56,7 +56,8 @@ class Campaign extends AbstractEntity
         $this->user = $user;
     }
 
-    public function __toString()
+    #[\Override]
+    public function __toString(): string
     {
         return $this->title;
     }

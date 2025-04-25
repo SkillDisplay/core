@@ -31,7 +31,6 @@ use SkillDisplay\Skills\Service\VerificationService;
 use TYPO3\CMS\Core\Error\Http\PageNotFoundException;
 use TYPO3\CMS\Core\Http\PropagateResponseException;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException;
 use TYPO3\CMS\Extbase\Mvc\View\JsonView;
 
 class SkillController extends AbstractController
@@ -54,7 +53,7 @@ class SkillController extends AbstractController
      * @throws PropagateResponseException
      * @throws Exception
      */
-    public function showAction(Skill $skill = null, SkillPath $path = null, string $apiKey = ''): ResponseInterface
+    public function showAction(?Skill $skill = null, ?SkillPath $path = null, string $apiKey = ''): ResponseInterface
     {
         $this->assertEntityAvailable($skill);
         $user = $this->getCurrentUser(false, $apiKey);
@@ -103,23 +102,22 @@ class SkillController extends AbstractController
      * @param Certifier|null $certifier
      * @param string $comment
      * @return ResponseInterface
-     * @throws NoSuchArgumentException
      */
     public function skillUpAjaxAction(
-        Skill $skill = null,
-        SkillPath $path = null,
-        SkillGroup $group = null,
-        Campaign $campaign = null,
-        Certifier $certifier = null,
+        ?Skill $skill = null,
+        ?SkillPath $path = null,
+        ?SkillGroup $group = null,
+        ?Campaign $campaign = null,
+        ?Certifier $certifier = null,
         string $comment = ''
     ): ResponseInterface {
         $user = $this->getCurrentUser();
         if (!$user) {
-            throw new AuthenticationException('');
+            throw new AuthenticationException('', 2138431249);
         }
 
         if (!$skill && !$path && !$group) {
-            throw new InvalidArgumentException('Missing entity to apply skillup to');
+            throw new InvalidArgumentException('Missing entity to apply skillup to', 7672029754);
         }
         $tier = (int)$this->request->getArgument('tier');
 
